@@ -1,4 +1,4 @@
-{
+﻿{
     "version": "0.2.0",
     "configurations": [
         {
@@ -10,9 +10,9 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/src/Clean.Architecture.Web/bin/Debug/net8.0/Clean.Architecture.Web.dll",
+            "program": "${workspaceFolder}/src/BusStop.Web/bin/Debug/net8.0/BusStop.Web.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/src/Clean.Architecture.Web",
+            "cwd": "${workspaceFolder}/src/BusStop.Web",
             "stopAtEntry": false,
             // Enable launching a web browser when ASP.NET Core starts. For more information: https://aka.ms/VSCode-CS-LaunchJson-WebBrowser
             "serverReadyAction": {

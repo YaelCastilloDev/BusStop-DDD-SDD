@@ -1,0 +1,54 @@
+---
+description: BusStop.Core domain model patterns
+globs: **/BusStop.Core/**
+alwaysApply: false
+---
+
+# BusStop.Core Patterns
+
+## Aggregate Structure
+```
+{Entity}Aggregate/
+├── {Entity}.cs          # aggregate root
+├── {Entity}Id.cs        # Vogen value object
+├── {Entity}Name.cs      # value object
+├── Events/
+├── Handlers/
+└── Specifications/
+```
+
+## Aggregate Root
+- Inherit `EntityBase<T, TId>` and `IAggregateRoot`.
+- Minimize public setters; use methods for state changes.
+- Call `RegisterDomainEvent()` on meaningful state transitions.
+
+## IDs (Vogen)
+```csharp
+[ValueObject<int>]
+public readonly partial struct RouteId
+{
+  private static Validation Validate(int value)
+    => value > 0 ? Validation.Ok : Validation.Invalid("RouteId must be positive.");
+}
+```
+
+## Value Objects
+- Co-located in aggregate folder.
+- Immutable; equality by properties.
+- Use `From()` factory methods (parse, don't validate).
+
+## Specifications
+- In `{Aggregate}/Specifications/`, inherit `Specification<T>`.
+- All conditional queries go here, never inline in repositories.
+
+## Domain Events
+- Past-tense names: `RouteCreatedEvent`, inherit `DomainEventBase`.
+- Handlers in `{Aggregate}/Handlers/`, implement `INotificationHandler<TEvent>`.
+
+## Forbidden in Core
+- EF Core attributes, DbContext, HTTP, ASP.NET Core.
+- Use-case orchestration (domain event handlers are allowed).
+
+## Invariants
+- Enforce with `Ardalis.GuardClauses` in constructors and factory methods.
+- Business rule violations throw domain exceptions, not return Results.

@@ -1,3 +1,3 @@
-{
-  "appHostPath": "../src/Clean.Architecture.AspireHost/Clean.Architecture.AspireHost.csproj"
+﻿{
+  "appHostPath": "../src/BusStop.AspireHost/BusStop.AspireHost.csproj"
 }
