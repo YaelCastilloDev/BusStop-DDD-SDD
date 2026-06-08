@@ -1,0 +1,33 @@
+﻿<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".template.config/template.json" />
+    <File Path="CleanArchitecture.nuspec" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/BusStop.Core/BusStop.Core.csproj" />
+    <Project Path="src/BusStop.Infrastructure/BusStop.Infrastructure.csproj" />
+    <Project Path="src/BusStop.UseCases/BusStop.UseCases.csproj" />
+    <Project Path="src/BusStop.Web/BusStop.Web.csproj" />
+  </Folder>
+  <Folder Name="/src/_aspire/">
+    <Project Path="src/BusStop.AspireHost/BusStop.AspireHost.csproj" />
+    <Project Path="src/BusStop.ServiceDefaults/BusStop.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/BusStop.FunctionalTests/BusStop.FunctionalTests.csproj">
+      <BuildDependency Project="src/BusStop.Web/BusStop.Web.csproj" />
+    </Project>
+    <Project Path="tests/BusStop.IntegrationTests/BusStop.IntegrationTests.csproj">
+      <BuildDependency Project="src/BusStop.Infrastructure/BusStop.Infrastructure.csproj" />
+    </Project>
+    <Project Path="tests/BusStop.UnitTests/BusStop.UnitTests.csproj" />
+  </Folder>
+</Solution>
