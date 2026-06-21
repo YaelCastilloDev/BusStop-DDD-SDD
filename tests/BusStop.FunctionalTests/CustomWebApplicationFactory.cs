@@ -1,79 +1,33 @@
 ﻿using BusStop.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Testcontainers.MsSql;
 
 namespace BusStop.FunctionalTests;
 
 public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProgram>, IAsyncLifetime where TProgram : class
 {
-  private MsSqlContainer? _dbContainer;
+  public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
-  public async ValueTask InitializeAsync()
-  {
-    try
-    {
-      _dbContainer = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2025-latest")
-        .WithPassword("Your_password123!")
-        .Build();
-      await _dbContainer.StartAsync();
-    }
-    catch (ArgumentException)
-    {
-      // Docker is not available; fall back to SQLite (configured via appsettings.Testing.json)
-      _dbContainer = null;
-    }
-  }
+  public new ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
-  public new async ValueTask DisposeAsync()
-  {
-    // Clean up environment variable
-    Environment.SetEnvironmentVariable("USE_SQL_SERVER", null);
-    if (_dbContainer != null)
-    {
-      await _dbContainer.DisposeAsync();
-    }
-  }
-
-  /// <summary>
-  /// Overriding CreateHost to avoid creating a separate ServiceProvider per this thread:
-  /// https://github.com/dotnet-architecture/eShopOnWeb/issues/465
-  /// </summary>
-  /// <param name="builder"></param>
-  /// <returns></returns>
   protected override IHost CreateHost(IHostBuilder builder)
   {
-    builder.UseEnvironment("Testing"); // will not send real emails
+    builder.UseEnvironment("Testing");
     var host = builder.Build();
     host.Start();
 
-    // Get service provider.
-    var serviceProvider = host.Services;
+    using var scope = host.Services.CreateScope();
+    var scopedServices = scope.ServiceProvider;
+    var db = scopedServices.GetRequiredService<AppDbContext>();
+    var logger = scopedServices.GetRequiredService<ILogger<CustomWebApplicationFactory<TProgram>>>();
 
-    // Create a scope to obtain a reference to the database
-    // context (AppDbContext).
-    using (var scope = serviceProvider.CreateScope())
+    try
     {
-      var scopedServices = scope.ServiceProvider;
-      var db = scopedServices.GetRequiredService<AppDbContext>();
-
-      var logger = scopedServices
-          .GetRequiredService<ILogger<CustomWebApplicationFactory<TProgram>>>();
-
-      try
-      {
-        // Functional tests use EnsureCreated to avoid migration-script coupling.
-        db.Database.EnsureCreated();
-
-        // Seed the database with test data only if it has not been seeded yet.
-        // This is safe for container reuse across test runs and multiple fixture instances.
-        SeedData.InitializeAsync(db).GetAwaiter().GetResult();
-      }
-      catch (Exception ex)
-      {
-        logger.LogError(ex, "An error occurred seeding the database with test messages. Error: {exceptionMessage}", ex.Message);
-        throw;
-      }
+      db.Database.EnsureCreated();
+      SeedData.InitializeAsync(db).GetAwaiter().GetResult();
+    }
+    catch (Exception ex)
+    {
+      logger.LogError(ex, "An error occurred seeding the database. Error: {exceptionMessage}", ex.Message);
+      throw;
     }
 
     return host;
@@ -81,47 +35,5 @@ public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProg
 
   protected override void ConfigureWebHost(IWebHostBuilder builder)
   {
-    if (_dbContainer != null)
-    {
-      // Force SQL Server mode even on non-Windows platforms for functional tests
-      Environment.SetEnvironmentVariable("USE_SQL_SERVER", "true");
-    }
-
-    builder
-        .ConfigureAppConfiguration((context, config) =>
-        {
-          if (_dbContainer != null)
-          {
-            // Set the connection string to use the Testcontainer
-            config.AddInMemoryCollection(new Dictionary<string, string?>
-            {
-              ["ConnectionStrings:DefaultConnection"] = _dbContainer.GetConnectionString()
-            });
-          }
-        })
-        .ConfigureServices(services =>
-        {
-          if (_dbContainer != null)
-          {
-            // Remove the app's ApplicationDbContext registration
-            var descriptors = services.Where(
-              d => d.ServiceType == typeof(AppDbContext) ||
-                   d.ServiceType == typeof(DbContextOptions<AppDbContext>))
-                  .ToList();
-
-            foreach (var descriptor in descriptors)
-            {
-              services.Remove(descriptor);
-            }
-
-            // Add ApplicationDbContext using the Testcontainers SQL Server instance
-            services.AddDbContext<AppDbContext>((provider, options) =>
-            {
-              options.UseSqlServer(_dbContainer.GetConnectionString());
-              var interceptor = provider.GetRequiredService<EventDispatchInterceptor>();
-              options.AddInterceptors(interceptor);
-            });
-          }
-        });
   }
 }
