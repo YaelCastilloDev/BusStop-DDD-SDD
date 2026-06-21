@@ -24,7 +24,10 @@ public sealed class Create(IMediator mediator) : Endpoint<CreateStopRequest, Sto
       return;
     }
 
-    await Send.ErrorsAsync(cancellation: ct);
+    if (result.Status == ResultStatus.NotFound)
+      await Send.NotFoundAsync(ct);
+    else
+      await Send.ErrorsAsync(cancellation: ct);
   }
 }
 
@@ -34,9 +37,6 @@ public sealed class CreateStopValidator : Validator<CreateStopRequest>
 {
   public CreateStopValidator()
   {
-    RuleFor(x => x.Name).Must(x => !string.IsNullOrWhiteSpace(x)).MaximumLength(100);
-    RuleFor(x => x.Latitude).InclusiveBetween(-90, 90);
-    RuleFor(x => x.Longitude).InclusiveBetween(-180, 180);
-    RuleFor(x => x.RouteId).Must(x => x > 0);
+    RuleFor(x => x.Name).MaximumLength(100);
   }
 }

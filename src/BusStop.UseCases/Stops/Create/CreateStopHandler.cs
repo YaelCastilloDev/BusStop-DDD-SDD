@@ -1,11 +1,19 @@
+using BusStop.Core.RouteAggregate;
+using BusStop.Core.RouteAggregate.Specifications;
 using BusStop.Core.StopAggregate;
 
 namespace BusStop.UseCases.Stops.Create;
 
-public sealed class CreateStopHandler(IRepository<Stop> repository) : ICommandHandler<CreateStopCommand, Result<StopResponse>>
+public sealed class CreateStopHandler(
+  IRepository<Stop> repository,
+  IReadRepository<Route> routeRepository) : ICommandHandler<CreateStopCommand, Result<StopResponse>>
 {
   public async ValueTask<Result<StopResponse>> Handle(CreateStopCommand request, CancellationToken cancellationToken)
   {
+    var route = await routeRepository.FirstOrDefaultAsync(new RouteByIdSpec(new RouteId(request.RouteId)), cancellationToken);
+    if (route is null)
+      return Result<StopResponse>.NotFound("Route not found.");
+
     var result = Stop.Create(request.Name, request.Latitude, request.Longitude, request.RouteId);
     if (!result.IsSuccess)
       return Result<StopResponse>.Error(result.Errors.FirstOrDefault());
