@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    "docs/",
+    "harness/",
+    ".cursor/rules/"
+  ],
+  "skills": {
+    "paths": [".opencode/skills"]
+  }
+}
