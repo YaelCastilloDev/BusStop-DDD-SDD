@@ -1,5 +1,4 @@
 ﻿using Ardalis.ListStartupServices;
-using BusStop.Infrastructure.Email;
 
 namespace BusStop.Web.Configurations;
 
@@ -10,9 +9,7 @@ public static class OptionConfigs
                                                     Microsoft.Extensions.Logging.ILogger logger,
                                                     WebApplicationBuilder builder)
   {
-    services.Configure<MailserverConfiguration>(configuration.GetSection("Mailserver"))
-    // Configure Web Behavior
-    .Configure<CookiePolicyOptions>(options =>
+    services.Configure<CookiePolicyOptions>(options =>
     {
       options.CheckConsentNeeded = context => true;
       options.MinimumSameSitePolicy = SameSiteMode.None;
@@ -20,12 +17,9 @@ public static class OptionConfigs
 
     if (builder.Environment.IsDevelopment())
     {
-      // add list services for diagnostic purposes - see https://github.com/ardalis/AspNetCoreStartupServices
       services.Configure<ServiceConfig>(config =>
       {
         config.Services = new List<ServiceDescriptor>(builder.Services);
-
-        // optional - default path to view services is /listallservices - recommended to choose your own path
         config.Path = "/listservices";
       });
     }

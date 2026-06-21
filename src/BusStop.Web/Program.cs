@@ -2,8 +2,8 @@
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.AddServiceDefaults()    // This sets up OpenTelemetry logging
-       .AddLoggerConfigs();     // This adds Serilog for console formatting
+builder.AddServiceDefaults()
+       .AddLoggerConfigs();
 
 using var loggerFactory = LoggerFactory.Create(config => config.AddConsole());
 var startupLogger = loggerFactory.CreateLogger<Program>();
@@ -18,9 +18,9 @@ builder.Services.AddFastEndpoints()
                 {
                   o.DocumentSettings = s =>
                   {
-                    s.Title = "Clean Architecture API";
+                    s.Title = "BusStop API";
                     s.Version = "v1";
-                    s.Description = "HTTP endpoints for the Clean Architecture sample application.";
+                    s.Description = "HTTP endpoints for BusStop - open bus stop registry.";
                   };
                   o.ShortSchemaNames = true;
                 });
@@ -29,9 +29,8 @@ var app = builder.Build();
 
 await app.UseAppMiddlewareAndSeedDatabase();
 
-app.MapDefaultEndpoints(); // Aspire health checks and metrics
+app.MapDefaultEndpoints();
 
 app.Run();
 
-// Make the implicit Program.cs class public, so integration tests can reference the correct assembly for host building
 public partial class Program { }
