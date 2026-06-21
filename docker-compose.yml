@@ -1,5 +1,6 @@
+
 services:
-  keycloak.auth.api:
+  api:
     image: ${DOCKER_REGISTRY-}busstopweb
     container_name: api
     build:
@@ -39,7 +40,7 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.5.2
     container_name: keycloak
-    command: start-dev
+    command: start-dev --import-realm
     depends_on:
       - postgres
     restart: unless-stopped
@@ -54,14 +55,15 @@ services:
       KC_DB_URL_HOST: postgres
       KC_DB_PORT: 5432
       KC_DB_URL_DATABASE: keycloak-auth
-      # Production Proxy Settings
       KC_HOSTNAME: ${DOMAIN}
       KC_PROXY_HEADERS: xforwarded
       KC_HTTP_ENABLED: "true"
     volumes:
+      - ./containers/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
       - ./containers/identity:/opt/keycloak/data
     ports:
       - 8080:8080
+
   nginx:
     image: nginx:latest
     container_name: nginx-proxy

@@ -1,0 +1,145 @@
+{
+  "realm": "auth-demo",
+  "displayName": "BusStop Authentication Realm",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "resetPasswordAllowed": true,
+  "loginWithEmailAllowed": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "reader",
+        "description": "Can read published transportation data",
+        "composite": false,
+        "clientRole": false
+      },
+      {
+        "name": "contributor",
+        "description": "Can create and update routes and stops",
+        "composite": false,
+        "clientRole": false
+      },
+      {
+        "name": "admin",
+        "description": "Full administrative access",
+        "composite": false,
+        "clientRole": false
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "busstop-api",
+      "name": "BusStop API",
+      "description": "The main BusStop ASP.NET API",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "CHANGE-ME-IN-PRODUCTION",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": false,
+      "implicitFlowEnabled": false,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "fullScopeAllowed": true,
+      "redirectUris": [
+        "http://localhost:5000/*",
+        "https://localhost:5001/*"
+      ],
+      "webOrigins": [
+        "http://localhost:5000",
+        "https://localhost:5001"
+      ],
+      "protocolMappers": [
+        {
+          "name": "realm roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "config": {
+            "claim.name": "role",
+            "user.attribute": "realm_roles",
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "multivalued": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "busstop-swagger",
+      "name": "BusStop Swagger UI",
+      "description": "Swagger UI for interactive API documentation",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "fullScopeAllowed": true,
+      "redirectUris": [
+        "http://localhost:57679/swagger/oauth2-redirect.html",
+        "https://localhost:57679/swagger/oauth2-redirect.html",
+        "http://localhost:5000/swagger/oauth2-redirect.html"
+      ],
+      "webOrigins": [
+        "http://localhost:57679",
+        "https://localhost:57679",
+        "http://localhost:5000"
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "reader1",
+      "enabled": true,
+      "email": "reader1@example.com",
+      "firstName": "Reader",
+      "lastName": "One",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["reader"]
+    },
+    {
+      "username": "contributor1",
+      "enabled": true,
+      "email": "contributor1@example.com",
+      "firstName": "Contributor",
+      "lastName": "One",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["reader", "contributor"]
+    },
+    {
+      "username": "admin1",
+      "enabled": true,
+      "email": "admin1@example.com",
+      "firstName": "Admin",
+      "lastName": "One",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["reader", "contributor", "admin"]
+    }
+  ]
+}
