@@ -24,7 +24,10 @@ public sealed class Create(IMediator mediator) : Endpoint<CreateCommentRequest, 
       return;
     }
 
-    await Send.ErrorsAsync(cancellation: ct);
+    if (result.Status == ResultStatus.NotFound)
+      await Send.NotFoundAsync(ct);
+    else
+      await Send.ErrorsAsync(cancellation: ct);
   }
 }
 
@@ -34,8 +37,6 @@ public sealed class CreateCommentValidator : Validator<CreateCommentRequest>
 {
   public CreateCommentValidator()
   {
-    RuleFor(x => x.Content).Must(x => !string.IsNullOrWhiteSpace(x)).MaximumLength(2000);
-    RuleFor(x => x.UserId).Must(x => x > 0);
-    RuleFor(x => x.RouteId).Must(x => x > 0);
+    RuleFor(x => x.Content).MaximumLength(2000);
   }
 }

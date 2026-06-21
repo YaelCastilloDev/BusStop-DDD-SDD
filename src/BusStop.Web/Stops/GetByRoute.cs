@@ -20,6 +20,8 @@ public sealed class GetByRoute(IMediator mediator) : Endpoint<GetStopsByRouteReq
 
     if (result.IsSuccess)
       await Send.OkAsync(result.Value, ct);
+    else if (result.Status == ResultStatus.NotFound)
+      await Send.NotFoundAsync(ct);
     else
       await Send.ErrorsAsync(cancellation: ct);
   }

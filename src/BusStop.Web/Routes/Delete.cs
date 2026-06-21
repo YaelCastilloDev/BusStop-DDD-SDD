@@ -34,9 +34,4 @@ public sealed record DeleteRequest(long Id, long DeletedById);
 
 public sealed class DeleteValidator : Validator<DeleteRequest>
 {
-  public DeleteValidator()
-  {
-    RuleFor(x => x.Id).Must(x => x > 0);
-    RuleFor(x => x.DeletedById).Must(x => x > 0);
-  }
 }

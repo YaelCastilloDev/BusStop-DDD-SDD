@@ -34,7 +34,7 @@ public sealed class CreateUserValidator : Validator<CreateUserRequest>
 {
   public CreateUserValidator()
   {
-    RuleFor(x => x.Username).Must(x => !string.IsNullOrWhiteSpace(x)).MinimumLength(3).MaximumLength(50);
-    RuleFor(x => x.Email).Must(x => !string.IsNullOrWhiteSpace(x)).EmailAddress();
+    RuleFor(x => x.Username).MinimumLength(3).MaximumLength(50);
+    RuleFor(x => x.Email).EmailAddress();
   }
 }

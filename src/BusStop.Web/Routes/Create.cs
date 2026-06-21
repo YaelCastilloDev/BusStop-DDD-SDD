@@ -24,7 +24,10 @@ public sealed class Create(IMediator mediator) : Endpoint<CreateRequest, RouteRe
       return;
     }
 
-    await Send.ErrorsAsync(cancellation: ct);
+    if (result.Status == ResultStatus.NotFound)
+      await Send.NotFoundAsync(ct);
+    else
+      await Send.ErrorsAsync(cancellation: ct);
   }
 }
 
@@ -34,7 +37,6 @@ public sealed class CreateValidator : Validator<CreateRequest>
 {
   public CreateValidator()
   {
-    RuleFor(x => x.Name).Must(x => !string.IsNullOrWhiteSpace(x)).MaximumLength(100);
-    RuleFor(x => x.CreatedById).Must(x => x > 0);
+    RuleFor(x => x.Name).MaximumLength(100);
   }
 }
