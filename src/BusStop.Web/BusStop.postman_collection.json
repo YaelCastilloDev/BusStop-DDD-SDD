@@ -1,0 +1,392 @@
+{
+  "info": {
+    "name": "BusStop API",
+    "description": "HTTP endpoints for BusStop - open bus stop registry.\n\n## Setup\n1. Start the app via Aspire: `dotnet run --project src\\BusStop.AspireHost`\n2. Find the web API port in the Aspire dashboard (https://localhost:17143)\n3. Update the `baseUrl` collection variable with the correct port\n\nAll endpoints currently allow anonymous access (no auth required).",
+    "schema": "https://raw.githubusercontent.com/postmanlabs/postman-collection/v2.1.0/collection-schema.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://localhost:57679",
+      "type": "string",
+      "description": "Base URL of the BusStop API (update port from Aspire dashboard)"
+    },
+    {
+      "key": "userId",
+      "value": "1",
+      "type": "string",
+      "description": "Default user ID (update after creating a user)"
+    },
+    {
+      "key": "routeId",
+      "value": "1",
+      "type": "string",
+      "description": "Default route ID (update after creating a route)"
+    },
+    {
+      "key": "stopId",
+      "value": "1",
+      "type": "string",
+      "description": "Default stop ID (update after creating a stop)"
+    },
+    {
+      "key": "commentId",
+      "value": "1",
+      "type": "string",
+      "description": "Default comment ID (update after creating a comment)"
+    }
+  ],
+  "item": [
+    {
+      "name": "Users",
+      "description": "User management endpoints",
+      "item": [
+        {
+          "name": "Create a user",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"alice\",\n  \"email\": \"alice@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            },
+            "description": "Creates a new user.\n\n### Validation rules\n- `username`: 3–50 characters\n- `email`: must be a valid email address"
+          },
+          "response": [
+            {
+              "name": "Created (201)",
+              "status": "Created",
+              "code": 201,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"username\": \"alice\",\n  \"email\": \"alice@example.com\",\n  \"createdAt\": \"2026-06-21T12:00:00Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get user by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}"]
+            },
+            "description": "Retrieves a user by their unique ID."
+          },
+          "response": [
+            {
+              "name": "OK (200)",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"username\": \"alice\",\n  \"email\": \"alice@example.com\",\n  \"createdAt\": \"2026-06-21T12:00:00Z\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Routes",
+      "description": "Bus route management endpoints",
+      "item": [
+        {
+          "name": "Create a route",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Red Line\",\n  \"createdById\": {{userId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/routes",
+              "host": ["{{baseUrl}}"],
+              "path": ["routes"]
+            },
+            "description": "Creates a new bus route.\n\n### Validation rules\n- `name`: maximum 100 characters"
+          },
+          "response": [
+            {
+              "name": "Created (201)",
+              "status": "Created",
+              "code": 201,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"name\": \"Red Line\",\n  \"createdById\": 1,\n  \"createdAt\": \"2026-06-21T12:00:00Z\",\n  \"isDeleted\": false\n}"
+            }
+          ]
+        },
+        {
+          "name": "List all routes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/routes",
+              "host": ["{{baseUrl}}"],
+              "path": ["routes"]
+            },
+            "description": "Retrieves a paginated list of all routes.\n\n### Query parameters\n- `Page` (int, optional, default: 1)\n- `PageSize` (int, optional, default: 20)"
+          }
+        },
+        {
+          "name": "Get route by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/routes/{{routeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["routes", "{{routeId}}"]
+            },
+            "description": "Retrieves a single route by its unique ID."
+          }
+        },
+        {
+          "name": "Get nearby routes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/routes/nearby?Latitude=40.7128&Longitude=-74.006&RadiusKm=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["routes", "nearby"],
+              "query": [
+                { "key": "Latitude", "value": "40.7128", "description": "Latitude of the center point" },
+                { "key": "Longitude", "value": "-74.006", "description": "Longitude of the center point" },
+                { "key": "RadiusKm", "value": "10", "description": "Search radius in kilometers (default: 10)" }
+              ]
+            },
+            "description": "Finds routes near a geographic location within a given radius."
+          }
+        },
+        {
+          "name": "Delete a route",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{routeId}},\n  \"deletedById\": {{userId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/routes/{{routeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["routes", "{{routeId}}"]
+            },
+            "description": "Soft-deletes a route.\n\n### Response\nReturns `204 No Content` on success."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Stops",
+      "description": "Bus stop management endpoints",
+      "item": [
+        {
+          "name": "Create a stop",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Times Square\",\n  \"latitude\": 40.758,\n  \"longitude\": -73.9855,\n  \"routeId\": {{routeId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/stops",
+              "host": ["{{baseUrl}}"],
+              "path": ["stops"]
+            },
+            "description": "Creates a new stop on a route.\n\n### Validation rules\n- `name`: maximum 100 characters\n\n### Response fields\n- `id`: unique identifier\n- `name`: stop name\n- `latitude`: geographic latitude\n- `longitude`: geographic longitude\n- `routeId`: parent route ID\n- `isDeleted`: soft-delete flag"
+          },
+          "response": [
+            {
+              "name": "Created (201)",
+              "status": "Created",
+              "code": 201,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"name\": \"Times Square\",\n  \"latitude\": 40.758,\n  \"longitude\": -73.9855,\n  \"routeId\": 1,\n  \"isDeleted\": false\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get stops by route",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/stops/route/{{routeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["stops", "route", "{{routeId}}"]
+            },
+            "description": "Retrieves all stops belonging to a specific route."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Comments",
+      "description": "Comment and reaction endpoints",
+      "item": [
+        {
+          "name": "Create a comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"This route is great!\",\n  \"userId\": {{userId}},\n  \"routeId\": {{routeId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments"]
+            },
+            "description": "Creates a comment on a route.\n\n### Validation rules\n- `content`: maximum 2000 characters\n\n### Response fields\n- `id`: unique identifier\n- `content`: comment text\n- `userId`: author's user ID\n- `routeId`: parent route ID\n- `createdAt`: timestamp\n- `isDeleted`: soft-delete flag\n- `likeCount`: number of likes\n- `dislikeCount`: number of dislikes"
+          },
+          "response": [
+            {
+              "name": "Created (201)",
+              "status": "Created",
+              "code": 201,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"content\": \"This route is great!\",\n  \"userId\": 1,\n  \"routeId\": 1,\n  \"createdAt\": \"2026-06-21T12:00:00Z\",\n  \"isDeleted\": false,\n  \"likeCount\": 0,\n  \"dislikeCount\": 0\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get comments by route",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comments/route/{{routeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "route", "{{routeId}}"]
+            },
+            "description": "Retrieves all comments for a specific route."
+          }
+        },
+        {
+          "name": "React to a comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"commentId\": {{commentId}},\n  \"userId\": {{userId}},\n  \"reactionType\": \"Like\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments/react",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "react"]
+            },
+            "description": "Likes or dislikes a comment.\n\n### Validation rules\n- `reactionType` must be exactly `\"Like\"` or `\"Dislike\"`\n\n### Response\nReturns `204 No Content` on success."
+          }
+        },
+        {
+          "name": "Delete a comment",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{commentId}},\n  \"deletedById\": {{userId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments/{{commentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "{{commentId}}"]
+            },
+            "description": "Soft-deletes a comment.\n\n### Response\nReturns `204 No Content` on success."
+          }
+        }
+      ]
+    }
+  ]
+}
