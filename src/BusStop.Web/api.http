@@ -1,43 +1,106 @@
-# For more info on HTTP files go to https://aka.ms/vs/httpfile
+# BusStop API — HTTP endpoint tests
+#
+# HOW TO RUN (two ways):
+#
+# 1. Aspire (requires Docker running):
+#      dotnet run --project src\BusStop.AspireHost
+#    Then open the Aspire dashboard URL shown in the console to find the web API port.
+#
+# 2. Standalone (Docker not required, but you need Postgres running):
+#      docker run -d --name busstop-pg -e POSTGRES_PASSWORD=busstop -e POSTGRES_DB=busstop -p 5432:5432 postgis/postgis:17-3.5
+#      dotnet run --project src\BusStop.Web
+#    The API will be at the port shown below (from launchSettings.json).
+#
+# All endpoints currently AllowAnonymous (no auth needed).
+
 @host=https://localhost
 @port=57679
 
-// List all contributors
-GET {{host}}:{{port}}/Contributors
-
-###
-
-// Get a specific contributor
-@id_to_get=1
-GET {{host}}:{{port}}/Contributors/{{id_to_get}}
-
-###
-
-// Add a new contributor
-POST {{host}}:{{port}}/Contributors
+### 1. Create a user
+POST {{host}}:{{port}}/users
 Content-Type: application/json
 
 {
-  "name": "John Doe 3",
-  "email": "test@test.com",
-  "phoneNumber": "1234567890"
+  "username": "alice",
+  "email": "alice@example.com"
 }
 
-###
+### 2. Get a user by ID (replace id with the one returned above)
+@userId=1
+GET {{host}}:{{port}}/users/{{userId}}
 
-// Update a contributor
-@id_to_update=3
-PUT {{host}}:{{port}}/Contributors/{{id_to_update}}
+### 3. Create a route
+@createdById=1
+POST {{host}}:{{port}}/routes
 Content-Type: application/json
 
 {
-  "id": {{id_to_update}},
-  "name": "ardalis2"
+  "name": "Red Line",
+  "createdById": {{createdById}}
 }
 
-###
+### 4. List all routes
+GET {{host}}:{{port}}/routes
 
-// Delete a contributor
-@id_to_delete=1
-DELETE {{host}}:{{port}}/Contributors/{{id_to_delete}}
+### 5. Get a route by ID
+@routeId=1
+GET {{host}}:{{port}}/routes/{{routeId}}
 
+### 6. Get nearby routes (adjust lat/lng to your area)
+GET {{host}}:{{port}}/routes/nearby?Latitude=40.7128&Longitude=-74.006&RadiusKm=10
+
+### 7. Create a stop on a route
+POST {{host}}:{{port}}/stops
+Content-Type: application/json
+
+{
+  "name": "Times Square",
+  "latitude": 40.7580,
+  "longitude": -73.9855,
+  "routeId": {{routeId}}
+}
+
+### 8. Get stops by route
+GET {{host}}:{{port}}/stops/route/{{routeId}}
+
+### 9. Create a comment on a route
+POST {{host}}:{{port}}/comments
+Content-Type: application/json
+
+{
+  "content": "This route is great!",
+  "userId": {{userId}},
+  "routeId": {{routeId}}
+}
+
+### 10. Get comments by route
+GET {{host}}:{{port}}/comments/route/{{routeId}}
+
+### 11. React to a comment (Like or Dislike)
+@commentId=1
+POST {{host}}:{{port}}/comments/react
+Content-Type: application/json
+
+{
+  "commentId": {{commentId}},
+  "userId": {{userId}},
+  "reactionType": "Like"
+}
+
+### 12. Delete a comment
+DELETE {{host}}:{{port}}/comments/{{commentId}}
+Content-Type: application/json
+
+{
+  "id": {{commentId}},
+  "deletedById": {{userId}}
+}
+
+### 13. Delete a route
+DELETE {{host}}:{{port}}/routes/{{routeId}}
+Content-Type: application/json
+
+{
+  "id": {{routeId}},
+  "deletedById": {{userId}}
+}
