@@ -11,7 +11,7 @@ public sealed class CommentConfiguration : IEntityTypeConfiguration<Comment>
     builder.ToTable("comments");
 
     builder.HasKey(c => c.Id);
-    builder.Property(c => c.Id).ValueGeneratedNever();
+    builder.Property(c => c.Id).ValueGeneratedOnAdd();
 
     builder.Property(c => c.Content)
            .HasConversion(content => content.Value, value => new CommentContent(value))
