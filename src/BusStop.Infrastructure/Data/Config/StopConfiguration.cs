@@ -11,7 +11,7 @@ public sealed class StopConfiguration : IEntityTypeConfiguration<Stop>
     builder.ToTable("stops");
 
     builder.HasKey(s => s.Id);
-    builder.Property(s => s.Id).ValueGeneratedNever();
+    builder.Property(s => s.Id).ValueGeneratedOnAdd();
 
     builder.Property(s => s.Name)
            .HasConversion(name => name.Value, value => new StopName(value))

@@ -9,7 +9,7 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
     builder.ToTable("users");
 
     builder.HasKey(u => u.Id);
-    builder.Property(u => u.Id).ValueGeneratedNever();
+    builder.Property(u => u.Id).ValueGeneratedOnAdd();
 
     builder.Property(u => u.Username)
            .HasConversion(name => name.Value, value => new Username(value))
