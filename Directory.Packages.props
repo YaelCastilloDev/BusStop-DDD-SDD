@@ -11,7 +11,7 @@
     <PackageVersion Include="Ardalis.Specification.EntityFrameworkCore" Version="9.3.1" />
     <PackageVersion Include="coverlet.collector" Version="10.0.0" />
     <PackageVersion Include="FastEndpoints" Version="8.1.0" />
-    <PackageVersion Include="FastEndpoints.ApiExplorer" Version="2.2.0" />
+    <PackageVersion Include="FastEndpoints.ApiExplorer" Version="2.3.0" />
     <PackageVersion Include="FastEndpoints.Swagger" Version="8.1.0" />
     <PackageVersion Include="Mediator.Abstractions" Version="3.0.2" />
     <PackageVersion Include="Mediator.SourceGenerator" Version="3.0.2" />
