@@ -17,14 +17,11 @@ public class User : EntityBase<long>, IAggregateRoot
     CreatedAt = DateTime.UtcNow;
   }
 
-  public static Result<User> Create(string username, string email)
+  public static User Create(string username, string email)
   {
-    if (string.IsNullOrWhiteSpace(username))
-      return Result<User>.Error("Username is required.");
-    if (string.IsNullOrWhiteSpace(email))
-      return Result<User>.Error("Email is required.");
-
-    return Result<User>.Success(new User(new Username(username), email));
+    Guard.Against.NullOrWhiteSpace(username);
+    Guard.Against.NullOrWhiteSpace(email);
+    return new User(new Username(username), email);
   }
 
   public void UpdateUsername(Username newUsername)
