@@ -9,7 +9,7 @@ description: BusStop.Core domain model patterns. Use when working in BusStop.Cor
 ```
 {Entity}Aggregate/
 ├── {Entity}.cs          # aggregate root
-├── {Entity}Id.cs        # Vogen value object
+├── {Entity}Id.cs        # Ardalis.ValueObject
 ├── {Entity}Name.cs      # value object
 ├── Events/
 ├── Handlers/
@@ -17,17 +17,21 @@ description: BusStop.Core domain model patterns. Use when working in BusStop.Cor
 ```
 
 ## Aggregate Root
-- Inherit `EntityBase<T, TId>` and `IAggregateRoot`.
+- Inherit `EntityBase<TId>` and `IAggregateRoot`.
 - Minimize public setters; use methods for state changes.
 - Call `RegisterDomainEvent()` on meaningful state transitions.
 
-## IDs (Vogen)
+## IDs
+Use `Ardalis.SharedKernel.ValueObject` for IDs.
 ```csharp
-[ValueObject<int>]
-public readonly partial struct RouteId
+public sealed class RouteId(long value) : ValueObject
 {
-  private static Validation Validate(int value)
-    => value > 0 ? Validation.Ok : Validation.Invalid("RouteId must be positive.");
+  public long Value { get; } = Guard.Against.NegativeOrZero(value);
+
+  protected override IEnumerable<object> GetEqualityComponents()
+  {
+    yield return Value;
+  }
 }
 ```
 
@@ -50,4 +54,5 @@ public readonly partial struct RouteId
 
 ## Invariants
 - Enforce with `Ardalis.GuardClauses` in constructors and factory methods.
-- Business rule violations throw domain exceptions, not return Results.
+- Business rule violations throw exceptions (via Guard clauses), not return Results.
+- See `harness/specs/clean-architecture-conventions.md#error-handling-strategy` for the full two-layer pattern.
