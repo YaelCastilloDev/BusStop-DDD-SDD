@@ -43,8 +43,8 @@ RouteAggregate/
 └── Specifications/
     └── RouteByIdSpec.cs
 ```
-- **Aggregate roots:** inherit `EntityBase<T, TId>` and `IAggregateRoot`.
-- **IDs:** Vogen `[ValueObject<T>]` structs (e.g., `RouteId`), not raw `Guid` or `int`.
+- **Aggregate roots:** inherit `EntityBase<TId>` and `IAggregateRoot`.
+- **IDs:** `Ardalis.SharedKernel.ValueObject` subclasses (e.g., `RouteId`), not raw `Guid` or `int`.
 - **Value objects:** co-located in aggregate folder. Use `ValueObject` base or records with `From()` factory methods.
 - **Domain events:** folder `Events/`, past-tense names (e.g., `RouteUpdatedEvent`), inherit `DomainEventBase`.
 - **Domain event handlers:** folder `Handlers/`, implement `INotificationHandler<TEvent>` from Mediator.
@@ -63,7 +63,7 @@ UseCases/Routes/Create/
 - **Commands:** `<Action><Entity>Command` (e.g., `CreateRouteCommand`).
 - **Queries:** `Get<Entity>Query`, `List<Entities>Query`.
 - **Handlers:** `<CommandOrQueryName>Handler`, implementing `ICommandHandler<,>` or query equivalents from **Mediator** (not MediatR).
-- **Returns:** use `Ardalis.Result` / `Result<T>` for expected failures (not found, validation), not exceptions.
+- **Returns:** use `Ardalis.Result` / `Result<T>` for expected failures (not found, validation). Handlers catch `ArgumentException` from domain Guard clause violations and wrap in `Result<T>.Error()`. Do not let Guard clause exceptions propagate to the API.
 - **Validators:** not in UseCases by default. Input validation belongs in the Web layer (FastEndpoints). Handlers may perform defensive checks for domain-level concerns.
 - **Query services:** read-optimized queries via interfaces like `IListRoutesQueryService` defined here, implemented in Infrastructure.
 
@@ -92,12 +92,69 @@ UseCases/Routes/Create/
 - **Result wrapper:** handlers return `Result<T>`; endpoints map results to HTTP responses without throwing for flow control.
 - **Mediator:** source-generated `IMediator` for command/query dispatch. Register in `MediatorConfig.cs`.
 
+## Error Handling Strategy (Two-Layer Approach)
+
+BusStop uses a layered error handling strategy: Guard Clauses protect domain integrity (throw), and the Result pattern wraps expected failures at the application boundary.
+
+### Layer 1: Domain — Guard Clauses (throw)
+- Domain entities enforce invariants with `Ardalis.GuardClauses`.
+- Guard clauses throw `ArgumentException` on invalid state.
+- This is a **programming bug defense** — by the time data reaches the domain, it should already be clean after Web-layer FluentValidation and handler preconditions.
+- Domain factory methods and constructors NEVER return `Result<T>` for input validation; they throw on violation.
+
+### Layer 2: Application — Result Pattern (catch and wrap)
+- UseCase handlers catch `ArgumentException` from Guard clause violations.
+- Convert caught exceptions into `Result<T>.Error()` for expected failures.
+- Return `Result<T>` to the API layer for consistent HTTP mapping via `ResultExtensions`.
+- NEVER let Guard clause exceptions propagate unhandled to the API.
+
+### Flow
+```
+FastEndpoints Validator (FluentValidation) → 400 on invalid input
+  ↓ (clean data)
+UseCase Handler → catches Guard exceptions → Result<T>.Error()
+  ↓ (validated entity)
+Domain Entity → Guard.Against (throws on programming bug)
+  ↓
+Repository → persistence
+```
+
+### Example
+```csharp
+// Core — domain entity (throws on invalid state)
+public static User Create(string username, string email)
+{
+  Guard.Against.NullOrWhiteSpace(username);
+  Guard.Against.NullOrWhiteSpace(email);
+  return new User(new Username(username), email);
+}
+
+// UseCases — handler (catches and wraps)
+public sealed class CreateUserHandler(IRepository<User> repository)
+  : ICommandHandler<CreateUserCommand, Result<UserResponse>>
+{
+  public async ValueTask<Result<UserResponse>> Handle(
+    CreateUserCommand request, CancellationToken ct)
+  {
+    try
+    {
+      var user = User.Create(request.Username, request.Email);
+      var created = await repository.AddAsync(user, ct);
+      return new UserResponse(created.Id, created.Username.Value, created.Email, created.CreatedAt);
+    }
+    catch (ArgumentException ex)
+    {
+      return Result<UserResponse>.Error(ex.Message);
+    }
+  }
+}
+```
+
 ## BusStop Domain Mapping
 | Concept | Core location | Use case slice example |
 |---------|---------------|------------------------|
 | Route | `RouteAggregate/Route.cs` | `Routes/Create`, `Routes/Update`, `Routes/SoftDelete` |
 | Stop | `StopAggregate/Stop.cs` | `Stops/Create`, `Stops/GetByLocation` |
-| Contribution | `ContributionAggregate/Contribution.cs` | `Contributions/Submit` |
 | ModerationAction | `ModerationActionAggregate/ModerationAction.cs` | `Moderation/Review`, `Moderation/Undo` |
 
 > **Note:** The template ships with a `ContributorAggregate` as a reference vertical slice. Replace it incrementally with BusStop aggregates per approved feature specs.
