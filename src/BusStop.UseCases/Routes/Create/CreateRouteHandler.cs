@@ -1,3 +1,4 @@
+using BusStop.Core.Interfaces;
 using BusStop.Core.RouteAggregate;
 using BusStop.Core.UserAggregate;
 using BusStop.Core.UserAggregate.Specifications;
@@ -10,11 +11,14 @@ public sealed class CreateRouteHandler(
 {
   public async ValueTask<Result<RouteResponse>> Handle(CreateRouteCommand request, CancellationToken cancellationToken)
   {
-    var user = await userRepository.FirstOrDefaultAsync(new UserByIdSpec(new UserId(request.CreatedById)), cancellationToken);
-    if (user is null)
-      return Result<RouteResponse>.NotFound("User not found.");
+    if (string.IsNullOrEmpty(request.Sub))
+      return Result<RouteResponse>.Unauthorized("Authentication required.");
 
-    var result = Route.Create(request.Name, request.CreatedById);
+    var user = await userRepository.FirstOrDefaultAsync(new UserByKeycloakSubSpec(request.Sub), cancellationToken);
+    if (user is null)
+      return Result<RouteResponse>.NotFound("User not found. Please register first.");
+
+    var result = Route.Create(request.Name, user.Id);
     if (!result.IsSuccess)
       return Result<RouteResponse>.Error(result.Errors.FirstOrDefault());
 

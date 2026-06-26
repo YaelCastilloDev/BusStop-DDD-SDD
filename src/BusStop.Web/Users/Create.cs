@@ -10,7 +10,7 @@ public sealed class Create(IMediator mediator) : Endpoint<CreateUserRequest, Use
   public override void Configure()
   {
     Post("/users");
-    AllowAnonymous();
+    Roles("RegisteredUser");
   }
 
   public override async Task HandleAsync(CreateUserRequest req, CancellationToken ct)
@@ -21,6 +21,12 @@ public sealed class Create(IMediator mediator) : Endpoint<CreateUserRequest, Use
     if (result.IsSuccess)
     {
       await Send.CreatedAtAsync<Create>(new { result.Value.Id }, result.Value, cancellation: ct);
+      return;
+    }
+
+    if (result.Status == ResultStatus.Unauthorized)
+    {
+      await Send.UnauthorizedAsync(ct);
       return;
     }
 

@@ -10,7 +10,7 @@ public sealed class Create(IMediator mediator) : Endpoint<CreateStopRequest, Sto
   public override void Configure()
   {
     Post("/stops");
-    AllowAnonymous();
+    Roles("RegisteredUser");
   }
 
   public override async Task HandleAsync(CreateStopRequest req, CancellationToken ct)
@@ -26,6 +26,8 @@ public sealed class Create(IMediator mediator) : Endpoint<CreateStopRequest, Sto
 
     if (result.Status == ResultStatus.NotFound)
       await Send.NotFoundAsync(ct);
+    else if (result.Status == ResultStatus.Unauthorized)
+      await Send.UnauthorizedAsync(ct);
     else
       await Send.ErrorsAsync(cancellation: ct);
   }

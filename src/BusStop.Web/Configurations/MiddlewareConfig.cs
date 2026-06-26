@@ -19,6 +19,9 @@ public static class MiddlewareConfig
       app.UseHsts();
     }
 
+    app.UseAuthentication();
+    app.UseAuthorization();
+
     if (app.Environment.IsDevelopment())
     {
       app.UseSwaggerGen(options =>

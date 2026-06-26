@@ -18,7 +18,7 @@ public class LoggingBehavior<TRequest, TResponse>(ILogger<LoggingBehavior<TReque
 
         if (_logger.IsEnabled(LogLevel.Information))
         {
-            _logger.LogInformation("Handling {RequestName} with {@Request}", typeof(TRequest).Name, request);
+            _logger.LogInformation("Handling {RequestName}", typeof(TRequest).Name);
         }
 
         var sw = Stopwatch.StartNew();

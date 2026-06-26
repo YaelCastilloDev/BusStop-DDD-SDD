@@ -9,12 +9,12 @@ public sealed class Delete(IMediator mediator) : Endpoint<DeleteCommentRequest>
   public override void Configure()
   {
     Delete("/comments/{Id}");
-    AllowAnonymous();
+    Roles("Curator");
   }
 
   public override async Task HandleAsync(DeleteCommentRequest req, CancellationToken ct)
   {
-    var command = new DeleteCommentCommand(req.Id, req.DeletedById);
+    var command = new DeleteCommentCommand(req.Id);
     var result = await _mediator.Send(command, ct);
 
     if (result.IsSuccess)
@@ -25,12 +25,14 @@ public sealed class Delete(IMediator mediator) : Endpoint<DeleteCommentRequest>
 
     if (result.Status == ResultStatus.NotFound)
       await Send.NotFoundAsync(ct);
+    else if (result.Status == ResultStatus.Unauthorized)
+      await Send.UnauthorizedAsync(ct);
     else
       await Send.ErrorsAsync(cancellation: ct);
   }
 }
 
-public sealed record DeleteCommentRequest(long Id, long DeletedById);
+public sealed record DeleteCommentRequest(long Id);
 
 public sealed class DeleteCommentValidator : Validator<DeleteCommentRequest>
 {

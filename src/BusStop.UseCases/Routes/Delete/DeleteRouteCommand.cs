@@ -1,3 +1,8 @@
+using BusStop.Core.Interfaces;
+
 namespace BusStop.UseCases.Routes.Delete;
 
-public sealed record DeleteRouteCommand(long RouteId, long DeletedById) : ICommand<Result>;
+public sealed record DeleteRouteCommand(long RouteId) : ICommand<Result>, IRequireAuthenticatedUser
+{
+    public string? Sub { get; set; }
+}

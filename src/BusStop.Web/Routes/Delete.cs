@@ -2,19 +2,19 @@ using BusStop.UseCases.Routes.Delete;
 
 namespace BusStop.Web.Routes;
 
-public sealed class Delete(IMediator mediator) : Endpoint<DeleteRequest>
+public sealed class Delete(IMediator mediator) : Endpoint<DeleteRouteRequest>
 {
   private readonly IMediator _mediator = mediator;
 
   public override void Configure()
   {
     Delete("/routes/{Id}");
-    AllowAnonymous();
+    Roles("Curator");
   }
 
-  public override async Task HandleAsync(DeleteRequest req, CancellationToken ct)
+  public override async Task HandleAsync(DeleteRouteRequest req, CancellationToken ct)
   {
-    var command = new DeleteRouteCommand(req.Id, req.DeletedById);
+    var command = new DeleteRouteCommand(req.Id);
     var result = await _mediator.Send(command, ct);
 
     if (result.IsSuccess)
@@ -25,13 +25,11 @@ public sealed class Delete(IMediator mediator) : Endpoint<DeleteRequest>
 
     if (result.Status == ResultStatus.NotFound)
       await Send.NotFoundAsync(ct);
+    else if (result.Status == ResultStatus.Unauthorized)
+      await Send.UnauthorizedAsync(ct);
     else
       await Send.ErrorsAsync(cancellation: ct);
   }
 }
 
-public sealed record DeleteRequest(long Id, long DeletedById);
-
-public sealed class DeleteValidator : Validator<DeleteRequest>
-{
-}
+public sealed record DeleteRouteRequest(long Id);
