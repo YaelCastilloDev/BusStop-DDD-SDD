@@ -14,7 +14,7 @@ public sealed class CreateRouteHandler(
     if (string.IsNullOrEmpty(request.Sub))
       return Result<RouteResponse>.Unauthorized("Authentication required.");
 
-    var user = await userRepository.FirstOrDefaultAsync(new UserByKeycloakSubSpec(request.Sub), cancellationToken);
+    var user = await userRepository.FirstOrDefaultAsync(new UserByExternalIdSpec(request.Sub), cancellationToken);
     if (user is null)
       return Result<RouteResponse>.NotFound("User not found. Please register first.");
 

@@ -17,7 +17,7 @@ public sealed class DeleteCommentHandler(
     if (string.IsNullOrEmpty(request.Sub))
       return Result.Unauthorized("Authentication required.");
 
-    var user = await userRepository.FirstOrDefaultAsync(new UserByKeycloakSubSpec(request.Sub), cancellationToken);
+    var user = await userRepository.FirstOrDefaultAsync(new UserByExternalIdSpec(request.Sub), cancellationToken);
     if (user is null)
       return Result.NotFound("User not found. Please register first.");
 

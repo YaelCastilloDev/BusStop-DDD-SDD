@@ -18,7 +18,7 @@ public static class MediatorConfig
         typeof(BusStop.Core.RouteAggregate.Route), // Core
         typeof(InfrastructureServiceExtensions), // Infrastructure
         typeof(MediatorConfig),                  // Web
-        typeof(BusStop.UseCases.Users.Create.CreateUserCommand) // UseCases
+        typeof(BusStop.UseCases.Users.Register.RegisterUserCommand) // UseCases
       ];
 
       options.PipelineBehaviors =
