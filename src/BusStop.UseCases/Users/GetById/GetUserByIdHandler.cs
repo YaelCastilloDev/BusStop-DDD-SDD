@@ -13,7 +13,6 @@ public sealed class GetUserByIdHandler(IReadRepository<User> repository) : IQuer
     if (user is null)
       return Result<UserResponse>.NotFound("User not found.");
 
-    return new UserResponse(user.Id, user.Username.Value, user.Email, user.KeycloakSub, user.CreatedAt);
+    return new UserResponse(user.Id, user.Username?.Value, user.Email, user.ExternalId, user.CreatedAt, user.CountryId);
   }
 }
-

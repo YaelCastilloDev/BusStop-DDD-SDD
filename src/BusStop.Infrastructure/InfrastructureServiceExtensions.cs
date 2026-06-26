@@ -1,4 +1,5 @@
 ﻿using BusStop.Infrastructure.Data;
+using BusStop.Infrastructure.Integrations.RabbitMQ;
 
 namespace BusStop.Infrastructure;
 
@@ -24,6 +25,8 @@ public static class InfrastructureServiceExtensions
 
     services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>))
            .AddScoped(typeof(IReadRepository<>), typeof(EfRepository<>));
+
+    services.AddRabbitMqMessaging(config);
 
     logger.LogInformation("{Project} services registered", "Infrastructure");
 
