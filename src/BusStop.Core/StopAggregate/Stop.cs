@@ -23,18 +23,14 @@ public class Stop : EntityBase<long>, IAggregateRoot
     RouteId = routeId;
   }
 
-  public static Result<Stop> Create(string name, double latitude, double longitude, long routeId)
+  public static Stop Create(string name, double latitude, double longitude, long routeId)
   {
-    if (string.IsNullOrWhiteSpace(name))
-      return Result<Stop>.Error("Stop name is required.");
-    if (latitude < -90 || latitude > 90)
-      return Result<Stop>.Error("Latitude must be between -90 and 90.");
-    if (longitude < -180 || longitude > 180)
-      return Result<Stop>.Error("Longitude must be between -180 and 180.");
-    if (routeId <= 0)
-      return Result<Stop>.Error("Route ID is required.");
+    Guard.Against.NullOrWhiteSpace(name);
+    Guard.Against.OutOfRange(latitude, nameof(latitude), -90, 90);
+    Guard.Against.OutOfRange(longitude, nameof(longitude), -180, 180);
+    Guard.Against.NegativeOrZero(routeId);
 
-    return Result<Stop>.Success(new Stop(new StopName(name), new Location(latitude, longitude), new RouteId(routeId)));
+    return new Stop(new StopName(name), new Location(latitude, longitude), new RouteId(routeId));
   }
 
   public void UpdateName(StopName newName)

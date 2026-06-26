@@ -22,14 +22,12 @@ public class Route : EntityBase<long>, IAggregateRoot
     CreatedAt = DateTime.UtcNow;
   }
 
-  public static Result<Route> Create(string name, long createdById)
+  public static Route Create(string name, long createdById)
   {
-    if (string.IsNullOrWhiteSpace(name))
-      return Result<Route>.Error("Route name is required.");
-    if (createdById <= 0)
-      return Result<Route>.Error("Creator ID is required.");
+    Guard.Against.NullOrWhiteSpace(name);
+    Guard.Against.NegativeOrZero(createdById);
 
-    return Result<Route>.Success(new Route(new RouteName(name), new UserId(createdById)));
+    return new Route(new RouteName(name), new UserId(createdById));
   }
 
   public void UpdateName(RouteName newName)

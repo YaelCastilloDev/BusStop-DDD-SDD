@@ -8,10 +8,16 @@ public sealed class CommentReaction : ValueObject
   public UserId UserId { get; }
   public ReactionType ReactionType { get; }
 
-  public CommentReaction(UserId userId, ReactionType reactionType)
+  private CommentReaction(UserId userId, ReactionType reactionType)
   {
     UserId = userId;
     ReactionType = reactionType;
+  }
+
+  public static CommentReaction From(UserId userId, ReactionType reactionType)
+  {
+    Guard.Against.Null(userId);
+    return new CommentReaction(userId, reactionType);
   }
 
 #pragma warning disable CS8618
