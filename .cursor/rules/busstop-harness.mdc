@@ -1,0 +1,37 @@
+---
+description: BusStop spec-first workflow and validation gates
+alwaysApply: true
+---
+
+# BusStop Harness
+
+Follow spec-driven delivery. Full spec: `harness/specs/harness.md`.
+
+## Before Implementation
+1. Read active feature spec with spec ID.
+2. Map work to exactly one bounded context.
+3. Use canonical domain terms: Route, Stop, Contribution, ModerationAction.
+
+## Lifecycle
+1. Intake → 2. Spec draft → 3. Validation preflight → 4. Implementation (smallest vertical slice) → 5. Verification → 6. Closure
+
+## Validation Gates (must pass before merge)
+- **Gate 1:** Single bounded context owner.
+- **Gate 2:** Domain language matches glossary.
+- **Gate 3:** Correct layer placement, dependency rule, aggregate-folder structure.
+- **Gate 4:** Guard clauses, Specifications (no inline LINQ), Result pattern, FastEndpoints validators on input endpoints.
+- **Gate 5:** Versioned/documented API and event changes.
+- **Gate 6:** Tests map to every acceptance criterion.
+
+## Guardrails
+- No merge without approved feature spec.
+- No cross-context data writes.
+- No undocumented breaking changes.
+- Commits/PRs reference spec ID.
+
+## Key References
+- Product: `harness/product/vision.md`
+- Architecture: `harness/system-design.md`
+- Conventions: `harness/specs/clean-architecture-conventions.md`
+- Agents: `harness/specs/agents.md`
+- Workflow: `harness/specs/authoring-workflow.md`

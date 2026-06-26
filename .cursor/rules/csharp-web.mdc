@@ -1,0 +1,40 @@
+---
+description: BusStop.Web FastEndpoints and API patterns
+globs: **/BusStop.Web/**
+alwaysApply: false
+---
+
+# BusStop.Web Patterns
+
+## Endpoints
+- FastEndpoints REPR: one class per operation (`Create.cs`, `GetById.cs`, `List.cs`, `Update.cs`, `Delete.cs`).
+- Inherit `Endpoint<TRequest, TResponse>` or typed `Results<...>`.
+- Delegate all logic to Mediator commands/queries — endpoints are thin.
+
+## DTOs and Validators
+- Co-locate: `Create.CreateRequest.cs`, `Create.CreateValidator.cs`.
+- Or nest in endpoint file for small features.
+- Every input-bearing endpoint must have a `Validator<TRequest>` (FluentValidation via FastEndpoints).
+
+## Result Mapping
+- Use `ResultExtensions.ToCreatedResult()`, `.ToGetByIdResult()`, etc.
+- Never throw for expected flow control — map `Result` status to HTTP.
+
+## Configuration
+- `Configurations/MediatorConfig.cs` — register Mediator source generator.
+- `Configurations/ServiceConfigs.cs` — DI registration.
+- `Configurations/MiddlewareConfig.cs` — pipeline setup.
+
+## DI Pattern
+```csharp
+public class Create(IMediator mediator) : Endpoint<...>
+{
+  private readonly IMediator _mediator = mediator;
+}
+```
+Never use constructor parameters directly in method bodies.
+
+## API Conventions
+- Route groups per bounded context: `/routes`, `/stops`, `/moderation`.
+- OpenAPI tags per aggregate/feature.
+- Authorization policies per role where required.
