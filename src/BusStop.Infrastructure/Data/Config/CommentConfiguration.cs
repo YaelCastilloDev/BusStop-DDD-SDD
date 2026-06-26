@@ -32,6 +32,7 @@ public sealed class CommentConfiguration : IEntityTypeConfiguration<Comment>
 
     builder.OwnsMany(c => c.Reactions, r =>
     {
+      // Stored as a JSON column. See Comment.cs for scaling considerations.
       r.ToJson("reactions");
       r.Property(x => x.UserId)
        .HasConversion(id => id.Value, value => new UserId(value));
