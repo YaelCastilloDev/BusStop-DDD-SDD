@@ -7,11 +7,16 @@ var postgres = builder.AddPostgres("postgres")
 
 var busStopDb = postgres.AddDatabase("PostgresConnection");
 
+var rabbitmq = builder.AddRabbitMQ("messaging")
+  .WithLifetime(ContainerLifetime.Persistent);
+
 builder.AddProject<Projects.BusStop_Web>("web")
   .WithEndpoint("https", e => e.Port = 57679)
   .WithReference(busStopDb)
+  .WithReference(rabbitmq)
   .WithEnvironment("ASPNETCORE_ENVIRONMENT", builder.Environment.EnvironmentName)
-  .WaitFor(busStopDb);
+  .WaitFor(busStopDb)
+  .WaitFor(rabbitmq);
 
 builder
   .Build()

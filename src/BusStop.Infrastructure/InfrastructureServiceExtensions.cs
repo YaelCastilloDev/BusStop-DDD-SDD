@@ -8,7 +8,8 @@ public static class InfrastructureServiceExtensions
   public static IServiceCollection AddInfrastructureServices(
     this IServiceCollection services,
     ConfigurationManager config,
-    ILogger logger)
+    ILogger logger,
+    params System.Reflection.Assembly[] additionalAssemblies)
   {
     string? connectionString = config.GetConnectionString("PostgresConnection");
     Guard.Against.Null(connectionString);
@@ -27,7 +28,14 @@ public static class InfrastructureServiceExtensions
            .AddScoped(typeof(IReadRepository<>), typeof(EfRepository<>));
 
     services.AddScoped<BusStop.UseCases.Routes.GetNearby.INearbyRoutesQueryService, BusStop.Infrastructure.Data.Queries.NearbyRoutesQueryService>();
-    services.AddRabbitMqMessaging(config);
+    services.AddScoped<BusStop.Core.NotificationAggregate.Interfaces.IEmailSender, BusStop.Infrastructure.Integrations.Email.DummyEmailSender>();
+    
+    var assemblies = new List<System.Reflection.Assembly> { typeof(BusStop.UseCases.Users.Register.RegisterUserCommand).Assembly };
+    if (additionalAssemblies != null)
+    {
+      assemblies.AddRange(additionalAssemblies);
+    }
+    services.AddRabbitMqMessaging(config, assemblies.ToArray());
 
     logger.LogInformation("{Project} services registered", "Infrastructure");
 
