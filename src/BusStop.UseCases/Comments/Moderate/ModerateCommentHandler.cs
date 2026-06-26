@@ -4,13 +4,13 @@ using BusStop.Core.Interfaces;
 using BusStop.Core.UserAggregate;
 using BusStop.Core.UserAggregate.Specifications;
 
-namespace BusStop.UseCases.Comments.Delete;
+namespace BusStop.UseCases.Comments.Moderate;
 
-public sealed class DeleteCommentHandler(
+public sealed class ModerateCommentHandler(
   IRepository<Comment> repository,
-  IReadRepository<User> userRepository) : ICommandHandler<DeleteCommentCommand, Result>
+  IReadRepository<User> userRepository) : ICommandHandler<ModerateCommentCommand, Result>
 {
-  public async ValueTask<Result> Handle(DeleteCommentCommand request, CancellationToken cancellationToken)
+  public async ValueTask<Result> Handle(ModerateCommentCommand request, CancellationToken cancellationToken)
   {
     if (request.CommentId <= 0)
       return Result.Error("Comment ID is required.");
@@ -27,10 +27,10 @@ public sealed class DeleteCommentHandler(
     if (comment is null)
       return Result.NotFound("Comment not found.");
 
-    if (comment.IsDeleted)
-      return Result.Error("Comment is already deleted.");
+    if (comment.IsModerated)
+      return Result.Error("Comment is already moderated.");
 
-    comment.Delete(new UserId(user.Id));
+    comment.Moderate(new UserId(user.Id));
 
     await repository.UpdateAsync(comment, cancellationToken);
 

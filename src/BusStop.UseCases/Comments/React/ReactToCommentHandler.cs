@@ -27,8 +27,8 @@ public sealed class ReactToCommentHandler(
     if (comment is null)
       return Result.NotFound("Comment not found.");
 
-    if (comment.IsDeleted)
-      return Result.Error("Cannot react to a deleted comment.");
+    if (comment.IsModerated)
+      return Result.Error("Cannot react to a moderated comment.");
 
     if (!Enum.TryParse<ReactionType>(request.ReactionType, ignoreCase: true, out var reactionType))
       reactionType = ReactionType.Like;

@@ -1,20 +1,20 @@
-using BusStop.UseCases.Comments.Delete;
+using BusStop.UseCases.Comments.Moderate;
 
 namespace BusStop.Web.Comments;
 
-public sealed class Delete(IMediator mediator) : Endpoint<DeleteCommentRequest>
+public sealed class Moderate(IMediator mediator) : Endpoint<ModerateCommentRequest>
 {
   private readonly IMediator _mediator = mediator;
 
   public override void Configure()
   {
     Delete("/comments/{Id}");
-    Roles("Curator");
+    Roles("SubAdmin", "Admin");
   }
 
-  public override async Task HandleAsync(DeleteCommentRequest req, CancellationToken ct)
+  public override async Task HandleAsync(ModerateCommentRequest req, CancellationToken ct)
   {
-    var command = new DeleteCommentCommand(req.Id);
+    var command = new ModerateCommentCommand(req.Id);
     var result = await _mediator.Send(command, ct);
 
     if (result.IsSuccess)
@@ -32,8 +32,8 @@ public sealed class Delete(IMediator mediator) : Endpoint<DeleteCommentRequest>
   }
 }
 
-public sealed record DeleteCommentRequest(long Id);
+public sealed record ModerateCommentRequest(long Id);
 
-public sealed class DeleteCommentValidator : Validator<DeleteCommentRequest>
+public sealed class ModerateCommentValidator : Validator<ModerateCommentRequest>
 {
 }
