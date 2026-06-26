@@ -10,14 +10,12 @@ Full specs: `harness/product/vision.md`, `harness/system-design.md`.
 ## Domain Glossary (canonical terms)
 - **Route:** a transport path with ordered stops.
 - **Stop:** a boarding/alighting point.
-- **Contribution:** a community-submitted create/edit proposal for a route or stop.
 - **ModerationAction:** a review, undo, escalation, or rollback decision.
 
 Do not use synonyms that alter meaning unless the glossary is updated first.
 
 ## Bounded Contexts
-- **TransitCatalog:** route/stop lifecycle and validation.
-- **ContributionModeration:** review, escalation, undo, rollback.
+- **TransitCatalog:** route/stop lifecycle, validation, and moderation.
 - **IdentityAccess:** authentication, role claims, policy enforcement.
 - **SearchReadModel:** optimized querying and indexing projections.
 - **AuditObservability:** immutable action logs and operational signals.
