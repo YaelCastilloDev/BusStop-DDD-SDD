@@ -23,7 +23,8 @@ public static class MediatorConfig
 
       options.PipelineBehaviors =
       [
-        typeof(LoggingBehavior<,>)
+        typeof(LoggingBehavior<,>),
+        typeof(CurrentUserBehavior<,>)
       ];
     });
 

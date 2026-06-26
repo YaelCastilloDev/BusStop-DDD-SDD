@@ -9,12 +9,12 @@ public sealed class React(IMediator mediator) : Endpoint<ReactToCommentRequest>
   public override void Configure()
   {
     Post("/comments/react");
-    AllowAnonymous();
+    Roles("RegisteredUser");
   }
 
   public override async Task HandleAsync(ReactToCommentRequest req, CancellationToken ct)
   {
-    var command = new ReactToCommentCommand(req.CommentId, req.UserId, req.ReactionType);
+    var command = new ReactToCommentCommand(req.CommentId, req.ReactionType);
     var result = await _mediator.Send(command, ct);
 
     if (result.IsSuccess)
@@ -25,12 +25,14 @@ public sealed class React(IMediator mediator) : Endpoint<ReactToCommentRequest>
 
     if (result.Status == ResultStatus.NotFound)
       await Send.NotFoundAsync(ct);
+    else if (result.Status == ResultStatus.Unauthorized)
+      await Send.UnauthorizedAsync(ct);
     else
       await Send.ErrorsAsync(cancellation: ct);
   }
 }
 
-public sealed record ReactToCommentRequest(long CommentId, long UserId, string ReactionType);
+public sealed record ReactToCommentRequest(long CommentId, string ReactionType);
 
 public sealed class ReactToCommentValidator : Validator<ReactToCommentRequest>
 {
