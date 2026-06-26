@@ -32,7 +32,7 @@ public sealed class CreateCommentHandler(
   }
 
   private static CommentResponse ToResponse(Comment c) =>
-    new(c.Id, c.Content.Value, c.UserId.Value, c.RouteId.Value, c.CreatedAt, c.IsDeleted,
+    new(c.Id, c.Content.Value, c.UserId.Value, c.RouteId.Value, c.CreatedAt, c.IsModerated,
         c.Reactions.Count(r => r.ReactionType == ReactionType.Like),
         c.Reactions.Count(r => r.ReactionType == ReactionType.Dislike));
 }

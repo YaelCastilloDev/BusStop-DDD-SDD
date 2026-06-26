@@ -27,8 +27,8 @@ public sealed class CommentConfiguration : IEntityTypeConfiguration<Comment>
            .IsRequired();
 
     builder.Property(c => c.CreatedAt).IsRequired();
-    builder.Property(c => c.DeletedAt).IsRequired(false);
-    builder.Property(c => c.DeletedBy).IsRequired(false);
+    builder.Property(c => c.ModeratedAt).IsRequired(false);
+    builder.Property(c => c.ModeratedBy).IsRequired(false);
 
     builder.OwnsMany(c => c.Reactions, r =>
     {
@@ -40,6 +40,6 @@ public sealed class CommentConfiguration : IEntityTypeConfiguration<Comment>
        .HasConversion<int>();
     });
 
-    builder.HasQueryFilter(c => c.DeletedAt == null);
+    builder.HasQueryFilter(c => c.ModeratedAt == null);
   }
 }

@@ -19,8 +19,8 @@ public sealed class GetCommentsByRouteHandler(
     var comments = await repository.ListAsync(spec, cancellationToken);
 
     var responses = comments
-      .Where(c => !c.IsDeleted)
-      .Select(c => new CommentResponse(c.Id, c.Content.Value, c.UserId.Value, c.RouteId.Value, c.CreatedAt, c.IsDeleted,
+      .Where(c => !c.IsModerated)
+      .Select(c => new CommentResponse(c.Id, c.Content.Value, c.UserId.Value, c.RouteId.Value, c.CreatedAt, c.IsModerated,
           c.Reactions.Count(r => r.ReactionType == ReactionType.Like),
           c.Reactions.Count(r => r.ReactionType == ReactionType.Dislike)))
       .ToList();

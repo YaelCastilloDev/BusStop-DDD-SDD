@@ -10,8 +10,8 @@ public class Comment : EntityBase<long>, IAggregateRoot
   public UserId UserId { get; private set; }
   public RouteId RouteId { get; private set; }
   public DateTime CreatedAt { get; private set; }
-  public DateTime? DeletedAt { get; private set; }
-  public long? DeletedBy { get; private set; }
+  public DateTime? ModeratedAt { get; private set; }
+  public long? ModeratedBy { get; private set; }
 
   // We store reactions as a JSON column (Value Objects) rather than a separate table.
   // This is performant and aligns with DDD since a reaction has no identity outside its comment.
@@ -42,15 +42,16 @@ public class Comment : EntityBase<long>, IAggregateRoot
     return new Comment(new CommentContent(content), new UserId(userId), new RouteId(routeId));
   }
 
-  public void Delete(UserId deletedBy)
+  // Moderate is for administrative takedowns. A future Remove method could be added for user-driven deletions.
+  public void Moderate(UserId moderatedBy)
   {
-    Guard.Against.Null(deletedBy);
-    DeletedAt = DateTime.UtcNow;
-    DeletedBy = deletedBy.Value;
-    RegisterDomainEvent(new CommentDeletedEvent(Id));
+    Guard.Against.Null(moderatedBy);
+    ModeratedAt = DateTime.UtcNow;
+    ModeratedBy = moderatedBy.Value;
+    RegisterDomainEvent(new CommentModeratedEvent(Id));
   }
 
-  public bool IsDeleted => DeletedAt.HasValue;
+  public bool IsModerated => ModeratedAt.HasValue;
 
   public void AddReaction(UserId userId, ReactionType reactionType)
   {
