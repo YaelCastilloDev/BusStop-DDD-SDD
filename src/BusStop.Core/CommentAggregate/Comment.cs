@@ -48,7 +48,7 @@ public class Comment : EntityBase<long>, IAggregateRoot
     Guard.Against.Null(moderatedBy);
     ModeratedAt = DateTime.UtcNow;
     ModeratedBy = moderatedBy.Value;
-    RegisterDomainEvent(new CommentModeratedEvent(Id));
+    RegisterDomainEvent(new CommentModeratedEvent(Id, UserId.Value));
   }
 
   public bool IsModerated => ModeratedAt.HasValue;

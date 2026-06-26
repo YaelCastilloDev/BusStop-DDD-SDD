@@ -42,6 +42,7 @@ public static class MiddlewareConfig
     }
 
     app.UseFastEndpoints();
+    app.MapHub<BusStop.Web.Notifications.NotificationsHub>("/hubs/notifications");
 
     if (!app.Environment.IsDevelopment())
     {
