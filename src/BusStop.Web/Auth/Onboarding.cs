@@ -1,5 +1,6 @@
 using BusStop.UseCases.Users;
 using BusStop.UseCases.Users.Register;
+using BusStop.Web.Extensions;
 
 namespace BusStop.Web.Auth;
 
@@ -18,25 +19,7 @@ public sealed class Onboarding(IMediator mediator) : Endpoint<OnboardingRequest,
     var command = new OnboardingCommand(req.Username, req.CountryId);
     var result = await _mediator.Send(command, ct);
 
-    if (result.IsSuccess)
-    {
-      await Send.OkAsync(result.Value, ct);
-      return;
-    }
-
-    if (result.Status == ResultStatus.Unauthorized)
-    {
-      await Send.UnauthorizedAsync(ct);
-      return;
-    }
-
-    if (result.Status == ResultStatus.NotFound)
-    {
-      await Send.NotFoundAsync(ct);
-      return;
-    }
-
-    await Send.ErrorsAsync(cancellation: ct);
+    await this.ToOkResultAsync(result, ct);
   }
 }
 

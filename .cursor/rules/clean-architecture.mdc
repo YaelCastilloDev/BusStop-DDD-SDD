@@ -17,8 +17,8 @@ Tests: `BusStop.UnitTests`, `BusStop.IntegrationTests`, `BusStop.FunctionalTests
 
 ## Core
 - One `{Entity}Aggregate/` folder per aggregate root.
-- `EntityBase<T, TId>` + `IAggregateRoot`.
-- Vogen `[ValueObject<T>]` for IDs.
+- `EntityBase<TId>` + `IAggregateRoot`.
+- `Ardalis.SharedKernel.ValueObject` for IDs.
 - Value objects co-located in aggregate folder with `From()` factories.
 - Specifications in `{Aggregate}/Specifications/`.
 - Domain events in `{Aggregate}/Events/`, handlers in `{Aggregate}/Handlers/`.
@@ -28,6 +28,7 @@ Tests: `BusStop.UnitTests`, `BusStop.IntegrationTests`, `BusStop.FunctionalTests
 - Feature slices: `Routes/Create/`, not `Commands/`.
 - Handlers: `ICommandHandler<,>` via **Mediator** (not MediatR).
 - Return `Result` / `Result<T>` for expected failures.
+- Handlers catch `ArgumentException` from domain Guard clause violations and wrap in `Result<T>.Error()`.
 - No validators here — Web layer owns FastEndpoints validators.
 
 ## Infrastructure
