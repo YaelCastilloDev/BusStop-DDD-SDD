@@ -1,4 +1,5 @@
 using BusStop.UseCases.Routes.Delete;
+using BusStop.Web.Extensions;
 
 namespace BusStop.Web.Routes;
 
@@ -17,16 +18,7 @@ public sealed class Delete(IMediator mediator) : Endpoint<DeleteRequest>
     var command = new DeleteRouteCommand(req.Id, req.DeletedById);
     var result = await _mediator.Send(command, ct);
 
-    if (result.IsSuccess)
-    {
-      await Send.NoContentAsync(ct);
-      return;
-    }
-
-    if (result.Status == ResultStatus.NotFound)
-      await Send.NotFoundAsync(ct);
-    else
-      await Send.ErrorsAsync(cancellation: ct);
+    await this.ToNoContentResultAsync(result, ct);
   }
 }
 
