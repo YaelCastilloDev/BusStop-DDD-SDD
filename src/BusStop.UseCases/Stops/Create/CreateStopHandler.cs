@@ -14,11 +14,7 @@ public sealed class CreateStopHandler(
     if (route is null)
       return Result<StopResponse>.NotFound("Route not found.");
 
-    var result = Stop.Create(request.Name, request.Latitude, request.Longitude, request.RouteId);
-    if (!result.IsSuccess)
-      return Result<StopResponse>.Error(result.Errors.FirstOrDefault());
-
-    var stop = result.Value;
+    var stop = Stop.Create(request.Name, request.Latitude, request.Longitude, request.RouteId);
     var created = await repository.AddAsync(stop, cancellationToken);
 
     return new StopResponse(created.Id, created.Name.Value, created.Location.Latitude, created.Location.Longitude, created.RouteId.Value, created.IsDeleted);

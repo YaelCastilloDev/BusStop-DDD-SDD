@@ -14,11 +14,7 @@ public sealed class CreateRouteHandler(
     if (user is null)
       return Result<RouteResponse>.NotFound("User not found.");
 
-    var result = Route.Create(request.Name, request.CreatedById);
-    if (!result.IsSuccess)
-      return Result<RouteResponse>.Error(result.Errors.FirstOrDefault());
-
-    var route = result.Value;
+    var route = Route.Create(request.Name, request.CreatedById);
     var created = await repository.AddAsync(route, cancellationToken);
 
     return new RouteResponse(created.Id, created.Name.Value, created.CreatedById.Value, created.CreatedAt, created.IsDeleted);

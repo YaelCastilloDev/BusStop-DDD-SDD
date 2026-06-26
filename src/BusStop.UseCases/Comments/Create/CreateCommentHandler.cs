@@ -22,11 +22,7 @@ public sealed class CreateCommentHandler(
     if (route is null)
       return Result<CommentResponse>.NotFound("Route not found.");
 
-    var result = Comment.Create(request.Content, request.UserId, request.RouteId);
-    if (!result.IsSuccess)
-      return Result<CommentResponse>.Error(result.Errors.FirstOrDefault());
-
-    var comment = result.Value;
+    var comment = Comment.Create(request.Content, request.UserId, request.RouteId);
     var created = await repository.AddAsync(comment, cancellationToken);
 
     return ToResponse(created);
