@@ -1,5 +1,6 @@
 using BusStop.UseCases.Routes;
 using BusStop.UseCases.Routes.Create;
+using BusStop.Web.Extensions;
 
 namespace BusStop.Web.Routes;
 
@@ -18,16 +19,7 @@ public sealed class Create(IMediator mediator) : Endpoint<CreateRequest, RouteRe
     var command = new CreateRouteCommand(req.Name, req.CreatedById);
     var result = await _mediator.Send(command, ct);
 
-    if (result.IsSuccess)
-    {
-      await Send.CreatedAtAsync<Create>(new { result.Value.Id }, result.Value, cancellation: ct);
-      return;
-    }
-
-    if (result.Status == ResultStatus.NotFound)
-      await Send.NotFoundAsync(ct);
-    else
-      await Send.ErrorsAsync(cancellation: ct);
+    await this.ToCreatedResultAsync(result, new { id = result.Value?.Id }, ct);
   }
 }
 

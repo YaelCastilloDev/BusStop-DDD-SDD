@@ -1,5 +1,6 @@
 using BusStop.UseCases.Routes;
 using BusStop.UseCases.Routes.GetById;
+using BusStop.Web.Extensions;
 
 namespace BusStop.Web.Routes;
 
@@ -18,16 +19,7 @@ public sealed class GetById(IMediator mediator) : Endpoint<GetByIdRequest, Route
     var query = new GetRouteByIdQuery(req.Id);
     var result = await _mediator.Send(query, ct);
 
-    if (result.IsSuccess)
-    {
-      await Send.OkAsync(result.Value, ct);
-      return;
-    }
-
-    if (result.Status == ResultStatus.NotFound)
-      await Send.NotFoundAsync(ct);
-    else
-      await Send.ErrorsAsync(cancellation: ct);
+    await this.ToGetByIdResultAsync(result, ct);
   }
 }
 
