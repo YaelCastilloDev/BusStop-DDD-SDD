@@ -13,6 +13,11 @@ public class Comment : EntityBase<long>, IAggregateRoot
   public DateTime? DeletedAt { get; private set; }
   public long? DeletedBy { get; private set; }
 
+  // We store reactions as a JSON column (Value Objects) rather than a separate table.
+  // This is performant and aligns with DDD since a reaction has no identity outside its comment.
+  // NOTE: This approach is ideal for low-to-moderate reaction counts (e.g., < 1000 per comment).
+  // If reactions scale to massive numbers (e.g., 10,000+), EF Core rewriting the entire JSON 
+  // string on every update will become a bottleneck, and this should be moved to a separate table.
   private readonly List<CommentReaction> _reactions = [];
   public IReadOnlyCollection<CommentReaction> Reactions => _reactions.AsReadOnly();
 
@@ -28,16 +33,13 @@ public class Comment : EntityBase<long>, IAggregateRoot
     CreatedAt = DateTime.UtcNow;
   }
 
-  public static Result<Comment> Create(string content, long userId, long routeId)
+  public static Comment Create(string content, long userId, long routeId)
   {
-    if (string.IsNullOrWhiteSpace(content))
-      return Result<Comment>.Error("Comment content is required.");
-    if (userId <= 0)
-      return Result<Comment>.Error("User ID is required.");
-    if (routeId <= 0)
-      return Result<Comment>.Error("Route ID is required.");
+    Guard.Against.NullOrWhiteSpace(content);
+    Guard.Against.NegativeOrZero(userId);
+    Guard.Against.NegativeOrZero(routeId);
 
-    return Result<Comment>.Success(new Comment(new CommentContent(content), new UserId(userId), new RouteId(routeId)));
+    return new Comment(new CommentContent(content), new UserId(userId), new RouteId(routeId));
   }
 
   public void Delete(UserId deletedBy)
@@ -54,6 +56,6 @@ public class Comment : EntityBase<long>, IAggregateRoot
   {
     Guard.Against.Null(userId);
     _reactions.RemoveAll(r => r.UserId == userId);
-    _reactions.Add(new CommentReaction(userId, reactionType));
+    _reactions.Add(CommentReaction.From(userId, reactionType));
   }
 }
