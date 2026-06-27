@@ -18,6 +18,7 @@
     <PackageReference Include="MassTransit" />
     <PackageReference Include="MassTransit.RabbitMQ" />
     <PackageReference Include="Vogen" />
+    <PackageReference Include="Resend" />
   </ItemGroup>
   
   <ItemGroup>

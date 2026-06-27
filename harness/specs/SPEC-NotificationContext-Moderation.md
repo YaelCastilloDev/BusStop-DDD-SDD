@@ -20,7 +20,7 @@ Users need to be notified when actions occur in the system that affect them, suc
 - **AspireHost**: `AppHost.cs` (RabbitMQ).
 - **Core**: `NotificationAggregate/` (UserNotification, UserNotificationId).
 - **UseCases**: Commands, Queries, Handlers, Consumers.
-- **Infrastructure**: Entity Configurations, EF Core DbContext, DummyEmailSender.
+- **Infrastructure**: Entity Configurations, EF Core DbContext, ResendEmailSender.
 - **Web**: FastEndpoints (`GetMy`, `Delete`), SignalR Hub (`NotificationsHub`).
 
 ## Command/Query and Endpoint Impact
@@ -33,7 +33,7 @@ Users need to be notified when actions occur in the system that affect them, suc
 ## Acceptance Criteria
 - Given a comment is moderated, when the event is processed, a UserNotification is saved to the database.
 - Given a UserNotification is saved, it is pushed to the target user via SignalR.
-- Given a UserNotification is processed, an email is "sent" via the IEmailSender (dummy log for now).
+- Given a UserNotification is processed, an email is sent via the `IEmailSender` (using Resend API, decoupled via RabbitMQ).
 - Given a user requests their notifications, they only receive their own notifications.
 - Given a user attempts to delete a notification, it is deleted only if they own it; otherwise, it fails or returns NotFound/Forbidden.
 
