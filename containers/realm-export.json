@@ -20,7 +20,9 @@
         "description": "RegisteredUser permissions + soft-delete routes, comments, users",
         "composite": true,
         "composites": {
-          "realm": ["RegisteredUser"]
+          "realm": [
+            "RegisteredUser"
+          ]
         },
         "clientRole": false
       },
@@ -29,7 +31,9 @@
         "description": "Curator permissions + approve/deny soft-delete requests + promote/demote User to Curator",
         "composite": true,
         "composites": {
-          "realm": ["Curator"]
+          "realm": [
+            "Curator"
+          ]
         },
         "clientRole": false
       },
@@ -38,7 +42,9 @@
         "description": "SubAdmin permissions + assign/manage SubAdmin role",
         "composite": true,
         "composites": {
-          "realm": ["SubAdmin"]
+          "realm": [
+            "SubAdmin"
+          ]
         },
         "clientRole": false
       }
@@ -125,7 +131,9 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["RegisteredUser"]
+      "realmRoles": [
+        "RegisteredUser"
+      ]
     },
     {
       "username": "curator1",
@@ -140,7 +148,9 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["Curator"]
+      "realmRoles": [
+        "Curator"
+      ]
     },
     {
       "username": "subadmin1",
@@ -155,7 +165,9 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["SubAdmin"]
+      "realmRoles": [
+        "SubAdmin"
+      ]
     },
     {
       "username": "admin1",
@@ -170,7 +182,104 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["Admin"]
+      "realmRoles": [
+        "Admin"
+      ]
+    }
+  ],
+  "browserFlow": "browser-admin-2fa",
+  "authenticationFlows": [
+    {
+      "alias": "browser-admin-2fa",
+      "description": "Browser flow with conditional OTP for Admin",
+      "providerId": "basic-flow",
+      "topLevel": true,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "auth-cookie",
+          "authenticatorFlow": false,
+          "requirement": "ALTERNATIVE",
+          "priority": 10,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
+        },
+        {
+          "authenticator": "identity-provider-redirector",
+          "authenticatorFlow": false,
+          "requirement": "ALTERNATIVE",
+          "priority": 20,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
+        },
+        {
+          "requirement": "ALTERNATIVE",
+          "priority": 30,
+          "flowAlias": "browser-admin-2fa forms",
+          "userSetupAllowed": false,
+          "authenticatorFlow": true,
+          "autheticatorFlow": true
+        }
+      ]
+    },
+    {
+      "alias": "browser-admin-2fa forms",
+      "description": "Username, password, otp and other auth forms.",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "auth-username-password-form",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
+        },
+        {
+          "requirement": "CONDITIONAL",
+          "priority": 20,
+          "flowAlias": "browser-admin-2fa conditional otp",
+          "userSetupAllowed": false,
+          "authenticatorFlow": true,
+          "autheticatorFlow": true
+        }
+      ]
+    },
+    {
+      "alias": "browser-admin-2fa conditional otp",
+      "description": "Flow to determine if OTP is required for admins",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "conditional-user-role",
+          "authenticatorConfig": "admin-role-config",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
+        },
+        {
+          "authenticator": "auth-otp-form",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 20,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
+        }
+      ]
+    }
+  ],
+  "authenticatorConfig": [
+    {
+      "alias": "admin-role-config",
+      "config": {
+        "condUserRole": "Admin"
+      }
     }
   ]
 }
