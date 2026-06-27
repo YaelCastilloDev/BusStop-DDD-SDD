@@ -6,7 +6,7 @@ namespace BusStop.Web.Configurations;
 
 public static class AuthConfig
 {
-    public static IServiceCollection AddAuthServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddAuthServices(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
         var authSection = configuration.GetSection("Authentication");
         var metadataAddress = authSection["MetadataAddress"] ?? throw new InvalidOperationException("Authentication:MetadataAddress is required.");
@@ -21,7 +21,7 @@ public static class AuthConfig
         .AddJwtBearer(options =>
         {
             options.MetadataAddress = metadataAddress;
-            options.RequireHttpsMetadata = false;
+            options.RequireHttpsMetadata = !environment.IsDevelopment();
             options.MapInboundClaims = false;
             options.TokenValidationParameters = new TokenValidationParameters
             {
