@@ -1,5 +1,6 @@
 ﻿using BusStop.Infrastructure.Data;
 using BusStop.Infrastructure.Integrations.RabbitMQ;
+using Resend;
 
 namespace BusStop.Infrastructure;
 
@@ -28,7 +29,16 @@ public static class InfrastructureServiceExtensions
            .AddScoped(typeof(IReadRepository<>), typeof(EfRepository<>));
 
     services.AddScoped<BusStop.UseCases.Routes.GetNearby.INearbyRoutesQueryService, BusStop.Infrastructure.Data.Queries.NearbyRoutesQueryService>();
-    services.AddScoped<BusStop.Core.NotificationAggregate.Interfaces.IEmailSender, BusStop.Infrastructure.Integrations.Email.DummyEmailSender>();
+    
+    var resendApiKey = config["Resend:ApiKey"];
+    if (string.IsNullOrWhiteSpace(resendApiKey))
+    {
+      logger.LogWarning("No Resend:ApiKey found in configuration. Email sending will fail if triggered.");
+    }
+    
+    services.AddResend(options => options.ApiToken = resendApiKey ?? "missing-key");
+    services.AddScoped<BusStop.Core.NotificationAggregate.Interfaces.IEmailSender, BusStop.Infrastructure.Integrations.Email.ResendEmailSender>();
+    logger.LogInformation("Resend email sender registered.");
     
     var assemblies = new List<System.Reflection.Assembly> { typeof(BusStop.UseCases.Users.Register.RegisterUserCommand).Assembly };
     if (additionalAssemblies != null)

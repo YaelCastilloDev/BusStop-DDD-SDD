@@ -70,6 +70,7 @@ This document is the implementation baseline, not an exhaustive future-state blu
 - Data: PostgreSQL (PostGIS candidate when geo queries require it).
 - Messaging: RabbitMQ with durable queues and retry policies.
 - Auth: Keycloak centralized identity.
+- Email: Resend API for cheap, scalable application emails. Keycloak uses Resend SMTP relay natively for auth emails (2FA, reset). Application-triggered emails are decoupled via RabbitMQ async dispatch.
 
 ## Data Design Principles
 - Route, Stop are aggregate roots with explicit invariants.
