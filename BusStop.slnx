@@ -16,6 +16,7 @@
     <Project Path="src/BusStop.Infrastructure/BusStop.Infrastructure.csproj" />
     <Project Path="src/BusStop.UseCases/BusStop.UseCases.csproj" />
     <Project Path="src/BusStop.Web/BusStop.Web.csproj" />
+    <File Path="src/BusStop.Frontend/package.json" />
   </Folder>
   <Folder Name="/src/_aspire/">
     <Project Path="src/BusStop.AspireHost/BusStop.AspireHost.csproj" />
