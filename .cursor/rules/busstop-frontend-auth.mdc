@@ -1,0 +1,14 @@
+# BusStop Frontend Authentication
+
+## 1. Keycloak & Keycloakify
+- Authentication is strictly managed via Keycloak.
+- Custom Keycloak login pages and themes must be built using `keycloakify`.
+- Do not use Clerk, Auth0, or other third-party SaaS auth providers.
+
+## 2. Keycloak Adapter
+- Integrate the `keycloak-js` client within an adapter in `src/lib/adapters/auth/`.
+- Do not leak Keycloak-specific logic directly into React components. Create a `useAuth` hook that abstracts the Keycloak instance.
+
+## 3. Protected Routes
+- Route guards must verify authentication status via the Keycloak adapter before rendering protected pages.
+- Handle token refresh and session expiration gracefully.

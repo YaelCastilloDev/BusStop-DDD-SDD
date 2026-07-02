@@ -1,0 +1,21 @@
+# BusStop Frontend Harness
+
+## Purpose
+Define the architectural guidelines and strict rules for frontend development in the BusStop application. This harness applies Feature-Sliced Design (FSD) and Clean Architecture principles to the frontend.
+
+## Core Pillars
+All agents and developers MUST follow the rules outlined in the specific domain rule files:
+- **Architecture:** `busstop-frontend-architecture.mdc`
+- **State Management:** `busstop-frontend-state.mdc`
+- **Styling & Theming:** `busstop-frontend-styling.mdc`
+- **Components:** `busstop-frontend-components.mdc`
+- **Routing:** `busstop-frontend-routing.mdc`
+- **Validation & Quality:** `busstop-frontend-validation.mdc`
+- **Authentication:** `busstop-frontend-auth.mdc`
+
+## Mandatory Directory Structure
+- `src/features/`: Smart components, feature-specific logic, state, and domain models.
+- `src/components/ui/`: Dumb, reusable presentation components (shadcn/ui).
+- `src/lib/adapters/`: Adapters wrapping external services (Maps, Analytics, Auth) to prevent vendor lock-in.
+- `src/routes/`: TanStack Router file-based routing.
+- `src/config/`: App-wide configurations (e.g., fonts, constants).
