@@ -1,0 +1,16 @@
+# BusStop Frontend Styling & Theming
+
+## 1. Utility-First CSS (Tailwind)
+- Strict use of Tailwind CSS utility classes.
+- Avoid writing custom CSS. Prohibition of custom CSS files unless absolutely necessary (e.g., complex animations not supported by Tailwind).
+- Use `tailwind-merge` and `clsx` (or `cn` utility) for dynamic class name merging.
+
+## 2. Theming & Dark Mode
+- Use CSS variables (`var(--color-...)`) defined in global CSS for colors.
+- Support Light and Dark mode seamlessly via these variables and Tailwind's dark mode strategies.
+- Do not hardcode specific hex colors in components; use semantic Tailwind classes (e.g., `bg-primary`, `text-muted-foreground`).
+
+## 3. Typography
+- Typography rules and fonts MUST be centrally defined.
+- Fonts must be loaded and configured in `src/config/fonts.ts`.
+- Use Tailwind's typography plugin and font-family utilities.
