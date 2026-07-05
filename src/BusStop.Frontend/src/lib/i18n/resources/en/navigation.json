@@ -1,0 +1,9 @@
+{
+  "dashboard": "Dashboard",
+  "mapExplorer": "Map Explorer",
+  "stops": "Stops",
+  "routes": "Routes",
+  "settings": "Settings",
+  "collapse": "Collapse sidebar",
+  "expand": "Expand sidebar"
+}

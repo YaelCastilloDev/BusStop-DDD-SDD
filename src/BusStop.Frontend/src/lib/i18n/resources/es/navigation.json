@@ -1,0 +1,9 @@
+{
+  "dashboard": "Panel",
+  "mapExplorer": "Explorador de Mapa",
+  "stops": "Paradas",
+  "routes": "Rutas",
+  "settings": "Configuración",
+  "collapse": "Colapsar barra lateral",
+  "expand": "Expandir barra lateral"
+}
