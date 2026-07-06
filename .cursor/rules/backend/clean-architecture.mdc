@@ -1,5 +1,5 @@
 ---
-description: BusStop Clean Architecture layer rules (Ardalis template)
+description: BusStop Clean Architecture layer rules (Ardalis template). Use when implementing features following Clean Architecture patterns.
 alwaysApply: true
 ---
 

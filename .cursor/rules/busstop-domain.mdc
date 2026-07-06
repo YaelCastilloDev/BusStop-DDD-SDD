@@ -1,5 +1,5 @@
 ---
-description: BusStop domain glossary and bounded contexts
+description: BusStop domain glossary and bounded contexts. Use when working with BusStop domain concepts, entities, or bounded contexts.
 alwaysApply: true
 ---
 
