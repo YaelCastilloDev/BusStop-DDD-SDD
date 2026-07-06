@@ -5,5 +5,9 @@
   "routes": "Rutas",
   "settings": "Configuración",
   "collapse": "Colapsar barra lateral",
-  "expand": "Expandir barra lateral"
+  "expand": "Expandir barra lateral",
+  "shareEmbed": "Compartir o incorporar mapa",
+  "print": "Imprimir",
+  "addMissingPlace": "Agregar un lugar faltante",
+  "stopRegistering": "Dejar de registrar"
 }

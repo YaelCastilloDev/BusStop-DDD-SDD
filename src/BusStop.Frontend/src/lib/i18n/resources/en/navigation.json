@@ -5,5 +5,9 @@
   "routes": "Routes",
   "settings": "Settings",
   "collapse": "Collapse sidebar",
-  "expand": "Expand sidebar"
+  "expand": "Expand sidebar",
+  "shareEmbed": "Share or embed map",
+  "print": "Print",
+  "addMissingPlace": "Add a missing place",
+  "stopRegistering": "Stop registering"
 }

@@ -1,13 +1,23 @@
-import type { Map, Marker, GeoJSONSource, LngLatBoundsLike } from 'maplibre-gl'
+import type {
+  Map as MaplibreMap,
+  Marker,
+  LngLatBoundsLike,
+  GeolocateControl,
+  FullscreenControl,
+  ScaleControl,
+} from 'maplibre-gl'
 import maplibregl from 'maplibre-gl'
 import type { IMapAdapter, MapOptions } from './types'
-import type { LatLng, MapEntityType, Route, Stop } from '@/features/map/types'
+import type { InteractionMode, LatLng, MapEntityType, Route, Stop } from '@/features/map/types'
 
 export class MapLibreAdapter implements IMapAdapter {
-  private map: Map | null = null
+  private map: MaplibreMap | null = null
   private markers: Map<string, Marker> = new Map()
   private routeSources: Set<string> = new Set()
-  private markerClickHandler: ((type: MapEntityType, id: string) => void) | null = null
+  private mapClickHandler: ((location: LatLng) => void) | null = null
+  private geolocateControl: GeolocateControl | null = null
+  private fullscreenControl: FullscreenControl | null = null
+  private scaleControl: ScaleControl | null = null
   private initialized = false
 
   initialize(container: HTMLElement, options: MapOptions): void {
@@ -18,7 +28,7 @@ export class MapLibreAdapter implements IMapAdapter {
       center: [options.center.lng, options.center.lat],
       zoom: options.zoom,
       style: options.style,
-      attributionControl: options.attributionControl ?? false,
+      attributionControl: (options.attributionControl ?? false) as false,
     })
 
     this.map.addControl(new maplibregl.NavigationControl(), 'top-left')
@@ -27,10 +37,13 @@ export class MapLibreAdapter implements IMapAdapter {
   }
 
   destroy(): void {
-    this.markers.forEach((marker) => marker.remove())
+    this.markers.forEach((marker: Marker) => marker.remove())
     this.markers.clear()
     this.routeSources.clear()
-    this.markerClickHandler = null
+    this.mapClickHandler = null
+    this.geolocateControl = null
+    this.fullscreenControl = null
+    this.scaleControl = null
 
     if (this.map) {
       this.map.remove()
@@ -50,31 +63,14 @@ export class MapLibreAdapter implements IMapAdapter {
 
     const el = document.createElement('div')
     el.className = 'map-marker map-marker--stop'
-    el.style.cssText = `
-      width: 28px;
-      height: 28px;
-      background-color: hsl(var(--primary));
-      border: 3px solid hsl(var(--background));
-      border-radius: 50%;
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      transition: transform 0.2s ease;
-    `
-
-    el.addEventListener('mouseenter', () => {
-      el.style.transform = 'scale(1.2)'
-    })
-    el.addEventListener('mouseleave', () => {
-      el.style.transform = 'scale(1)'
-    })
-
-    const marker = new maplibregl.Marker({ element: el })
-      .setLngLat([stop.location.lng, stop.location.lat])
-      .addTo(this.map)
 
     if (onClick) {
       el.addEventListener('click', () => onClick(stop.id))
     }
+
+    const marker = new maplibregl.Marker({ element: el })
+      .setLngLat([stop.location.lng, stop.location.lat])
+      .addTo(this.map)
 
     this.markers.set(stop.id, marker)
   }
@@ -180,11 +176,73 @@ export class MapLibreAdapter implements IMapAdapter {
     })
   }
 
-  onMarkerClick(handler: (entityType: MapEntityType, entityId: string) => void): void {
-    this.markerClickHandler = handler
+  onMarkerClick(_handler: (entityType: MapEntityType, entityId: string) => void): void {
   }
 
   offMarkerClick(): void {
-    this.markerClickHandler = null
+  }
+
+  setInteractionMode(mode: InteractionMode): void {
+    if (!this.map) return
+
+    const canvas = this.map.getCanvas()
+
+    if (mode === 'add-stop') {
+      canvas.style.cursor = 'crosshair'
+    } else {
+      canvas.style.cursor = ''
+    }
+  }
+
+  onMapClick(handler: (location: LatLng) => void): void {
+    this.mapClickHandler = handler
+
+    if (this.map) {
+      this.map.on('click', this.handleMapClick)
+    }
+  }
+
+  offMapClick(): void {
+    this.mapClickHandler = null
+
+    if (this.map) {
+      this.map.off('click', this.handleMapClick)
+    }
+  }
+
+  addGeolocateControl(): void {
+    if (!this.map || this.geolocateControl) return
+
+    this.geolocateControl = new maplibregl.GeolocateControl({
+      positionOptions: { enableHighAccuracy: true },
+      trackUserLocation: true,
+    })
+
+    this.map.addControl(this.geolocateControl, 'bottom-right')
+  }
+
+  addFullscreenControl(): void {
+    if (!this.map || this.fullscreenControl) return
+
+    this.fullscreenControl = new maplibregl.FullscreenControl()
+    this.map.addControl(this.fullscreenControl, 'top-right')
+  }
+
+  addScaleControl(): void {
+    if (!this.map || this.scaleControl) return
+
+    this.scaleControl = new maplibregl.ScaleControl({
+      maxWidth: 120,
+      unit: 'metric',
+    })
+
+    this.map.addControl(this.scaleControl, 'bottom-left')
+  }
+
+  private handleMapClick = (e: { lngLat: { lat: number; lng: number } }): void => {
+    this.mapClickHandler?.({
+      lat: e.lngLat.lat,
+      lng: e.lngLat.lng,
+    })
   }
 }
