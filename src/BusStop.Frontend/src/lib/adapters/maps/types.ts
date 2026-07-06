@@ -4,12 +4,7 @@ export interface MapOptions {
   center: LatLng
   zoom: number
   style: string
-  attributionControl?: boolean
-}
-
-export interface MarkerClickEvent {
-  entityType: MapEntityType
-  entityId: string
+  attributionControl?: false
 }
 
 export interface IMapAdapter {

@@ -10,8 +10,9 @@ import { useMapUIStore } from '@/stores/map-ui-store'
 export function MainSidebar() {
   const { t } = useTranslation('navigation')
   const { setOpen } = useSidebar()
-  const interactionMode = useMapUIStore((s) => s.interactionMode)
-  const setInteractionMode = useMapUIStore((s) => s.setInteractionMode)
+  const { interactionMode, setInteractionMode } = useMapUIStore(
+    ({ interactionMode, setInteractionMode }) => ({ interactionMode, setInteractionMode })
+  )
 
   const isAddingStop = interactionMode === 'add-stop'
 
@@ -36,7 +37,7 @@ export function MainSidebar() {
     },
     {
       icon: isAddingStop ? MapPinOff : MapPinPlus,
-      label: isAddingStop ? t('stopRegistering') : t('addMissingPlace'),
+      label: isAddingStop ? t('cancelAddStop') : t('addMissingPlace'),
       indent: true,
       onClick: handleAddMissingPlace,
       active: isAddingStop,
