@@ -1,12 +1,10 @@
-import type {
-  Map as MaplibreMap,
-  Marker,
-  LngLatBoundsLike,
-  GeolocateControl,
-  FullscreenControl,
-  ScaleControl,
+import maplibregl, {
+  type Map as MaplibreMap,
+  type Marker,
+  type GeolocateControl,
+  type FullscreenControl,
+  type ScaleControl,
 } from 'maplibre-gl'
-import maplibregl from 'maplibre-gl'
 import type { IMapAdapter, MapOptions } from './types'
 import type { InteractionMode, LatLng, MapEntityType, Route, Stop } from '@/features/map/types'
 
@@ -14,6 +12,7 @@ export class MapLibreAdapter implements IMapAdapter {
   private map: MaplibreMap | null = null
   private markers: Map<string, Marker> = new Map()
   private routeSources: Set<string> = new Set()
+  private markerClickHandler: ((type: MapEntityType, id: string) => void) | null = null
   private mapClickHandler: ((location: LatLng) => void) | null = null
   private geolocateControl: GeolocateControl | null = null
   private fullscreenControl: FullscreenControl | null = null
@@ -28,10 +27,16 @@ export class MapLibreAdapter implements IMapAdapter {
       center: [options.center.lng, options.center.lat],
       zoom: options.zoom,
       style: options.style,
-      attributionControl: (options.attributionControl ?? false) as false,
+      attributionControl: options.attributionControl ?? false,
     })
 
     this.map.addControl(new maplibregl.NavigationControl(), 'top-left')
+
+    this.map.once('style.load', () => {
+      this.addGeolocateControl()
+      this.addFullscreenControl()
+      this.addScaleControl()
+    })
 
     this.initialized = true
   }
@@ -40,6 +45,7 @@ export class MapLibreAdapter implements IMapAdapter {
     this.markers.forEach((marker: Marker) => marker.remove())
     this.markers.clear()
     this.routeSources.clear()
+    this.markerClickHandler = null
     this.mapClickHandler = null
     this.geolocateControl = null
     this.fullscreenControl = null
@@ -64,9 +70,13 @@ export class MapLibreAdapter implements IMapAdapter {
     const el = document.createElement('div')
     el.className = 'map-marker map-marker--stop'
 
-    if (onClick) {
-      el.addEventListener('click', () => onClick(stop.id))
-    }
+    el.addEventListener('click', () => {
+      if (onClick) {
+        onClick(stop.id)
+      } else {
+        this.markerClickHandler?.('stop', stop.id)
+      }
+    })
 
     const marker = new maplibregl.Marker({ element: el })
       .setLngLat([stop.location.lng, stop.location.lat])
@@ -97,8 +107,8 @@ export class MapLibreAdapter implements IMapAdapter {
       (coord) => [coord.lng, coord.lat] as [number, number]
     )
 
-    this.map.on('load', () => {
-      if (!this.map) return
+    const add = () => {
+      if (!this.map || this.routeSources.has(sourceId)) return
 
       this.map.addSource(sourceId, {
         type: 'geojson',
@@ -128,10 +138,12 @@ export class MapLibreAdapter implements IMapAdapter {
       })
 
       this.routeSources.add(sourceId)
-    })
+    }
 
     if (this.map.isStyleLoaded()) {
-      this.map.fire('load')
+      add()
+    } else {
+      this.map.once('style.load', add)
     }
   }
 
@@ -168,7 +180,7 @@ export class MapLibreAdapter implements IMapAdapter {
     const mapBounds = coords.reduce(
       (mb, coord) => mb.extend(coord),
       new maplibregl.LngLatBounds(coords[0], coords[0])
-    ) as LngLatBoundsLike
+    )
 
     this.map.fitBounds(mapBounds, {
       padding,
@@ -176,10 +188,12 @@ export class MapLibreAdapter implements IMapAdapter {
     })
   }
 
-  onMarkerClick(_handler: (entityType: MapEntityType, entityId: string) => void): void {
+  onMarkerClick(handler: (entityType: MapEntityType, entityId: string) => void): void {
+    this.markerClickHandler = handler
   }
 
   offMarkerClick(): void {
+    this.markerClickHandler = null
   }
 
   setInteractionMode(mode: InteractionMode): void {
