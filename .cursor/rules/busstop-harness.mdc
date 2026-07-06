@@ -1,5 +1,5 @@
 ---
-description: BusStop spec-first workflow and validation gates
+description: BusStop spec-first workflow and validation gates. Use when implementing features, reviewing PRs, or following the spec-driven delivery workflow.
 alwaysApply: true
 ---
 

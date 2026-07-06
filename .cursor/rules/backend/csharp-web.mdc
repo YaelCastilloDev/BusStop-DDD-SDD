@@ -1,5 +1,5 @@
 ---
-description: BusStop.Web FastEndpoints and API patterns
+description: BusStop.Web FastEndpoints and API patterns. Use when working in BusStop.Web project or implementing API endpoints.
 globs: **/BusStop.Web/**
 alwaysApply: false
 ---

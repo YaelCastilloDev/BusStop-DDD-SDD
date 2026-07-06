@@ -1,5 +1,5 @@
 ---
-description: BusStop.Core domain model patterns
+description: BusStop.Core domain model patterns. Use when working in BusStop.Core project or implementing domain aggregates.
 globs: **/BusStop.Core/**
 alwaysApply: false
 ---
