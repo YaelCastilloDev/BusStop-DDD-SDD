@@ -22,6 +22,8 @@ export interface Route {
 
 export type MapEntityType = 'stop' | 'route'
 
+export type InteractionMode = 'browse' | 'add-stop'
+
 export interface SelectedEntity {
   type: MapEntityType
   id: string

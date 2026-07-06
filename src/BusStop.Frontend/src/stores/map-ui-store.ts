@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { getCookie, setCookie } from '@/lib/cookies'
-import type { MapEntityType, SelectedEntity } from '@/features/map/types'
+import type { InteractionMode, MapEntityType, SelectedEntity } from '@/features/map/types'
 
 const SIDEBAR_COLLAPSED_KEY = 'bs_sidebar_collapsed'
 
@@ -8,6 +8,7 @@ interface MapUIState {
   selectedEntity: SelectedEntity | null
   detailsPanelOpen: boolean
   sidebarCollapsed: boolean
+  interactionMode: InteractionMode
 
   selectEntity: (type: MapEntityType, id: string) => void
   clearSelection: () => void
@@ -16,6 +17,7 @@ interface MapUIState {
   closePanel: () => void
   toggleSidebar: () => void
   setSidebarCollapsed: (collapsed: boolean) => void
+  setInteractionMode: (mode: InteractionMode) => void
 }
 
 function getInitialSidebarState(): boolean {
@@ -30,6 +32,7 @@ export const useMapUIStore = create<MapUIState>()((set) => ({
   selectedEntity: null,
   detailsPanelOpen: false,
   sidebarCollapsed: getInitialSidebarState(),
+  interactionMode: 'browse',
 
   selectEntity: (type, id) =>
     set({
@@ -62,4 +65,11 @@ export const useMapUIStore = create<MapUIState>()((set) => ({
     setCookie(SIDEBAR_COLLAPSED_KEY, String(collapsed))
     set({ sidebarCollapsed: collapsed })
   },
+
+  setInteractionMode: (mode) =>
+    set({
+      interactionMode: mode,
+      selectedEntity: null,
+      detailsPanelOpen: false,
+    }),
 }))

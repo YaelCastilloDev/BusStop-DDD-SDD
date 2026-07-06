@@ -1,4 +1,4 @@
-import type { LatLng, MapEntityType, Route, Stop } from '@/features/map/types'
+import type { InteractionMode, LatLng, MapEntityType, Route, Stop } from '@/features/map/types'
 
 export interface MapOptions {
   center: LatLng
@@ -23,6 +23,10 @@ export interface IMapAdapter {
   fitBounds(bounds: LatLng[], padding?: number): void
   onMarkerClick(handler: (entityType: MapEntityType, entityId: string) => void): void
   offMarkerClick(): void
-  addGeolocateControl?(): void
-  addNavigationControl?(): void
+  setInteractionMode(mode: InteractionMode): void
+  onMapClick(handler: (location: LatLng) => void): void
+  offMapClick(): void
+  addGeolocateControl(): void
+  addFullscreenControl(): void
+  addScaleControl(): void
 }

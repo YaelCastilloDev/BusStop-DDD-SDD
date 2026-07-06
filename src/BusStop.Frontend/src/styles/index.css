@@ -1,12 +1,9 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import './theme.css';
+@import './tokens.css';
 
 @custom-variant dark (&:is(.dark *));
-
-@theme {
-  --z-60: 60;
-}
 
 :root {
   --topbar-height: 3.5rem;
@@ -92,4 +89,19 @@
   to {
     height: 0;
   }
+}
+
+.map-marker--stop {
+  width: 28px;
+  height: 28px;
+  background-color: hsl(var(--primary));
+  border: 3px solid hsl(var(--background));
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease;
+}
+
+.map-marker--stop:hover {
+  transform: scale(1.2);
 }

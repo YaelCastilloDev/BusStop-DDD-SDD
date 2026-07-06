@@ -21,7 +21,7 @@ import './styles/index.css'
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: (failureCount, error) => {
+      retry: (_failureCount, error) => {
         if (import.meta.env.DEV) return false
 
         return !(
