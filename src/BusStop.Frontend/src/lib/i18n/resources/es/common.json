@@ -6,5 +6,8 @@
   "loading": "Cargando...",
   "comingSoon": "Próximamente",
   "error": "Ocurrió un error",
-  "retry": "Reintentar"
+  "retry": "Reintentar",
+  "signIn": "Iniciar sesión",
+  "logout": "Cerrar sesión",
+  "toggleSidebar": "Alternar barra lateral"
 }

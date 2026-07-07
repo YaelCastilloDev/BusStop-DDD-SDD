@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
-import { AxiosError } from 'axios'
+import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios'
 import {
   QueryCache,
   QueryClient,
@@ -10,9 +10,9 @@ import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { I18nextProvider } from 'react-i18next'
 import { toast } from 'sonner'
 import i18n from '@/lib/i18n'
+import { getAuthToken } from '@/lib/adapters/auth'
 import { DirectionProvider } from './context/direction-provider'
 import { FontProvider } from './context/font-provider'
-import { ThemeProvider } from './context/theme-provider'
 // Generated Routes
 import { routeTree } from './routeTree.gen'
 // Styles
@@ -56,6 +56,17 @@ const queryClient = new QueryClient({
   }),
 })
 
+axios.interceptors.request.use(
+  async (config: InternalAxiosRequestConfig) => {
+    const token = await getAuthToken()
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => Promise.reject(error)
+)
+
 // Create a new router instance
 const router = createRouter({
   routeTree,
@@ -79,13 +90,11 @@ if (!rootElement.innerHTML) {
     <StrictMode>
       <QueryClientProvider client={queryClient}>
         <I18nextProvider i18n={i18n}>
-          <ThemeProvider>
-            <FontProvider>
-              <DirectionProvider>
-                <RouterProvider router={router} />
-              </DirectionProvider>
-            </FontProvider>
-          </ThemeProvider>
+          <FontProvider>
+            <DirectionProvider>
+              <RouterProvider router={router} />
+            </DirectionProvider>
+          </FontProvider>
         </I18nextProvider>
       </QueryClientProvider>
     </StrictMode>
