@@ -16,7 +16,15 @@
     "test:ui": "vitest --ui --browser.headless",
     "test:browser": "vitest",
     "test:coverage": "vitest run --coverage --browser.headless",
-    "test:browser:install": "playwright install chromium --with-deps"
+    "test:browser:install": "playwright install chromium --with-deps",
+    "keycloakify": "keycloakify",
+    "build-theme": "keycloakify build",
+    "dev-theme": "keycloakify start-keycloak"
+  },
+  "keycloakify": {
+    "accountThemeImplementation": "none",
+    "themeName": ["busstop"],
+    "extraThemeProperties": ["parent=keycloak"]
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -47,6 +55,7 @@
     "clsx": "^2.1.1",
     "cmdk": "1.1.1",
     "date-fns": "^4.1.0",
+    "framer-motion": "^12.42.2",
     "i18next": "^26.3.4",
     "i18next-browser-languagedetector": "^8.2.1",
     "input-otp": "^1.4.2",
