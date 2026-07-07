@@ -10,9 +10,8 @@ import { useMapUIStore } from '@/stores/map-ui-store'
 export function MainSidebar() {
   const { t } = useTranslation('navigation')
   const { setOpen } = useSidebar()
-  const { interactionMode, setInteractionMode } = useMapUIStore(
-    ({ interactionMode, setInteractionMode }) => ({ interactionMode, setInteractionMode })
-  )
+  const interactionMode = useMapUIStore((s) => s.interactionMode)
+  const setInteractionMode = useMapUIStore((s) => s.setInteractionMode)
 
   const isAddingStop = interactionMode === 'add-stop'
 
