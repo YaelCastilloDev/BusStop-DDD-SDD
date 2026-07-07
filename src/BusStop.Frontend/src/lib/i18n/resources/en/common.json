@@ -6,5 +6,8 @@
   "loading": "Loading...",
   "comingSoon": "Coming soon",
   "error": "An error occurred",
-  "retry": "Retry"
+  "retry": "Retry",
+  "signIn": "Sign In",
+  "logout": "Log out",
+  "toggleSidebar": "Toggle sidebar"
 }
