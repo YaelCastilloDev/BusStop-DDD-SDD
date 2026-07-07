@@ -18,7 +18,7 @@ export function MapPage() {
     >
       <div className='flex h-svh flex-col w-full'>
         <TopBar />
-        <div className='flex flex-1 overflow-hidden'>
+        <div className='relative flex-1 overflow-hidden'>
           <MainSidebar />
           <MapLayout>
             <MapContainer />
