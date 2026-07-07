@@ -44,7 +44,7 @@ export function MainSidebar() {
   ]
 
   return (
-    <Sidebar collapsible='icon' className='z-70 border-r'>
+    <Sidebar collapsible='offcanvas' className='z-70 border-r'>
       <SidebarContent className='p-0 gap-0'>
         <button
           onClick={() => setOpen(true)}

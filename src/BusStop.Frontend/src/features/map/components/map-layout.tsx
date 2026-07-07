@@ -12,7 +12,7 @@ export function MapLayout({ children }: MapLayoutProps) {
   return (
     <div
       className={cn(
-        'relative flex flex-1 overflow-hidden',
+        'absolute inset-0 flex overflow-hidden',
         detailsPanelOpen && 'md:pr-[380px]'
       )}
     >
