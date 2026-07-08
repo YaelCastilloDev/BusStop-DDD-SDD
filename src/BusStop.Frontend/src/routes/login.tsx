@@ -1,24 +1,20 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useAuth } from '@/lib/adapters/auth'
+import { AuthCardLayout } from '@/keycloak-theme/login/components/AuthCardLayout'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { Bus, LogIn } from 'lucide-react'
 
 export const Route = createFileRoute('/login')({
   component: LoginPage,
 })
 
 function LoginPage() {
-  const { login, isLoading, isAuthenticated, error } = useAuth()
-  const [loginTriggered, setLoginTriggered] = useState(false)
+  const { directLogin, isLoading, isAuthenticated, error } = useAuth()
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [submitting, setSubmitting] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -27,47 +23,68 @@ function LoginPage() {
     }
   }, [isAuthenticated, navigate])
 
-  const handleLogin = async () => {
-    setLoginTriggered(true)
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+    if (!username.trim() || !password) return
+
+    setSubmitting(true)
     try {
-      await login()
+      await directLogin(username, password)
     } catch {
-      setLoginTriggered(false)
+      setSubmitting(false)
     }
   }
 
   return (
-    <div className='flex min-h-svh items-center justify-center bg-background p-4'>
-      <Card className='w-full max-w-sm shadow-lg'>
-        <CardHeader className='space-y-1 text-center'>
-          <Bus className='mx-auto size-12 text-primary' />
-          <CardTitle className='text-h2'>BusStop</CardTitle>
-          <CardDescription className='text-body-sm'>
-            Sign in to manage transit routes and stops
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {error ? (
-            <p className='text-sm text-destructive mb-4 text-center'>
-              {error}
-            </p>
-          ) : null}
+    <AuthCardLayout
+      title='Sign In'
+      description='Enter your credentials to access BusStop'
+    >
+      <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
+        {error ? (
+          <p className='text-sm text-destructive text-center' role='alert'>
+            {error}
+          </p>
+        ) : null}
+
+        <div className='space-y-2'>
+          <Label htmlFor='username'>Email</Label>
+          <Input
+            id='username'
+            name='username'
+            type='text'
+            autoFocus
+            autoComplete='username'
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            disabled={submitting || isLoading}
+          />
+        </div>
+
+        <div className='space-y-2'>
+          <Label htmlFor='password'>Password</Label>
+          <Input
+            id='password'
+            name='password'
+            type='password'
+            autoComplete='current-password'
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={submitting || isLoading}
+          />
+        </div>
+
+        <div className='pt-2'>
           <Button
+            type='submit'
             className='w-full'
             size='lg'
-            onClick={handleLogin}
-            disabled={loginTriggered || isLoading}
+            disabled={submitting || isLoading || !username.trim() || !password}
           >
-            <LogIn className='size-4' />
-            {loginTriggered ? 'Redirecting...' : 'Sign in with Keycloak'}
+            {submitting || isLoading ? 'Signing in...' : 'Sign In'}
           </Button>
-        </CardContent>
-        <CardFooter className='justify-center'>
-          <p className='text-caption text-muted-foreground'>
-            You will be redirected to the Keycloak login page
-          </p>
-        </CardFooter>
-      </Card>
-    </div>
+        </div>
+      </form>
+    </AuthCardLayout>
   )
 }

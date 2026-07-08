@@ -3,6 +3,7 @@ import type { UserProfile } from './types'
 export interface IAuthAdapter {
   init(): Promise<boolean>
   login(): Promise<void>
+  directLogin(username: string, password: string): Promise<void>
   logout(): Promise<void>
   register(): Promise<void>
   getToken(): Promise<string | undefined>
