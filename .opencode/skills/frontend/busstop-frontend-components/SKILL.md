@@ -1,3 +1,8 @@
+---
+name: busstop-frontend-components
+description: BusStop frontend component guidelines using shadcn/ui. Use when building UI components, smart/dumb separation, typography roles, accessibility, or GIS components.
+---
+
 # BusStop Frontend Component Guidelines
 
 ## 1. Component Library (shadcn/ui)
@@ -27,14 +32,14 @@ Rules:
 - Sidebar navigation items use `text-label`.
 - Form labels and input placeholders use `text-label`.
 - Version or metadata text uses `text-caption`.
-- Never compose raw `text-sm font-medium` ? use the semantic token instead.
+- Never compose raw `text-sm font-medium` — use the semantic token instead.
 
 ## 4. Accessibility (a11y) & Responsiveness
 - All components MUST be accessible. Use Radix UI primitives (which back shadcn) to ensure keyboard navigation and ARIA attributes.
 - Enforce a mobile-first approach. Design the default view for mobile and use Tailwind's `md:`, `lg:`, `xl:` breakpoints to scale up.
 
 ## 5. GIS & Map Components
-- All map interactions go through `src/lib/adapters/maps/IMapAdapter` ? never import MapLibre GL (or any map SDK) directly in React components.
+- All map interactions go through `src/lib/adapters/maps/IMapAdapter` — never import MapLibre GL (or any map SDK) directly in React components.
 - Markers and popups must use domain types (Stop, Route) from `src/features/map/types.ts`, not map-provider-specific types.
 - Responsive layout for details panels: side panel on desktop (>= md breakpoint), bottom sheet (vaul Drawer) on mobile.
 - Map container must fill available viewport space using `absolute inset-0` or flex layout with `flex-1`.
