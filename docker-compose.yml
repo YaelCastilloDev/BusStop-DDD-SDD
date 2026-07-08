@@ -12,6 +12,14 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://aspire-dashboard:18889"
+      ConnectionStrings__PostgresConnection: "Host=postgres;Port=5432;Database=busstop;Username=${DB_USER};Password=${DB_PASSWORD}"
+      ConnectionStrings__messaging: "amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672"
+      RabbitMQ__Host: "rabbitmq"
+      Keycloak__AuthorizationUrl: "http://keycloak:8080/realms/auth-demo/protocol/openid-connect/auth"
+      Keycloak__TokenUrl: "http://keycloak:8080/realms/auth-demo/protocol/openid-connect/token"
+      Authentication__MetadataAddress: "http://keycloak:8080/realms/auth-demo/.well-known/openid-configuration"
+      Authentication__ValidIssuer: "http://localhost:8080/realms/auth-demo"
+      Authentication__Audience: "busstop-api"
     restart: unless-stopped
     depends_on:
       - postgres
@@ -24,8 +32,19 @@ services:
       - 18888:18888
     restart: unless-stopped
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
+    ports:
+      - 5672:5672
+      - 15672:15672
+    restart: unless-stopped
+
   postgres:
-    image: postgres:17
+    image: postgis/postgis:17-3.5
     container_name: keycloak-db
     environment:
       POSTGRES_USER: ${DB_USER}
@@ -51,7 +70,6 @@ services:
       KC_DB: postgres
       KC_DB_USERNAME: ${DB_USER}
       KC_DB_PASSWORD: ${DB_PASSWORD}
-      KC_DB_SCHEMA: keycloak
       KC_DB_URL_HOST: postgres
       KC_DB_PORT: 5432
       KC_DB_URL_DATABASE: keycloak-auth
