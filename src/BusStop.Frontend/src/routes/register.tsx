@@ -6,14 +6,18 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 
-export const Route = createFileRoute('/login')({
-  component: LoginPage,
+export const Route = createFileRoute('/register')({
+  component: RegisterPage,
 })
 
-function LoginPage() {
-  const { directLogin, isLoading, isAuthenticated, error } = useAuth()
+function RegisterPage() {
+  const { directRegister, isLoading, isAuthenticated, error } = useAuth()
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const navigate = useNavigate()
 
@@ -25,11 +29,12 @@ function LoginPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    if (!username.trim() || !password) return
+    if (!firstName.trim() || !lastName.trim() || !email.trim() || !username.trim() || !password || !confirmPassword) return
+    if (password !== confirmPassword) return
 
     setSubmitting(true)
     try {
-      await directLogin(username, password)
+      await directRegister({ firstName: firstName.trim(), lastName: lastName.trim(), email: email.trim(), username: username.trim(), password })
     } catch {
       setSubmitting(false)
     }
@@ -39,9 +44,9 @@ function LoginPage() {
     <AuthCardLayout
       footer={
         <>
-          <span className='text-muted-foreground'>Don't have an account?</span>
-          <a href='/register' className='text-primary text-sm font-medium hover:underline'>
-            Create an account
+          <span className='text-muted-foreground'>Already have an account?</span>
+          <a href='/login' className='text-primary text-sm font-medium hover:underline'>
+            Sign in
           </a>
         </>
       }
@@ -72,7 +77,7 @@ function LoginPage() {
 
       <div className='flex items-center justify-center gap-2'>
         <hr className='grow border' />
-        <p className='text-base text-foreground font-medium'>Sign In</p>
+        <p className='text-base text-foreground font-medium'>Sign Up</p>
         <hr className='grow border' />
       </div>
 
@@ -83,15 +88,63 @@ function LoginPage() {
           </p>
         ) : null}
 
+        <div className='grid grid-cols-2 gap-4 mb-4'>
+          <div>
+            <div className='mb-2 block'>
+              <Label htmlFor='firstName' className='font-semibold'>First Name</Label>
+            </div>
+            <Input
+              id='firstName'
+              name='firstName'
+              type='text'
+              autoComplete='given-name'
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              disabled={submitting || isLoading}
+              className='h-10 rounded-lg py-2 shadow-none text-sm !border focus-visible:outline-0 focus-visible:ring-0 focus-visible:border-primary'
+            />
+          </div>
+          <div>
+            <div className='mb-2 block'>
+              <Label htmlFor='lastName' className='font-semibold'>Last Name</Label>
+            </div>
+            <Input
+              id='lastName'
+              name='lastName'
+              type='text'
+              autoComplete='family-name'
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              disabled={submitting || isLoading}
+              className='h-10 rounded-lg py-2 shadow-none text-sm !border focus-visible:outline-0 focus-visible:ring-0 focus-visible:border-primary'
+            />
+          </div>
+        </div>
+
         <div className='mb-4'>
           <div className='mb-2 block'>
-            <Label htmlFor='username' className='font-semibold'>Email</Label>
+            <Label htmlFor='email' className='font-semibold'>Email</Label>
+          </div>
+          <Input
+            id='email'
+            name='email'
+            type='email'
+            autoComplete='email'
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={submitting || isLoading}
+            className='h-10 rounded-lg py-2 shadow-none text-sm !border focus-visible:outline-0 focus-visible:ring-0 focus-visible:border-primary'
+          />
+        </div>
+
+        <div className='mb-4'>
+          <div className='mb-2 block'>
+            <Label htmlFor='username' className='font-semibold'>Username</Label>
           </div>
           <Input
             id='username'
             name='username'
             type='text'
-            autoFocus
             autoComplete='username'
             value={username}
             onChange={(e) => setUsername(e.target.value)}
@@ -108,9 +161,25 @@ function LoginPage() {
             id='password'
             name='password'
             type='password'
-            autoComplete='current-password'
+            autoComplete='new-password'
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            disabled={submitting || isLoading}
+            className='h-10 rounded-lg py-2 shadow-none text-sm !border focus-visible:outline-0 focus-visible:ring-0 focus-visible:border-primary'
+          />
+        </div>
+
+        <div className='mb-4'>
+          <div className='mb-2 block'>
+            <Label htmlFor='confirm-password' className='font-semibold'>Confirm Password</Label>
+          </div>
+          <Input
+            id='confirm-password'
+            name='confirm-password'
+            type='password'
+            autoComplete='new-password'
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             disabled={submitting || isLoading}
             className='h-10 rounded-lg py-2 shadow-none text-sm !border focus-visible:outline-0 focus-visible:ring-0 focus-visible:border-primary'
           />
@@ -120,9 +189,9 @@ function LoginPage() {
           <Button
             type='submit'
             className='w-full h-10 px-5 py-2 text-sm font-medium shadow-none transition-colors hover:bg-primary-emphasis focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background'
-            disabled={submitting || isLoading || !username.trim() || !password}
+            disabled={submitting || isLoading || !firstName.trim() || !lastName.trim() || !email.trim() || !username.trim() || !password || !confirmPassword || password !== confirmPassword}
           >
-            {submitting || isLoading ? 'Signing in...' : 'Sign In'}
+            {submitting || isLoading ? 'Creating account...' : 'Sign Up'}
           </Button>
         </div>
       </form>

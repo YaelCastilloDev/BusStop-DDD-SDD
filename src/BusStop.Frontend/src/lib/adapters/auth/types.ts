@@ -17,3 +17,11 @@ export type BusStopRole =
   | 'Curator'
   | 'SubAdmin'
   | 'Admin'
+
+export interface DirectRegisterRequest {
+  firstName: string
+  lastName: string
+  email: string
+  username: string
+  password: string
+}

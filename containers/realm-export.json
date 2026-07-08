@@ -3,7 +3,7 @@
   "displayName": "BusStop Authentication Realm",
   "enabled": true,
   "sslRequired": "none",
-  "registrationAllowed": false,
+  "registrationAllowed": true,
   "resetPasswordAllowed": true,
   "loginWithEmailAllowed": true,
   "accessTokenLifespan": 900,
