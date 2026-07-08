@@ -1,6 +1,6 @@
 import { SidebarProvider } from '@/components/ui/sidebar'
 import { useMapUIStore } from '@/stores/map-ui-store'
-import { TopBar } from '@/features/map/components/top-bar'
+import { TopBar } from '@/components/top-bar'
 import { MainSidebar } from '@/features/map/components/main-sidebar'
 import { MapLayout } from '@/features/map/components/map-layout'
 import { MapContainer } from '@/features/map/components/map-container'
