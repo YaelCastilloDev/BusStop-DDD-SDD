@@ -11,15 +11,12 @@ import { I18nextProvider } from 'react-i18next'
 import { toast } from 'sonner'
 import i18n from '@/lib/i18n'
 import { getAuthToken } from '@/lib/adapters/auth'
-import { createLogger } from '@/lib/logger'
 import { DirectionProvider } from './context/direction-provider'
 import { FontProvider } from './context/font-provider'
 // Generated Routes
 import { routeTree } from './routeTree.gen'
 // Styles
 import './styles/index.css'
-
-const mainLogger = createLogger('main')
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,7 +36,6 @@ const queryClient = new QueryClient({
       onError: (error) => {
         if (error instanceof AxiosError) {
           if (error.response?.status === 304) {
-            mainLogger.warn('mutation returned 304 Not Modified', { url: error.config?.url })
             toast.error('Content not modified!')
           }
         }
@@ -50,11 +46,9 @@ const queryClient = new QueryClient({
     onError: (error) => {
       if (error instanceof AxiosError) {
         if (error.response?.status === 401) {
-          mainLogger.warn('query returned 401 Unauthorized', { url: error.config?.url })
           toast.error('Session expired!')
         }
         if (error.response?.status === 500) {
-          mainLogger.error('query returned 500 Internal Server Error', { url: error.config?.url })
           toast.error('Internal Server Error!')
         }
       }
@@ -67,22 +61,10 @@ axios.interceptors.request.use(
     const token = await getAuthToken()
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
-      mainLogger.debug('Bearer token attached to request', {
-        url: config.url,
-        method: config.method,
-      })
-    } else {
-      mainLogger.debug('no token available for request', {
-        url: config.url,
-        method: config.method,
-      })
     }
     return config
   },
-  (error) => {
-    mainLogger.error('axios request interceptor failed', error)
-    return Promise.reject(error)
-  }
+  (error) => Promise.reject(error)
 )
 
 // Create a new router instance
