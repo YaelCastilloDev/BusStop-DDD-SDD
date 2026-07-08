@@ -27,20 +27,13 @@ export class KeycloakAdapter implements IAuthAdapter {
       realm: import.meta.env.VITE_KEYCLOAK_REALM ?? 'auth-demo',
       clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID ?? 'busstop-api',
     })
-    logger.debug('adapter created', {
-      url: import.meta.env.VITE_KEYCLOAK_URL ?? 'http://localhost:8080',
-      realm: import.meta.env.VITE_KEYCLOAK_REALM ?? 'auth-demo',
-      clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID ?? 'busstop-api',
-    })
   }
 
   async init(): Promise<boolean> {
     if (this._initPromise) {
-      logger.debug('init already in progress, reusing existing promise')
       return this._initPromise
     }
 
-    logger.info('starting Keycloak initialization')
     this._initPromise = this._doInit()
     return this._initPromise
   }
@@ -66,7 +59,6 @@ export class KeycloakAdapter implements IAuthAdapter {
         ),
       ])
       this._initialized = true
-      logger.info('Keycloak initialized successfully', { authenticated })
       return authenticated
     } catch (error) {
       this._initialized = true
@@ -77,15 +69,12 @@ export class KeycloakAdapter implements IAuthAdapter {
   }
 
   async login(): Promise<void> {
-    logger.info('redirecting to Keycloak login')
     await this.keycloak.login({
       redirectUri: window.location.origin,
     })
   }
 
   async directLogin(username: string, password: string): Promise<void> {
-    logger.info('attempting direct grant login', { username })
-
     const tokenUrl = `${this.keycloak.authServerUrl}/realms/${this.keycloak.realm}/protocol/openid-connect/token`
 
     const body = new URLSearchParams({
@@ -123,11 +112,6 @@ export class KeycloakAdapter implements IAuthAdapter {
         }
       }
 
-      logger.error('direct login rejected', {
-        username,
-        status: response.status,
-        error: errorMessage,
-      })
       throw new Error(errorMessage)
     }
 
@@ -145,19 +129,15 @@ export class KeycloakAdapter implements IAuthAdapter {
     this.keycloak.idToken = data.id_token
     this.keycloak.authenticated = true
     this._initialized = true
-
-    logger.info('direct login successful', { username, expiresIn: data.expires_in })
   }
 
   async logout(): Promise<void> {
-    logger.info('redirecting to Keycloak logout')
     await this.keycloak.logout({
       redirectUri: window.location.origin,
     })
   }
 
   async register(): Promise<void> {
-    logger.info('redirecting to Keycloak registration')
     await this.keycloak.register({
       redirectUri: window.location.origin,
     })
@@ -165,13 +145,11 @@ export class KeycloakAdapter implements IAuthAdapter {
 
   async getToken(): Promise<string | undefined> {
     if (!this._initialized) {
-      logger.debug('getToken skipped: adapter not initialized')
       return undefined
     }
 
     try {
       await this.keycloak.updateToken(TOKEN_MIN_VALIDITY_SECONDS)
-      logger.debug('token refreshed successfully')
       return this.keycloak.token
     } catch (error) {
       logger.warn('token refresh failed', error instanceof Error ? error.message : error)
@@ -202,21 +180,18 @@ export class KeycloakAdapter implements IAuthAdapter {
 
   onTokenExpired(callback: () => void): void {
     this.keycloak.onTokenExpired = () => {
-      logger.warn('token expired, attempting refresh')
       callback()
     }
   }
 
   onAuthRefreshSuccess(callback: () => void): void {
     this.keycloak.onAuthRefreshSuccess = () => {
-      logger.info('auth refresh succeeded')
       callback()
     }
   }
 
   onAuthRefreshError(callback: () => void): void {
     this.keycloak.onAuthRefreshError = () => {
-      logger.error('auth refresh failed, logging out')
       this.keycloak.logout()
       callback()
     }
