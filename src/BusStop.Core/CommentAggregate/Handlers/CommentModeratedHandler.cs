@@ -1,5 +1,7 @@
 namespace BusStop.Core.CommentAggregate.Handlers;
 
+using BusStop.Core.CommentAggregate.Events;
+
 public class CommentModeratedHandler(ILogger<CommentModeratedHandler> logger) : INotificationHandler<CommentModeratedEvent>
 {
   public ValueTask Handle(CommentModeratedEvent notification, CancellationToken cancellationToken)
