@@ -3,8 +3,6 @@
 @import './theme.css';
 @import './tokens.css';
 
-@custom-variant dark (&:is(.dark *));
-
 :root {
   --topbar-height: 3.5rem;
 }
