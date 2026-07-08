@@ -1,6 +1,6 @@
 import Keycloak from 'keycloak-js'
 import type { IAuthAdapter } from './IAuthAdapter'
-import type { UserProfile } from './types'
+import type { DirectRegisterRequest, UserProfile } from './types'
 import { createLogger } from '@/lib/logger'
 
 const TOKEN_MIN_VALIDITY_SECONDS = 30
@@ -141,6 +141,88 @@ export class KeycloakAdapter implements IAuthAdapter {
     await this.keycloak.register({
       redirectUri: window.location.origin,
     })
+  }
+
+  async directRegister(userData: DirectRegisterRequest): Promise<void> {
+    const tokenUrl = `${this.keycloak.authServerUrl}/realms/${this.keycloak.realm}/protocol/openid-connect/token`
+    const adminUsername = import.meta.env.VITE_KEYCLOAK_ADMIN_USERNAME ?? 'admin1'
+    const adminPassword = import.meta.env.VITE_KEYCLOAK_ADMIN_PASSWORD ?? 'password'
+
+    const adminBody = new URLSearchParams({
+      grant_type: 'password',
+      client_id: this.keycloak.clientId!,
+      username: adminUsername,
+      password: adminPassword,
+    })
+
+    let adminResponse: Response
+    try {
+      adminResponse = await fetch(tokenUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: adminBody.toString(),
+      })
+    } catch (networkError) {
+      const message = networkError instanceof Error ? networkError.message : 'Network error'
+      logger.error('direct register: admin auth network error', message)
+      throw new Error('Unable to reach the authentication server. Please try again.')
+    }
+
+    if (!adminResponse.ok) {
+      logger.error('direct register: admin auth failed', `HTTP ${adminResponse.status}`)
+      throw new Error('Registration is not available right now. Please try again later.')
+    }
+
+    const adminData: { access_token: string } = await adminResponse.json()
+    const adminToken = adminData.access_token
+
+    const usersUrl = `${this.keycloak.authServerUrl}/admin/realms/${this.keycloak.realm}/users`
+
+    let userResponse: Response
+    try {
+      userResponse = await fetch(usersUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${adminToken}`,
+        },
+        body: JSON.stringify({
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          email: userData.email,
+          username: userData.username,
+          enabled: true,
+          credentials: [{
+            type: 'password',
+            value: userData.password,
+            temporary: false,
+          }],
+        }),
+      })
+    } catch (networkError) {
+      const message = networkError instanceof Error ? networkError.message : 'Network error'
+      logger.error('direct register: user creation network error', message)
+      throw new Error('Unable to reach the authentication server. Please try again.')
+    }
+
+    if (!userResponse.ok) {
+      let errorMsg = 'Registration failed. Please try again.'
+      try {
+        const err = await userResponse.json()
+        if (err.errorMessage) {
+          errorMsg = err.errorMessage
+        } else if (err.error) {
+          errorMsg = err.error
+        }
+      } catch {
+        if (userResponse.status === 409) {
+          errorMsg = 'A user with this username or email already exists.'
+        }
+      }
+      throw new Error(errorMsg)
+    }
+
+    await this.directLogin(userData.username, userData.password)
   }
 
   async getToken(): Promise<string | undefined> {

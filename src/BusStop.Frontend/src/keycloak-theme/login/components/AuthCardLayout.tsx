@@ -1,23 +1,12 @@
 import type { ReactNode } from 'react'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 import { BusTrailCanvas } from './BusTrailCanvas'
 
 interface AuthCardLayoutProps {
-  title: string
-  description?: string
   children: ReactNode
   footer?: ReactNode
 }
 
 export function AuthCardLayout({
-  title,
-  description,
   children,
   footer,
 }: AuthCardLayoutProps) {
@@ -27,20 +16,19 @@ export function AuthCardLayout({
         <BusTrailCanvas />
       </div>
 
-      <Card className='relative z-10 w-full max-w-md shadow-lg'>
-        <CardHeader className='space-y-1 text-center'>
-          <CardTitle className='text-h2'>{title}</CardTitle>
-          {description ? (
-            <CardDescription className='text-body-sm'>
-              {description}
-            </CardDescription>
-          ) : null}
-        </CardHeader>
-        <CardContent>{children}</CardContent>
+      <div className='relative z-10 flex w-full flex-col gap-6 rounded-lg border-none bg-card p-6 text-card-foreground shadow-none md:w-[450px]'>
+        <div className='mx-auto mb-2'>
+          <h1 className='text-2xl font-bold text-foreground dark:text-white'>BusStop</h1>
+        </div>
+
+        {children}
+
         {footer ? (
-          <div className='border-t px-6 pb-6 pt-4'>{footer}</div>
+          <div className='flex gap-2 items-center justify-start text-base font-medium mt-6'>
+            {footer}
+          </div>
         ) : null}
-      </Card>
+      </div>
     </div>
   )
 }

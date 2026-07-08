@@ -2,7 +2,7 @@ import { useEffect, useCallback } from 'react'
 import { useAuthStore } from './auth-store'
 import { KeycloakAdapter } from './KeycloakAdapter'
 import type { IAuthAdapter } from './IAuthAdapter'
-import type { BusStopRole } from './types'
+import type { BusStopRole, DirectRegisterRequest } from './types'
 
 let adapterInstance: IAuthAdapter | null = null
 let initStarted = false
@@ -96,6 +96,21 @@ export function useAuth() {
     }
   }, [])
 
+  const directRegister = useCallback(async (userData: DirectRegisterRequest) => {
+    store.setLoading(true)
+    store.setError(null)
+    try {
+      await auth.directRegister(userData)
+      const user = auth.getUserProfile()
+      store.setAuthenticated(user)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Registration failed'
+      store.setError(message)
+      store.setLoading(false)
+      throw err
+    }
+  }, [])
+
   const getToken = useCallback(async () => {
     return auth.getToken()
   }, [])
@@ -116,6 +131,7 @@ export function useAuth() {
     directLogin,
     logout,
     register,
+    directRegister,
     getToken,
     hasRole,
   }
