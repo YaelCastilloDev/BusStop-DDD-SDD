@@ -84,7 +84,7 @@ export function MainSidebar() {
                   />
                 )}
                 <span
-                  className={`text-body-sm tracking-[0.25px] overflow-hidden whitespace-nowrap group-data-[collapsible=icon]:hidden ${
+                  className={`text-label overflow-hidden whitespace-nowrap group-data-[collapsible=icon]:hidden ${
                     item.active ? 'text-primary' : ''
                   }`}
                 >
