@@ -1,3 +1,8 @@
+---
+name: busstop-frontend-styling
+description: BusStop frontend styling and theming rules using Tailwind CSS and design tokens. Use when styling components, working with themes, or defining colors/typography.
+---
+
 # BusStop Frontend Styling & Theming
 
 Canonical source: `harness/specs/frontend-design-system.md`
@@ -14,9 +19,9 @@ Implementation: `src/BusStop.Frontend/src/styles/tokens.css`
 - Z-index values MUST reference the layer constants from `tokens.css` (`z-10`, `z-40`, `z-60`, `z-70`, `z-100`, `z-110`, `z-120`). No arbitrary `z-[N]` values.
 - Layout spacing uses named tokens where defined (`p-section`, `gap-container`). Fall back to Tailwind's standard scale for fine-grained spacing.
 
-## 3. Theming
+## 3. Theming & Dark Mode
 - Use CSS variables (`var(--color-...)`) defined in global CSS for colors.
-- The application uses light theme only. All color variables are defined in `:root` in `theme.css`.
+- Support Light and Dark mode seamlessly via these variables and Tailwind's dark mode strategies.
 - Do not hardcode specific hex colors in components; use semantic Tailwind classes (e.g., `bg-primary`, `text-muted-foreground`).
 - Color semantics defined in `harness/specs/frontend-design-system.md`.
 
