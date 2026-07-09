@@ -21,10 +21,14 @@ public class KeycloakAdminService(
             var clientId = configuration["Keycloak:Admin:ClientId"];
             var clientSecret = configuration["Keycloak:Admin:ClientSecret"];
 
-            Guard.Against.NullOrWhiteSpace(baseUrl);
-            Guard.Against.NullOrWhiteSpace(realm);
-            Guard.Against.NullOrWhiteSpace(clientId);
-            Guard.Against.NullOrWhiteSpace(clientSecret);
+            if (string.IsNullOrWhiteSpace(baseUrl))
+                return Result.Error("Keycloak Admin BaseUrl is required.");
+            if (string.IsNullOrWhiteSpace(realm))
+                return Result.Error("Keycloak Admin Realm is required.");
+            if (string.IsNullOrWhiteSpace(clientId))
+                return Result.Error("Keycloak Admin ClientId is required.");
+            if (string.IsNullOrWhiteSpace(clientSecret))
+                return Result.Error("Keycloak Admin ClientSecret is required.");
 
             var client = httpClientFactory.CreateClient("KeycloakAdmin");
 

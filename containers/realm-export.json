@@ -85,8 +85,7 @@
           "protocol": "openid-connect",
           "protocolMapper": "oidc-usermodel-realm-role-mapper",
           "config": {
-            "claim.name": "realm_access.roles",
-            "user.attribute": "realm_roles",
+            "claim.name": "realm_access",
             "access.token.claim": "true",
             "id.token.claim": "true",
             "multivalued": "true"

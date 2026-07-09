@@ -1,4 +1,5 @@
 using BusStop.UseCases.Comments.Moderate;
+using BusStop.Web.Extensions;
 
 namespace BusStop.Web.Comments;
 
@@ -17,18 +18,7 @@ public sealed class Moderate(IMediator mediator) : Endpoint<ModerateCommentReque
     var command = new ModerateCommentCommand(req.Id);
     var result = await _mediator.Send(command, ct);
 
-    if (result.IsSuccess)
-    {
-      await Send.NoContentAsync(ct);
-      return;
-    }
-
-    if (result.Status == ResultStatus.NotFound)
-      await Send.NotFoundAsync(ct);
-    else if (result.Status == ResultStatus.Unauthorized)
-      await Send.UnauthorizedAsync(ct);
-    else
-      await Send.ErrorsAsync(cancellation: ct);
+    await this.ToNoContentResultAsync(result, ct);
   }
 }
 

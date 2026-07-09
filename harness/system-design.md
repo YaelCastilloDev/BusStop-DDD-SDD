@@ -26,11 +26,13 @@ This document is the implementation baseline, not an exhaustive future-state blu
 - IdentityAccess: authentication, role claims, policy enforcement.
 - SearchReadModel: optimized querying and indexing projections.
 - AuditObservability: immutable action logs and operational signals.
+- NotificationContext: user notification delivery via SignalR, email, and stored records.
 
 ## Context Map
-- TransitCatalog publishes domain events consumed by SearchReadModel and AuditObservability.
+- TransitCatalog publishes domain events consumed by SearchReadModel, AuditObservability, and NotificationContext.
 - IdentityAccess provides claims used by all write-side policies.
 - AuditObservability is append-only and cannot mutate domain aggregates.
+- NotificationContext consumes integration events from TransitCatalog (e.g., CommentModerated) and pushes real-time updates via SignalR.
 
 ## High-Level Flow
 1. Client sends authenticated command to API.

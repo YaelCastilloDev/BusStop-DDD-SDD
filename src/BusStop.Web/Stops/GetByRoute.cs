@@ -1,5 +1,6 @@
 using BusStop.UseCases.Stops;
 using BusStop.UseCases.Stops.GetByRoute;
+using BusStop.Web.Extensions;
 
 namespace BusStop.Web.Stops;
 
@@ -18,12 +19,7 @@ public sealed class GetByRoute(IMediator mediator) : Endpoint<GetStopsByRouteReq
     var query = new GetStopsByRouteQuery(req.RouteId);
     var result = await _mediator.Send(query, ct);
 
-    if (result.IsSuccess)
-      await Send.OkAsync(result.Value, ct);
-    else if (result.Status == ResultStatus.NotFound)
-      await Send.NotFoundAsync(ct);
-    else
-      await Send.ErrorsAsync(cancellation: ct);
+    await this.ToOkResultAsync(result, ct);
   }
 }
 

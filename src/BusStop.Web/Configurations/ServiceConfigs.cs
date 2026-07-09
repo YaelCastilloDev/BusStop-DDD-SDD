@@ -25,6 +25,9 @@ public static class ServiceConfigs
 
     services.AddSignalR();
 
+    services.AddExceptionHandler<GlobalExceptionHandler>();
+    services.AddProblemDetails();
+
     services.AddRateLimiter(options =>
     {
       options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>

@@ -1,3 +1,5 @@
+using BusStop.Core.Exceptions;
+
 namespace BusStop.Core.CountryAggregate;
 
 public class Country : EntityBase<long>, IAggregateRoot
@@ -17,20 +19,24 @@ public class Country : EntityBase<long>, IAggregateRoot
 
     public static Country Create(string name, string isoCode)
     {
-        Guard.Against.NullOrWhiteSpace(name);
-        Guard.Against.NullOrWhiteSpace(isoCode);
+        if (string.IsNullOrWhiteSpace(name))
+            throw new DomainValidationException("Country name is required.", nameof(name));
+        if (string.IsNullOrWhiteSpace(isoCode))
+            throw new DomainValidationException("Country ISO code is required.", nameof(isoCode));
         return new Country(name, isoCode);
     }
 
     public void UpdateName(string newName)
     {
-        Guard.Against.NullOrWhiteSpace(newName);
+        if (string.IsNullOrWhiteSpace(newName))
+            throw new DomainValidationException("New country name is required.", nameof(newName));
         Name = newName;
     }
 
     public void UpdateIsoCode(string newIsoCode)
     {
-        Guard.Against.NullOrWhiteSpace(newIsoCode);
+        if (string.IsNullOrWhiteSpace(newIsoCode))
+            throw new DomainValidationException("New country ISO code is required.", nameof(newIsoCode));
         IsoCode = newIsoCode;
     }
 }

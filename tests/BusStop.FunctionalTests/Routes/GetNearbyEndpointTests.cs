@@ -32,24 +32,24 @@ public class GetNearbyEndpointTests : IClassFixture<CustomWebApplicationFactory<
 
         var user = User.Create("testuser", "test@example.com");
         db.Users.Add(user);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var route = Route.Create("Downtown Express", user.Id);
         db.Routes.Add(route);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // 40.7128, -74.0060 (New York City)
         var stop = Stop.Create("Central Station", 40.7128, -74.0060, route.Id);
         db.Stops.Add(stop);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         // Querying exactly at the stop location
-        var response = await _client.GetAsync($"/routes/nearby?latitude=40.7128&longitude=-74.0060");
+        var response = await _client.GetAsync($"/routes/nearby?latitude=40.7128&longitude=-74.0060", TestContext.Current.CancellationToken);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var result = await response.Content.ReadFromJsonAsync<NearbyRoutesResponse>();
+        var result = await response.Content.ReadFromJsonAsync<NearbyRoutesResponse>(TestContext.Current.CancellationToken);
         
         result.ShouldNotBeNull();
         result.IsClosestMatchOnly.ShouldBeFalse();
@@ -66,24 +66,24 @@ public class GetNearbyEndpointTests : IClassFixture<CustomWebApplicationFactory<
 
         var user = User.Create("testuser2", "test2@example.com");
         db.Users.Add(user);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var route = Route.Create("Uptown Local", user.Id);
         db.Routes.Add(route);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // 40.7128, -74.0060 (New York City)
         var stop = Stop.Create("North Station", 40.7128, -74.0060, route.Id);
         db.Stops.Add(stop);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         // Querying from ~10km away (40.8000, -74.0060)
-        var response = await _client.GetAsync($"/routes/nearby?latitude=40.8000&longitude=-74.0060");
+        var response = await _client.GetAsync($"/routes/nearby?latitude=40.8000&longitude=-74.0060", TestContext.Current.CancellationToken);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var result = await response.Content.ReadFromJsonAsync<NearbyRoutesResponse>();
+        var result = await response.Content.ReadFromJsonAsync<NearbyRoutesResponse>(TestContext.Current.CancellationToken);
         
         result.ShouldNotBeNull();
         result.IsClosestMatchOnly.ShouldBeTrue();
@@ -100,24 +100,24 @@ public class GetNearbyEndpointTests : IClassFixture<CustomWebApplicationFactory<
 
         var user = User.Create("testuser3", "test3@example.com");
         db.Users.Add(user);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var route = Route.Create("Far Away Route", user.Id);
         db.Routes.Add(route);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // 40.7128, -74.0060 (New York City)
         var stop = Stop.Create("Far Station", 40.7128, -74.0060, route.Id);
         db.Stops.Add(stop);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         // Querying from London (51.5074, -0.1278) - very far away
-        var response = await _client.GetAsync($"/routes/nearby?latitude=51.5074&longitude=-0.1278");
+        var response = await _client.GetAsync($"/routes/nearby?latitude=51.5074&longitude=-0.1278", TestContext.Current.CancellationToken);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var result = await response.Content.ReadFromJsonAsync<NearbyRoutesResponse>();
+        var result = await response.Content.ReadFromJsonAsync<NearbyRoutesResponse>(TestContext.Current.CancellationToken);
         
         result.ShouldNotBeNull();
         result.IsClosestMatchOnly.ShouldBeFalse();

@@ -1,3 +1,4 @@
+using BusStop.Core.Exceptions;
 using BusStop.Core.CommentAggregate.Events;
 using BusStop.Core.RouteAggregate;
 using BusStop.Core.UserAggregate;
@@ -35,9 +36,12 @@ public class Comment : EntityBase<long>, IAggregateRoot
 
   public static Comment Create(string content, long userId, long routeId)
   {
-    Guard.Against.NullOrWhiteSpace(content);
-    Guard.Against.NegativeOrZero(userId);
-    Guard.Against.NegativeOrZero(routeId);
+    if (string.IsNullOrWhiteSpace(content))
+      throw new DomainValidationException("Comment content is required.", nameof(content));
+    if (userId <= 0)
+      throw new DomainValidationException("UserId must be positive.", nameof(userId));
+    if (routeId <= 0)
+      throw new DomainValidationException("RouteId must be positive.", nameof(routeId));
 
     return new Comment(new CommentContent(content), new UserId(userId), new RouteId(routeId));
   }
@@ -45,7 +49,8 @@ public class Comment : EntityBase<long>, IAggregateRoot
   // Moderate is for administrative takedowns. A future Remove method could be added for user-driven deletions.
   public void Moderate(UserId moderatedBy)
   {
-    Guard.Against.Null(moderatedBy);
+    if (moderatedBy is null)
+      throw new DomainValidationException("ModeratedBy is required.", nameof(moderatedBy));
     ModeratedAt = DateTime.UtcNow;
     ModeratedBy = moderatedBy.Value;
     RegisterDomainEvent(new CommentModeratedEvent(Id, UserId.Value));
@@ -55,7 +60,8 @@ public class Comment : EntityBase<long>, IAggregateRoot
 
   public void AddReaction(UserId userId, ReactionType reactionType)
   {
-    Guard.Against.Null(userId);
+    if (userId is null)
+      throw new DomainValidationException("UserId is required for reaction.", nameof(userId));
     _reactions.RemoveAll(r => r.UserId == userId);
     _reactions.Add(CommentReaction.From(userId, reactionType));
   }

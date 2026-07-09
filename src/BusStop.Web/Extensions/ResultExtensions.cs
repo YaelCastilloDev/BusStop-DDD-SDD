@@ -43,13 +43,13 @@ public static class ResultExtensions
     {
         if (result.IsSuccess)
         {
-            await ep.HttpContext.Response.SendAsync(null, 204, cancellation: ct);
+            await ep.HttpContext.Response.SendAsync<object?>(null, 204, cancellation: ct);
             return;
         }
         await ep.HandleErrorResultAsync(result, ct);
     }
 
-    private static async Task HandleErrorResultAsync(this IEndpoint ep, IResult result, CancellationToken ct)
+    private static async Task HandleErrorResultAsync(this IEndpoint ep, Ardalis.Result.IResult result, CancellationToken ct)
     {
         if (result.Status == ResultStatus.NotFound)
         {

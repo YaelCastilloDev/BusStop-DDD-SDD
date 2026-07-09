@@ -49,7 +49,7 @@ RouteAggregate/
 - **Domain events:** folder `Events/`, past-tense names (e.g., `RouteUpdatedEvent`), inherit `DomainEventBase`.
 - **Domain event handlers:** folder `Handlers/`, implement `INotificationHandler<TEvent>` from Mediator.
 - **Specifications:** folder `Specifications/` inside each aggregate. Use `Ardalis.Specification`.
-- **Invariants:** enforce with `Ardalis.GuardClauses` in constructors and factory methods.
+- **Invariants:** enforce domain rules with `DomainValidationException` in constructors and factory methods. Use `Ardalis.GuardClauses` for defensive null/range checks on non-domain code (configuration, pipeline behaviors, service constructors).
 - **Interfaces:** repository and service abstractions defined here, implemented in Infrastructure.
 
 ### BusStop.UseCases
@@ -63,7 +63,7 @@ UseCases/Routes/Create/
 - **Commands:** `<Action><Entity>Command` (e.g., `CreateRouteCommand`).
 - **Queries:** `Get<Entity>Query`, `List<Entities>Query`.
 - **Handlers:** `<CommandOrQueryName>Handler`, implementing `ICommandHandler<,>` or query equivalents from **Mediator** (not MediatR).
-- **Returns:** use `Ardalis.Result` / `Result<T>` for expected failures (not found, validation). Handlers catch `ArgumentException` from domain Guard clause violations and wrap in `Result<T>.Error()`. Do not let Guard clause exceptions propagate to the API.
+- **Returns:** use `Ardalis.Result` / `Result<T>` for expected failures (not found, validation). Handlers must NOT contain try-catch for domain exceptions — the `DomainExceptionBehavior` Mediator pipeline catches `DomainValidationException` and wraps in `Result<T>.Error()`. Do not let domain exceptions propagate to the API.
 - **Validators:** not in UseCases by default. Input validation belongs in the Web layer (FastEndpoints). Handlers may perform defensive checks for domain-level concerns.
 - **Query services:** read-optimized queries via interfaces like `IListRoutesQueryService` defined here, implemented in Infrastructure.
 
@@ -86,68 +86,96 @@ UseCases/Routes/Create/
 - **Primary constructors:** assign dependencies to private `_fields` (never use constructor parameters directly).
 
 ## Key Patterns
-- **Guard clauses:** `Guard.Against.NullOrEmpty(value, nameof(value))` instead of manual null throws.
+- **Domain exceptions:** throw `DomainValidationException` for domain invariant violations in entity factories and methods. Use `Guard.Against.*` for defensive null/range checks in non-domain code (configuration, pipeline behaviors).
 - **Specification:** all conditional queries as `Specification<T>` classes in Core, not inline repository logic.
 - **Domain events:** aggregates call `RegisterDomainEvent`; handlers implement `INotificationHandler<T>`.
 - **Result wrapper:** handlers return `Result<T>`; endpoints map results to HTTP responses without throwing for flow control.
 - **Mediator:** source-generated `IMediator` for command/query dispatch. Register in `MediatorConfig.cs`.
 
-## Error Handling Strategy (Two-Layer Approach)
+## Error Handling Strategy (Three-Layer Approach)
 
-BusStop uses a layered error handling strategy: Guard Clauses protect domain integrity (throw), and the Result pattern wraps expected failures at the application boundary.
+BusStop uses a three-layer error handling strategy combining typed domain exceptions, a Mediator pipeline behavior, and a global ASP.NET Core exception handler.
 
-### Layer 1: Domain — Guard Clauses (throw)
-- Domain entities enforce invariants with `Ardalis.GuardClauses`.
-- Guard clauses throw `ArgumentException` on invalid state.
-- This is a **programming bug defense** — by the time data reaches the domain, it should already be clean after Web-layer FluentValidation and handler preconditions.
-- Domain factory methods and constructors NEVER return `Result<T>` for input validation; they throw on violation.
+### Layer 1: Web — FluentValidation (FastEndpoints)
+- Input-bearing endpoints MUST have a `Validator<TRequest>`.
+- Catches malformed input before it reaches the handler or domain layer.
+- Returns 400 with structured validation errors.
 
-### Layer 2: Application — Result Pattern (catch and wrap)
-- UseCase handlers catch `ArgumentException` from Guard clause violations.
-- Convert caught exceptions into `Result<T>.Error()` for expected failures.
-- Return `Result<T>` to the API layer for consistent HTTP mapping via `ResultExtensions`.
-- NEVER let Guard clause exceptions propagate unhandled to the API.
+### Layer 2: Mediator Pipeline — DomainExceptionBehavior
+- A single `IPipelineBehavior<,>` registered in `MediatorConfig.cs`.
+- Catches `DomainValidationException` thrown by domain entities/value objects.
+- Converts to `Result<T>.Error()` or `Result.Error()` automatically.
+- Handlers contain ZERO try-catch for domain exceptions — the pipeline handles it.
+- Does NOT catch `ArgumentException` or `Exception` — only `DomainValidationException`.
+
+### Layer 3: ASP.NET Core — GlobalExceptionHandler
+- Implements `IExceptionHandler`, registered via `services.AddExceptionHandler<T>()`.
+- Catches any exception that escapes the Mediator pipeline (programming bugs, infrastructure failures).
+- Returns RFC 7807 Problem Details JSON with 500 status.
+- Logs full stack trace. Never leaks internals to the client.
+
+### Two-Tool Strategy for Throwing Code
+
+| Tool | Where | Purpose | HTTP Result |
+|------|-------|---------|-------------|
+| `DomainValidationException` | Domain entities/value objects | Business rule violations | 400 via pipeline |
+| `Guard.Against.*` | Infrastructure, config, pipeline behaviors | Defensive programming bugs | 500 via global handler |
 
 ### Flow
 ```
-FastEndpoints Validator (FluentValidation) → 400 on invalid input
-  ↓ (clean data)
-UseCase Handler → catches Guard exceptions → Result<T>.Error()
-  ↓ (validated entity)
-Domain Entity → Guard.Against (throws on programming bug)
-  ↓
+Client Request
+  │
+  ▼
+FastEndpoints Validator (FluentValidation) → 400 on malformed input
+  │ (clean data)
+  ▼
+Mediator Pipeline
+  ├── DomainExceptionBehavior ◄── catches DomainValidationException → Result.Error()
+  ├── LoggingBehavior
+  └── CurrentUserBehavior
+  │
+  ▼
+UseCase Handler → calls domain factory (no try-catch needed)
+  │
+  ▼
+Domain Entity → throw new DomainValidationException(...) for business rules
+  │
+  ▼
 Repository → persistence
+  │
+  └── Any other exception → GlobalExceptionHandler → 500 ProblemDetails
 ```
 
 ### Example
 ```csharp
-// Core — domain entity (throws on invalid state)
-public static User Create(string username, string email)
+// Core — domain entity: throws DomainValidationException for business rules
+public static Route Create(string name, long createdById)
 {
-  Guard.Against.NullOrWhiteSpace(username);
-  Guard.Against.NullOrWhiteSpace(email);
-  return new User(new Username(username), email);
+    if (string.IsNullOrWhiteSpace(name))
+        throw new DomainValidationException("Route name is required.", nameof(name));
+    if (createdById <= 0)
+        throw new DomainValidationException("CreatedById must be positive.", nameof(createdById));
+    return new Route(new RouteName(name), new UserId(createdById));
 }
 
-// UseCases — handler (catches and wraps)
-public sealed class CreateUserHandler(IRepository<User> repository)
-  : ICommandHandler<CreateUserCommand, Result<UserResponse>>
+// UseCases — handler: clean, no try-catch (pipeline handles it)
+public sealed class CreateRouteHandler(IRepository<Route> repository, ...)
+  : ICommandHandler<CreateRouteCommand, Result<RouteResponse>>
 {
-  public async ValueTask<Result<UserResponse>> Handle(
-    CreateUserCommand request, CancellationToken ct)
-  {
-    try
+    public async ValueTask<Result<RouteResponse>> Handle(
+        CreateRouteCommand request, CancellationToken ct)
     {
-      var user = User.Create(request.Username, request.Email);
-      var created = await repository.AddAsync(user, ct);
-      return new UserResponse(created.Id, created.Username.Value, created.Email, created.CreatedAt);
+        if (string.IsNullOrEmpty(request.Sub))
+            return Result<RouteResponse>.Unauthorized("Authentication required.");
+
+        var route = Route.Create(request.Name, user.Id); // may throw DomainValidationException
+        var created = await repository.AddAsync(route, ct);
+        return new RouteResponse(created.Id, ...);
     }
-    catch (ArgumentException ex)
-    {
-      return Result<UserResponse>.Error(ex.Message);
-    }
-  }
 }
+
+// Infrastructure — config validation: Guard.Against for defensive checks
+Guard.Against.Null(connectionString); // throws at startup if misconfigured
 ```
 
 ## BusStop Domain Mapping

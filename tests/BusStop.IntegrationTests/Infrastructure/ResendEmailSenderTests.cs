@@ -19,7 +19,7 @@ public class ResendEmailSenderTests
         // Arrange
         var mockResend = Substitute.For<IResend>();
         mockResend.EmailSendAsync(Arg.Any<EmailMessage>(), Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult(new ResendResponse<Guid> { Content = Guid.NewGuid(), Success = true }));
+            .Returns(Task.FromResult(new ResendResponse<Guid>(Guid.NewGuid(), new ResendRateLimit())));
 
         var mockEnv = Substitute.For<IHostEnvironment>();
         mockEnv.EnvironmentName.Returns("Development");
@@ -29,7 +29,7 @@ public class ResendEmailSenderTests
         var sender = new ResendEmailSender(mockResend, mockEnv, mockLogger);
 
         // Act
-        await sender.SendEmailAsync("real.user@example.com", "Test Subject", "Test Body");
+        await sender.SendEmailAsync("real.user@example.com", "Test Subject", "Test Body", TestContext.Current.CancellationToken);
 
         // Assert
         await mockResend.Received(1).EmailSendAsync(
@@ -49,7 +49,7 @@ public class ResendEmailSenderTests
         // Arrange
         var mockResend = Substitute.For<IResend>();
         mockResend.EmailSendAsync(Arg.Any<EmailMessage>(), Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult(new ResendResponse<Guid> { Content = Guid.NewGuid(), Success = true }));
+            .Returns(Task.FromResult(new ResendResponse<Guid>(Guid.NewGuid(), new ResendRateLimit())));
 
         var mockEnv = Substitute.For<IHostEnvironment>();
         mockEnv.EnvironmentName.Returns("Production");
@@ -59,7 +59,7 @@ public class ResendEmailSenderTests
         var sender = new ResendEmailSender(mockResend, mockEnv, mockLogger);
 
         // Act
-        await sender.SendEmailAsync("real.user@example.com", "Test Subject", "Test Body");
+        await sender.SendEmailAsync("real.user@example.com", "Test Subject", "Test Body", TestContext.Current.CancellationToken);
 
         // Assert
         await mockResend.Received(1).EmailSendAsync(
