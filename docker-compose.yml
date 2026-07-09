@@ -20,6 +20,10 @@ services:
       Authentication__MetadataAddress: "http://keycloak:8080/realms/auth-demo/.well-known/openid-configuration"
       Authentication__ValidIssuer: "http://localhost:8080/realms/auth-demo"
       Authentication__Audience: "busstop-api"
+      Keycloak__Admin__BaseUrl: "http://keycloak:8080"
+      Keycloak__Admin__Realm: "auth-demo"
+      Keycloak__Admin__ClientId: "busstop-api"
+      Keycloak__Admin__ClientSecret: "${KEYCLOAK_CLIENT_SECRET}"
     restart: unless-stopped
     depends_on:
       - postgres
