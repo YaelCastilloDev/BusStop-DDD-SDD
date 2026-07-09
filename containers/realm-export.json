@@ -6,6 +6,8 @@
   "registrationAllowed": true,
   "resetPasswordAllowed": true,
   "loginWithEmailAllowed": true,
+  "defaultRoles": ["RegisteredUser"],
+  "verifyEmail": true,
   "accessTokenLifespan": 900,
   "roles": {
     "realm": [
@@ -57,11 +59,12 @@
       "description": "The main BusStop ASP.NET API",
       "enabled": true,
       "protocol": "openid-connect",
-      "publicClient": true,
+      "publicClient": false,
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": true,
       "serviceAccountsEnabled": true,
       "authorizationServicesEnabled": false,
+      "secret": "busstop-api-secret-placeholder",
       "implicitFlowEnabled": false,
       "bearerOnly": false,
       "consentRequired": false,
@@ -186,6 +189,17 @@
       "realmRoles": [
         "Admin"
       ]
+    },
+    {
+      "username": "service-account-busstop-api",
+      "enabled": true,
+      "serviceAccountClientId": "busstop-api",
+      "clientRoles": {
+        "realm-management": [
+          "manage-users",
+          "view-users"
+        ]
+      }
     }
   ],
   "browserFlow": "browser-admin-2fa",
