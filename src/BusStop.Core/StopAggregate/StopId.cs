@@ -1,10 +1,13 @@
 using Ardalis.SharedKernel;
+using BusStop.Core.Exceptions;
 
 namespace BusStop.Core.StopAggregate;
 
 public sealed class StopId(long value) : ValueObject
 {
-  public long Value { get; } = Guard.Against.NegativeOrZero(value);
+  public long Value { get; } = value > 0
+    ? value
+    : throw new DomainValidationException("StopId must be positive.", nameof(value));
 
   protected override IEnumerable<object> GetEqualityComponents()
   {

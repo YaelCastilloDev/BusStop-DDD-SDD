@@ -15,16 +15,9 @@ public sealed class RegisterUserHandler(IRepository<User> repository) : ICommand
     if (existing is not null)
       return Result<UserResponse>.Error("User already registered.");
 
-    try
-    {
-      var user = User.Create(request.Email, request.Sub);
-      var created = await repository.AddAsync(user, cancellationToken);
+    var user = User.Create(request.Email, request.Sub);
+    var created = await repository.AddAsync(user, cancellationToken);
 
-      return new UserResponse(created.Id, created.Username?.Value, created.Email, created.ExternalId, created.CreatedAt, created.CountryId);
-    }
-    catch (ArgumentException ex)
-    {
-      return Result<UserResponse>.Error(ex.Message);
-    }
+    return new UserResponse(created.Id, created.Username?.Value, created.Email, created.ExternalId, created.CreatedAt, created.CountryId);
   }
 }

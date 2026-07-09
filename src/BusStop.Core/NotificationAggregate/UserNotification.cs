@@ -1,5 +1,5 @@
-using Ardalis.GuardClauses;
 using Ardalis.SharedKernel;
+using BusStop.Core.Exceptions;
 using BusStop.Core.UserAggregate;
 
 namespace BusStop.Core.NotificationAggregate;
@@ -27,9 +27,12 @@ public class UserNotification : EntityBase<long>, IAggregateRoot
 
   public static UserNotification Create(long userId, string title, string message)
   {
-    Guard.Against.NegativeOrZero(userId);
-    Guard.Against.NullOrWhiteSpace(title);
-    Guard.Against.NullOrWhiteSpace(message);
+    if (userId <= 0)
+      throw new DomainValidationException("UserId must be positive.", nameof(userId));
+    if (string.IsNullOrWhiteSpace(title))
+      throw new DomainValidationException("Notification title is required.", nameof(title));
+    if (string.IsNullOrWhiteSpace(message))
+      throw new DomainValidationException("Notification message is required.", nameof(message));
 
     return new UserNotification(new UserId(userId), title, message);
   }

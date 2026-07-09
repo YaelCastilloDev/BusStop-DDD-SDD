@@ -68,8 +68,11 @@ public readonly partial struct RouteId
 - Handlers in `{Aggregate}/Handlers/`, implement `INotificationHandler<TEvent>`.
 
 ## Invariants
-- Enforce with `Ardalis.GuardClauses` in constructors and factory methods.
+- Enforce domain business rules with `DomainValidationException` in constructors and factory methods.
+- Use `Ardalis.GuardClauses` for defensive null/range checks on non-domain code only.
+- DomainValidationException is caught by the Mediator `DomainExceptionBehavior` pipeline and converted to `Result.Error()`.
 - Business rule violations throw domain exceptions, not return Results.
+- See `harness/specs/SPEC-Architecture-ExceptionHandling.md` for the full error handling strategy.
 
 ## Forbidden
 - EF Core attributes, DbContext, HTTP, ASP.NET Core in Core.

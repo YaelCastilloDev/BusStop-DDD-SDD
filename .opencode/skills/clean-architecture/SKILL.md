@@ -28,7 +28,7 @@ Tests: `BusStop.UnitTests`, `BusStop.IntegrationTests`, `BusStop.FunctionalTests
 - Feature slices: `Routes/Create/`, not `Commands/`.
 - Handlers: `ICommandHandler<,>` via **Mediator** (not MediatR).
 - Return `Result` / `Result<T>` for expected failures.
-- Handlers catch `ArgumentException` from domain Guard clause violations and wrap in `Result<T>.Error()`.
+- Handlers must NOT contain try-catch for domain exceptions — the `DomainExceptionBehavior` Mediator pipeline catches `DomainValidationException` and wraps in `Result<T>.Error()`. See `harness/specs/SPEC-Architecture-ExceptionHandling.md`.
 - No validators here — Web layer owns FastEndpoints validators.
 
 ## Infrastructure

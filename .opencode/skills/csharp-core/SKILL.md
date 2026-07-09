@@ -26,7 +26,9 @@ Use `Ardalis.SharedKernel.ValueObject` for IDs.
 ```csharp
 public sealed class RouteId(long value) : ValueObject
 {
-  public long Value { get; } = Guard.Against.NegativeOrZero(value);
+  if (value <= 0)
+      throw new DomainValidationException("Id must be positive.", nameof(value));
+  public long Value { get; } = value;
 
   protected override IEnumerable<object> GetEqualityComponents()
   {
@@ -53,6 +55,8 @@ public sealed class RouteId(long value) : ValueObject
 - Use-case orchestration (domain event handlers are allowed).
 
 ## Invariants
-- Enforce with `Ardalis.GuardClauses` in constructors and factory methods.
-- Business rule violations throw exceptions (via Guard clauses), not return Results.
-- See `harness/specs/clean-architecture-conventions.md#error-handling-strategy` for the full two-layer pattern.
+- Enforce domain business rules with `DomainValidationException` in constructors and factory methods.
+- Use `Ardalis.GuardClauses` for defensive null/range checks on non-domain code only (configuration, pipeline behaviors).
+- Business rule violations throw `DomainValidationException`, not return Results.
+- The Mediator `DomainExceptionBehavior` pipeline catches `DomainValidationException` and converts to `Result.Error()`.
+- See `harness/specs/SPEC-Architecture-ExceptionHandling.md` for the full error handling strategy.

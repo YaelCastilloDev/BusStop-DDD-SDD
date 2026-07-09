@@ -1,0 +1,9 @@
+using Ardalis.Result;
+using BusStop.Core.Interfaces;
+
+namespace BusStop.UseCases.Users.GetMe;
+
+public sealed record GetMeQuery() : IQuery<Result<UserResponse>>, IRequireAuthenticatedUser
+{
+    public string? Sub { get; set; }
+}

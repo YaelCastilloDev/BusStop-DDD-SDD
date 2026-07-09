@@ -1,3 +1,4 @@
+using BusStop.Core.Exceptions;
 using BusStop.Core.RouteAggregate.Events;
 using BusStop.Core.UserAggregate;
 
@@ -24,21 +25,25 @@ public class Route : EntityBase<long>, IAggregateRoot
 
   public static Route Create(string name, long createdById)
   {
-    Guard.Against.NullOrWhiteSpace(name);
-    Guard.Against.NegativeOrZero(createdById);
+    if (string.IsNullOrWhiteSpace(name))
+      throw new DomainValidationException("Route name is required.", nameof(name));
+    if (createdById <= 0)
+      throw new DomainValidationException("CreatedById must be positive.", nameof(createdById));
 
     return new Route(new RouteName(name), new UserId(createdById));
   }
 
   public void UpdateName(RouteName newName)
   {
-    Guard.Against.Null(newName);
+    if (newName is null)
+      throw new DomainValidationException("New name is required.", nameof(newName));
     Name = newName;
   }
 
   public void Delete(UserId deletedBy)
   {
-    Guard.Against.Null(deletedBy);
+    if (deletedBy is null)
+      throw new DomainValidationException("DeletedBy is required.", nameof(deletedBy));
     DeletedAt = DateTime.UtcNow;
     DeletedBy = deletedBy.Value;
     RegisterDomainEvent(new RouteDeletedEvent(Id));

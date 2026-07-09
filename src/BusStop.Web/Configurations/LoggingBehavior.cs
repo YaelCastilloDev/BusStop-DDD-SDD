@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Ardalis.GuardClauses;
 using Mediator;
 
 namespace BusStop.Web.Configurations;
@@ -14,7 +13,7 @@ public class LoggingBehavior<TRequest, TResponse>(ILogger<LoggingBehavior<TReque
         MessageHandlerDelegate<TRequest, TResponse> next,
         CancellationToken cancellationToken)
     {
-        Guard.Against.Null(request);
+        ArgumentNullException.ThrowIfNull(request);
 
         if (_logger.IsEnabled(LogLevel.Information))
         {

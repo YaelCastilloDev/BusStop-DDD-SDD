@@ -1,12 +1,12 @@
 ﻿using BusStop.Infrastructure.Data;
+using Microsoft.Extensions.Configuration;
 using Testcontainers.PostgreSql;
 
 namespace BusStop.FunctionalTests;
 
 public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProgram>, IAsyncLifetime where TProgram : class
 {
-  private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder()
-      .WithImage("postgis/postgis:15-3.3")
+  private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder("postgis/postgis:15-3.3")
       .WithDatabase("busstop_test")
       .WithUsername("postgres")
       .WithPassword("postgres")
@@ -36,7 +36,7 @@ public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProg
     try
     {
       db.Database.EnsureCreated();
-      SeedData.InitializeAsync(db).GetAwaiter().GetResult();
+      Task.Run(() => SeedData.InitializeAsync(db)).GetAwaiter().GetResult();
     }
     catch (Exception ex)
     {

@@ -23,5 +23,5 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
   }
 
   public override int SaveChanges() =>
-        SaveChangesAsync().GetAwaiter().GetResult();
+    throw new NotSupportedException("Use SaveChangesAsync instead.");
 }

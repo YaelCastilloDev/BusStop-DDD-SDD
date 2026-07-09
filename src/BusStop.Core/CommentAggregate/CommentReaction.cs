@@ -1,4 +1,5 @@
 using Ardalis.SharedKernel;
+using BusStop.Core.Exceptions;
 using BusStop.Core.UserAggregate;
 
 namespace BusStop.Core.CommentAggregate;
@@ -16,7 +17,8 @@ public sealed class CommentReaction : ValueObject
 
   public static CommentReaction From(UserId userId, ReactionType reactionType)
   {
-    Guard.Against.Null(userId);
+    if (userId is null)
+      throw new DomainValidationException("UserId is required for reaction.", nameof(userId));
     return new CommentReaction(userId, reactionType);
   }
 

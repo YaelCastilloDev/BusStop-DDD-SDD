@@ -1,4 +1,5 @@
 ﻿using BusStop.Infrastructure.Data;
+using BusStop.Infrastructure.Integrations.Keycloak;
 using BusStop.Infrastructure.Integrations.RabbitMQ;
 using Resend;
 
@@ -13,7 +14,8 @@ public static class InfrastructureServiceExtensions
     params System.Reflection.Assembly[] additionalAssemblies)
   {
     string? connectionString = config.GetConnectionString("PostgresConnection");
-    Guard.Against.Null(connectionString);
+    if (connectionString is null)
+      throw new InvalidOperationException("PostgresConnection is required.");
 
     services.AddScoped<EventDispatchInterceptor>();
     services.AddScoped<IDomainEventDispatcher, MediatorDomainEventDispatcher>();
@@ -36,10 +38,17 @@ public static class InfrastructureServiceExtensions
       logger.LogWarning("No Resend:ApiKey found in configuration. Email sending will fail if triggered.");
     }
     
-    services.AddResend(options => options.ApiToken = resendApiKey ?? "missing-key");
+    services.AddOptions();
+    services.AddHttpClient<ResendClient>();
+    services.Configure<ResendClientOptions>(options => options.ApiToken = resendApiKey ?? "missing-key");
+    services.AddTransient<IResend, ResendClient>();
     services.AddScoped<BusStop.Core.NotificationAggregate.Interfaces.IEmailSender, BusStop.Infrastructure.Integrations.Email.ResendEmailSender>();
     logger.LogInformation("Resend email sender registered.");
     
+    services.AddHttpClient("KeycloakAdmin", c => c.Timeout = TimeSpan.FromSeconds(10));
+    services.AddScoped<BusStop.Core.Interfaces.IKeycloakAdminService, KeycloakAdminService>();
+    logger.LogInformation("Keycloak admin service registered.");
+
     var assemblies = new List<System.Reflection.Assembly> { typeof(BusStop.UseCases.Users.Register.RegisterUserCommand).Assembly };
     if (additionalAssemblies != null)
     {
