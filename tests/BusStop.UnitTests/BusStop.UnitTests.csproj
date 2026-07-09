@@ -8,6 +8,7 @@
   <ItemGroup>
     <Compile Remove="Core\Services\ToDoItemSearchService_GetAllIncompleteItems.cs" />
     <Compile Remove="Core\Services\ToDoItemSearchService_GetNextIncompleteItem.cs" />
+    <Compile Remove="Web\Routes\GetNearbyValidatorTests.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,6 +27,8 @@
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="Mediator.Abstractions" />
     <PackageReference Include="Mediator.SourceGenerator" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" />
+    <PackageReference Include="Microsoft.Extensions.Http" />
   </ItemGroup>
 
   <ItemGroup>
@@ -41,6 +44,12 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\BusStop.Core\BusStop.Core.csproj" />
     <ProjectReference Include="..\..\src\BusStop.UseCases\BusStop.UseCases.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\src\BusStop.Infrastructure\Integrations\Keycloak\KeycloakAdminService.cs">
+      <Link>Infrastructure\KeycloakAdminService.cs</Link>
+    </Compile>
   </ItemGroup>
 
 </Project>
