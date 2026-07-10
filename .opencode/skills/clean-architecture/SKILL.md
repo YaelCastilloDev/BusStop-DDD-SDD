@@ -28,7 +28,13 @@ Tests: `BusStop.UnitTests`, `BusStop.IntegrationTests`, `BusStop.FunctionalTests
 - Feature slices: `Routes/Create/`, not `Commands/`.
 - Handlers: `ICommandHandler<,>` via **Mediator** (not MediatR).
 - Return `Result` / `Result<T>` for expected failures.
-- Handlers must NOT contain try-catch for domain exceptions — the `DomainExceptionBehavior` Mediator pipeline catches `DomainValidationException` and wraps in `Result<T>.Error()`. See `harness/specs/SPEC-Architecture-ExceptionHandling.md`.
+- Domain factories return `Result<T>` — handlers pattern-match, no try-catch needed:
+  ```csharp
+  var routeResult = Route.Create(request.Name, user.Id);
+  if (!routeResult.IsSuccess)
+      return Result<RouteResponse>.Error(new ErrorList(routeResult.Errors));
+  var route = routeResult.Value;
+  ```
 - No validators here — Web layer owns FastEndpoints validators.
 
 ## Infrastructure

@@ -17,29 +17,34 @@ description: BusStop.Core domain model patterns. Use when working in BusStop.Cor
 ```
 
 ## Aggregate Root
-- Inherit `EntityBase<TId>` and `IAggregateRoot`.
+- Inherit `EntityBase<long>` and `IAggregateRoot`.
 - Minimize public setters; use methods for state changes.
 - Call `RegisterDomainEvent()` on meaningful state transitions.
 
 ## IDs
-Use `Ardalis.SharedKernel.ValueObject` for IDs.
+`Ardalis.SharedKernel.ValueObject` subclasses. Constructors use `Guard.Against` for defensive checks.
 ```csharp
-public sealed class RouteId(long value) : ValueObject
+public sealed class RouteId : ValueObject
 {
-  if (value <= 0)
-      throw new DomainValidationException("Id must be positive.", nameof(value));
-  public long Value { get; } = value;
+    public long Value { get; }
 
-  protected override IEnumerable<object> GetEqualityComponents()
-  {
-    yield return Value;
-  }
+    public RouteId(long value)
+    {
+        Guard.Against.NegativeOrZero(value, nameof(value));
+        Value = value;
+    }
+
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        yield return Value;
+    }
 }
 ```
 
 ## Value Objects
 - Co-located in aggregate folder.
 - Immutable; equality by properties.
+- Constructors use `Guard.Against.*` (Null, NullOrWhiteSpace, NegativeOrZero, OutOfRange).
 - Use `From()` factory methods (parse, don't validate).
 
 ## Specifications
@@ -50,13 +55,62 @@ public sealed class RouteId(long value) : ValueObject
 - Past-tense names: `RouteCreatedEvent`, inherit `DomainEventBase`.
 - Handlers in `{Aggregate}/Handlers/`, implement `INotificationHandler<TEvent>`.
 
+## Error Types
+- Per-aggregate `const string` in `Errors/{Entity}Errors.cs`.
+- Used in factory methods to build validation error lists.
+
 ## Forbidden in Core
 - EF Core attributes, DbContext, HTTP, ASP.NET Core.
 - Use-case orchestration (domain event handlers are allowed).
 
-## Invariants
-- Enforce domain business rules with `DomainValidationException` in constructors and factory methods.
-- Use `Ardalis.GuardClauses` for defensive null/range checks on non-domain code only (configuration, pipeline behaviors).
-- Business rule violations throw `DomainValidationException`, not return Results.
-- The Mediator `DomainExceptionBehavior` pipeline catches `DomainValidationException` and converts to `Result.Error()`.
-- See `harness/specs/SPEC-Architecture-ExceptionHandling.md` for the full error handling strategy.
+## Two-Tier Error Strategy
+
+| Pattern | Handles | Frequency | Example |
+|---------|---------|-----------|---------|
+| **Result Pattern** | Expected failures (business rules). User input is wrong, state transition not allowed. | High | Empty comment, archived route, already deleted. |
+| **Guard Clauses** | Impossible failures (developer/system errors). Invalid data that should have been caught earlier. | Low / Never in production | Null or negative ID passed to internal constructor. |
+
+### Factories → Result<T>
+```csharp
+public static Result<Comment> Create(string content, long userId, long routeId)
+{
+    var errors = new List<string>();
+    if (string.IsNullOrWhiteSpace(content)) errors.Add(CommentErrors.EmptyContent);
+    if (userId <= 0) errors.Add(CommentErrors.InvalidUser);
+    if (routeId <= 0) errors.Add(CommentErrors.InvalidRoute);
+    if (errors.Count > 0) return Result<Comment>.Error(new ErrorList(errors));
+    return Result<Comment>.Success(new Comment(
+        new CommentContent(content), new UserId(userId), new RouteId(routeId)));
+}
+```
+
+### Constructors → Guard.Against
+```csharp
+private Comment(CommentContent content, UserId userId, RouteId routeId)
+{
+    Guard.Against.Null(content, nameof(content));
+    Guard.Against.Null(userId, nameof(userId));
+    Guard.Against.Null(routeId, nameof(routeId));
+    Content = content; UserId = userId; RouteId = routeId;
+}
+```
+
+### State-Changing Methods
+```csharp
+public Result Delete(UserId deletedBy)
+{
+    Guard.Against.Null(deletedBy, nameof(deletedBy));   // bug → throw
+    if (IsDeleted)
+        return Result.Error(new ErrorList([Errors.AlreadyDeleted]));  // business rule → Result
+    DeletedAt = DateTime.UtcNow;
+    return Result.Success();
+}
+```
+
+### Handlers
+```csharp
+var routeResult = Route.Create(request.Name, user.Id);
+if (!routeResult.IsSuccess)
+    return Result<RouteResponse>.Error(new ErrorList(routeResult.Errors));
+var route = routeResult.Value;
+```

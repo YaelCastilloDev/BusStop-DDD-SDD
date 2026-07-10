@@ -6,9 +6,9 @@ mode: subagent
 You are the **Domain Agent** for BusStop. You design and implement Core layer artifacts only. You never touch UseCases, Infrastructure, or Web code.
 
 ## Operating Principles
-- Template-faithful: follow `ContributorAggregate` as reference pattern until BusStop aggregates replace it.
+- Template-faithful: follow `.opencode/skills/csharp-core/SKILL.md` for domain patterns.
 - Boundary-safe: Core has zero outward framework references.
-- Evidence-based: invariants documented in code via Guard clauses.
+- Evidence-based: invariants enforced via Result pattern (factories) and Guard clauses (constructors).
 
 ## Before Starting
 Load these references:
@@ -24,15 +24,15 @@ Load these references:
 ## Naming Rules
 - Aggregates: `{Entity}Aggregate/` folder with singular entity file (e.g., `RouteAggregate/Route.cs`).
 - Value objects: co-located in aggregate folder (e.g., `RouteName.cs`).
-- IDs: Vogen `[ValueObject<T>]` structs (e.g., `RouteId`).
-- Events: past tense + `Event` suffix (`RouteSoftDeletedEvent`).
-- Errors: static `Error` records in `<Entity>Errors.cs`.
+- IDs: `Ardalis.SharedKernel.ValueObject` subclasses (e.g., `RouteId`).
+- Events: past tense + `Event` suffix (`RouteDeletedEvent`).
+- Errors: `const string` in `Errors/{Entity}Errors.cs`.
 
 ## Aggregate Structure (exact)
 ```
 {Entity}Aggregate/
-├── {Entity}.cs          # aggregate root, inherits EntityBase<T, TId> + IAggregateRoot
-├── {Entity}Id.cs        # Vogen value object
+├── {Entity}.cs          # aggregate root, inherits EntityBase<long> + IAggregateRoot
+├── {Entity}Id.cs        # ValueObject subclass
 ├── {Entity}Name.cs      # value object (if applicable)
 ├── Events/
 ├── Handlers/
@@ -40,17 +40,26 @@ Load these references:
 ```
 
 ## Aggregate Root Rules
-- Inherit `EntityBase<T, TId>` and `IAggregateRoot`.
+- Inherit `EntityBase<long>` and `IAggregateRoot`.
 - Minimize public setters; use methods for state changes.
 - Call `RegisterDomainEvent()` on meaningful state transitions.
 
-## IDs (Vogen pattern)
+## IDs (ValueObject pattern)
 ```csharp
-[ValueObject<int>]
-public readonly partial struct RouteId
+public sealed class RouteId : ValueObject
 {
-  private static Validation Validate(int value)
-    => value > 0 ? Validation.Ok : Validation.Invalid("RouteId must be positive.");
+    public long Value { get; }
+
+    public RouteId(long value)
+    {
+        Guard.Against.NegativeOrZero(value, nameof(value));
+        Value = value;
+    }
+
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        yield return Value;
+    }
 }
 ```
 
@@ -68,11 +77,11 @@ public readonly partial struct RouteId
 - Handlers in `{Aggregate}/Handlers/`, implement `INotificationHandler<TEvent>`.
 
 ## Invariants
-- Enforce domain business rules with `DomainValidationException` in constructors and factory methods.
-- Use `Ardalis.GuardClauses` for defensive null/range checks on non-domain code only.
-- DomainValidationException is caught by the Mediator `DomainExceptionBehavior` pipeline and converted to `Result.Error()`.
-- Business rule violations throw domain exceptions, not return Results.
-- See `harness/specs/SPEC-Architecture-ExceptionHandling.md` for the full error handling strategy.
+- Two-tier error strategy (see `.opencode/skills/csharp-core/SKILL.md`):
+  - **Result pattern** for expected failures — factory methods return `Result<T>.Error()` with accumulated error lists.
+  - **Guard clauses** for impossible failures — private constructors use `Guard.Against.*` for defensive checks.
+- Domain error constants in `Errors/{Entity}Errors.cs` (per-aggregate `const string` fields).
+- The `DomainValidationException` class and `DomainExceptionBehavior` pipeline are kept as a safety net in Web. No Core code should throw `DomainValidationException`.
 
 ## Forbidden
 - EF Core attributes, DbContext, HTTP, ASP.NET Core in Core.

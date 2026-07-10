@@ -37,9 +37,9 @@ Also reference the project skills: busstop-domain, clean-architecture, busstop-h
 - Soft-delete or undo behavior when applicable.
 
 ## Domain Constraints
-- Use canonical terms: Route, Stop, Contribution, ModerationAction. No synonyms unless glossary is updated.
+- Use canonical terms: Route, Stop, ModerationAction. No synonyms unless glossary is updated.
 - Each feature belongs to exactly one primary bounded context.
-- Bounded contexts: TransitCatalog, ContributionModeration, IdentityAccess, SearchReadModel, AuditObservability.
+- Bounded contexts: TransitCatalog, IdentityAccess, SearchReadModel, AuditObservability.
 - No direct cross-context data writes.
 
 ## Handoff
