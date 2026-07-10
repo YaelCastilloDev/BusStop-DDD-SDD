@@ -26,4 +26,8 @@ public sealed record ModerateCommentRequest(long Id);
 
 public sealed class ModerateCommentValidator : Validator<ModerateCommentRequest>
 {
+  public ModerateCommentValidator()
+  {
+    RuleFor(x => x.Id).GreaterThan(0);
+  }
 }

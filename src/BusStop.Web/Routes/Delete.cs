@@ -23,3 +23,12 @@ public sealed class Delete(IMediator mediator) : Endpoint<DeleteRouteRequest>
 }
 
 public sealed record DeleteRouteRequest(long Id);
+
+public sealed class DeleteRouteValidator : Validator<DeleteRouteRequest>
+{
+  public DeleteRouteValidator()
+  {
+    RuleFor(x => x.Id).GreaterThan(0);
+  }
+}
+
