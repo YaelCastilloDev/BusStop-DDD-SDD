@@ -46,11 +46,12 @@ UseCases/{Entity}/
 - Map entities to DTOs inside handlers, not in endpoints.
 
 ## Result Pattern
+Handlers match on `Result<T>` from domain factories. No try-catch needed — factories return Result directly.
 ```csharp
-public async Task<Result<RouteResponse>> Handle(CreateRouteCommand request, CancellationToken ct)
-{
-    // guard, execute, return Result
-}
+var routeResult = Route.Create(request.Name, user.Id);
+if (!routeResult.IsSuccess)
+    return Result<RouteResponse>.Error(new ErrorList(routeResult.Errors));
+var route = routeResult.Value;
 ```
 Return `Result` / `Result<T>` for expected failures. Never throw for flow control.
 

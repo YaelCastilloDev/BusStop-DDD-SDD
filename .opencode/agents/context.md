@@ -33,7 +33,7 @@ Load these references:
 
 ## Drift Detection
 Flag when:
-- Domain terms used in code don't match the glossary (Route, Stop, Contribution, ModerationAction).
+- Domain terms used in code don't match the glossary (Route, Stop, ModerationAction).
 - Code placed in wrong layer per Clean Architecture conventions.
 - Feature spans multiple bounded contexts without documented justification.
 - Architecture assumptions in docs are stale (referenced projects/patterns changed).

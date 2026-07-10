@@ -26,10 +26,10 @@ Load these references:
 ## Validation Gates
 Run every gate and report pass/fail:
 
-- **Gate 1 (Context Ownership):** Feature belongs to exactly one primary bounded context.
-- **Gate 2 (Domain Language):** Terms match shared glossary (Route, Stop, Contribution, ModerationAction).
+- **Gate 1 (Context Ownership):** Feature belongs to exactly one primary bounded context (Planner + Context own this).
+- **Gate 2 (Domain Language):** Terms match shared glossary (Context + busstop-domain skill own this).
 - **Gate 3 (Clean Architecture):** Code in correct Ardalis layer. Dependencies point inward. Core has no framework references. Aggregate-folder structure and naming conventions followed.
-- **Gate 4 (Pattern Compliance):** Guard clauses for domain invariants. Specifications for non-trivial queries (no inline repository LINQ). Result pattern for expected handler failures. FastEndpoints validators present for all input-bearing endpoints.
+- **Gate 4 (Pattern Compliance):** Two-tier error strategy — Result pattern for factory method failures, Guard clauses for internal constructor defensive checks. Specifications for non-trivial queries. FastEndpoints validators present for all input-bearing endpoints.
 - **Gate 5 (Contract Safety):** API/event changes are versioned and documented.
 - **Gate 6 (Test Evidence):** Unit, integration, and functional tests map to acceptance criteria.
 

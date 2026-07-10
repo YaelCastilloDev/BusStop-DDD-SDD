@@ -28,6 +28,3 @@ Do not use synonyms that alter meaning unless the glossary is updated first.
 
 ## Governance Roles
 User, Curator, Moderator, SubAdmin, Admin — least privilege by default.
-
-## Reference Slice
-Template ships with `ContributorAggregate` as a reference pattern. Replace incrementally with BusStop aggregates per feature specs.

@@ -10,7 +10,7 @@ Follow spec-driven delivery. Full spec: `harness/specs/lifecycle.md`.
 ## Before Implementation
 1. Read active feature spec with spec ID.
 2. Map work to exactly one bounded context.
-3. Use canonical domain terms: Route, Stop, Contribution, ModerationAction.
+3. Use canonical domain terms: Route, Stop, ModerationAction.
 
 ## Lifecycle
 1. Intake → 2. Spec draft → 3. Validation preflight → 4. Implementation (smallest vertical slice) → 5. Verification → 6. Closure
@@ -31,11 +31,11 @@ Follow spec-driven delivery. Full spec: `harness/specs/lifecycle.md`.
 Implementation order: Planner → Context → Domain → UseCase → Infrastructure → Web → Reviewer → Test
 
 ## Validation Gates (must pass before merge)
-- **Gate 1 (Context Ownership):** Single bounded context owner. Planner + Context verify.
-- **Gate 2 (Domain Language):** Terms match glossary. Context detects drift.
-- **Gate 3 (Clean Architecture):** Correct layer placement, dependency flow, aggregate-folder structure. Domain + UseCase + Infrastructure + Web comply; Reviewer verifies.
-- **Gate 4 (Pattern Compliance):** Guard clauses, Specifications, Result pattern, FastEndpoints validators. Reviewer verifies.
-- **Gate 5 (Contract Safety):** Versioned/documented API and event changes. Reviewer verifies.
+- **Gate 1 (Context Ownership):** Single bounded context owner. Planner + Context agents verify.
+- **Gate 2 (Domain Language):** Terms match glossary. Context agent detects drift; busstop-domain skill defines canon.
+- **Gate 3 (Clean Architecture):** Correct layer placement, dependency flow, aggregate-folder structure. Domain + UseCase + Infrastructure + Web agents comply; clean-architecture skill defines rules; Reviewer verifies.
+- **Gate 4 (Pattern Compliance):** Two-tier error strategy (Result for factories, Guard for constructors). Specifications for queries. FastEndpoints validators on all input endpoints. csharp-core + csharp-web skills define; Reviewer verifies.
+- **Gate 5 (Contract Safety):** Versioned/documented API and event changes. Web + Infrastructure agents responsible; Reviewer verifies.
 - **Gate 6 (Test Evidence):** Tests map to every acceptance criterion. Test agent provides; Reviewer verifies.
 
 ## Guardrails
