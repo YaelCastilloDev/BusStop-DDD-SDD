@@ -1,4 +1,6 @@
-namespace BusStop.Core.StopAggregate.Events;
+using BusStop.Core.StopAggregate.Events;
+
+namespace BusStop.Core.StopAggregate.Handlers;
 
 public class StopDeletedHandler(ILogger<StopDeletedHandler> logger) : INotificationHandler<StopDeletedEvent>
 {

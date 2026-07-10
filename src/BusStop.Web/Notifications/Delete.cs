@@ -1,7 +1,5 @@
 using BusStop.UseCases.Notifications.Delete;
 using BusStop.Web.Extensions;
-using FastEndpoints;
-using Mediator;
 
 namespace BusStop.Web.Notifications;
 

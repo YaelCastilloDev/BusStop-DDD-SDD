@@ -1,8 +1,6 @@
 using BusStop.UseCases.Notifications;
 using BusStop.UseCases.Notifications.GetMy;
 using BusStop.Web.Extensions;
-using FastEndpoints;
-using Mediator;
 
 namespace BusStop.Web.Notifications;
 

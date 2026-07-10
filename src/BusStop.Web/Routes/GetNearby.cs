@@ -1,7 +1,5 @@
 using BusStop.UseCases.Routes.GetNearby;
 using BusStop.Web.Extensions;
-using FastEndpoints;
-using FluentValidation;
 
 namespace BusStop.Web.Routes;
 
