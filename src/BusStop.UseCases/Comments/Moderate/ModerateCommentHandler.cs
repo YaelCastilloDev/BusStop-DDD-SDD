@@ -27,14 +27,12 @@ public sealed class ModerateCommentHandler(
     if (comment is null)
       return Result.NotFound("Comment not found.");
 
-    if (comment.IsModerated)
-      return Result.Error("Comment is already moderated.");
-
-    comment.Moderate(new UserId(user.Id));
+    var moderateResult = comment.Moderate(new UserId(user.Id));
+    if (!moderateResult.IsSuccess)
+      return Result.Error(new ErrorList(moderateResult.Errors));
 
     await repository.UpdateAsync(comment, cancellationToken);
 
     return Result.Success();
   }
 }
-

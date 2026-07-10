@@ -27,14 +27,12 @@ public sealed class DeleteRouteHandler(
     if (route is null)
       return Result.NotFound("Route not found.");
 
-    if (route.IsDeleted)
-      return Result.Error("Route is already deleted.");
-
-    route.Delete(new UserId(user.Id));
+    var deleteResult = route.Delete(new UserId(user.Id));
+    if (!deleteResult.IsSuccess)
+      return Result.Error(new ErrorList(deleteResult.Errors));
 
     await repository.UpdateAsync(route, cancellationToken);
 
     return Result.Success();
   }
 }
-

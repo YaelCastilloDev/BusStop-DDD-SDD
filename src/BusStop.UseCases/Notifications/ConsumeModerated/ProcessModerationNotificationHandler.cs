@@ -28,10 +28,13 @@ public class ProcessModerationNotificationHandler(
     var title = "Your comment was moderated";
     var message = $"Your comment (ID: {request.CommentId}) was moderated. Reason: {request.ModerationReason}";
 
-    var notification = UserNotification.Create(request.UserId, title, message);
+    var notificationResult = UserNotification.Create(request.UserId, title, message);
+    if (!notificationResult.IsSuccess)
+      return Result.Error(new ErrorList(notificationResult.Errors));
+
+    var notification = notificationResult.Value;
     await repository.AddAsync(notification, cancellationToken);
 
-    // Send email
     await emailSender.SendEmailAsync(user.Email, title, message, cancellationToken);
 
     return Result.Success();

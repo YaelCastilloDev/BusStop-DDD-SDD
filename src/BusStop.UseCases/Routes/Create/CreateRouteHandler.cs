@@ -18,10 +18,13 @@ public sealed class CreateRouteHandler(
     if (user is null)
       return Result<RouteResponse>.NotFound("User not found. Please register first.");
 
-    var route = Route.Create(request.Name, user.Id);
+    var routeResult = Route.Create(request.Name, user.Id);
+    if (!routeResult.IsSuccess)
+      return Result<RouteResponse>.Error(new ErrorList(routeResult.Errors));
+
+    var route = routeResult.Value;
     var created = await repository.AddAsync(route, cancellationToken);
 
     return new RouteResponse(created.Id, created.Name.Value, created.CreatedById.Value, created.CreatedAt, created.IsDeleted);
   }
 }
-
