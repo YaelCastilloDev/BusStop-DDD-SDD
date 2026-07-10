@@ -1,5 +1,5 @@
 using BusStop.UseCases.Users;
-using BusStop.UseCases.Users.Register;
+using BusStop.UseCases.Users.Onboarding;
 using BusStop.Web.Extensions;
 
 namespace BusStop.Web.Auth;

@@ -1,4 +1,6 @@
-namespace BusStop.Core.RouteAggregate.Events;
+using BusStop.Core.RouteAggregate.Events;
+
+namespace BusStop.Core.RouteAggregate.Handlers;
 
 public class RouteDeletedHandler(ILogger<RouteDeletedHandler> logger) : INotificationHandler<RouteDeletedEvent>
 {

@@ -19,11 +19,6 @@ public static class MiddlewareConfig
       app.UseHsts();
     }
 
-    if (!app.Environment.IsDevelopment())
-    {
-        app.UseExceptionHandler();
-    }
-
     app.Use(async (context, next) =>
     {
       context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
