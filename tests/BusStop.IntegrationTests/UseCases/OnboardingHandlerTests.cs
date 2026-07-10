@@ -2,18 +2,22 @@ using BusStop.Core.CountryAggregate;
 using BusStop.Core.UserAggregate;
 using BusStop.Infrastructure.Data;
 using BusStop.UseCases.Users;
-using BusStop.UseCases.Users.Register;
+using BusStop.UseCases.Users.Onboarding;
 
 namespace BusStop.IntegrationTests.UseCases;
 
+// SPEC-IdentityAccess-RegisterFlow
 public class OnboardingHandlerTests : IntegrationTestBase
 {
-  private readonly EfRepository<User> _userRepository;
-  private readonly EfRepository<Country> _countryRepository;
-  private readonly OnboardingHandler _handler;
+  private EfRepository<User> _userRepository = null!;
+  private EfRepository<Country> _countryRepository = null!;
+  private OnboardingHandler _handler = null!;
 
-  public OnboardingHandlerTests()
+  public OnboardingHandlerTests(PostgreSqlFixture fixture) : base(fixture) { }
+
+  public override async ValueTask InitializeAsync()
   {
+    await base.InitializeAsync();
     _userRepository = new EfRepository<User>(DbContext);
     _countryRepository = new EfRepository<Country>(DbContext);
     _handler = new OnboardingHandler(_userRepository, _countryRepository);
