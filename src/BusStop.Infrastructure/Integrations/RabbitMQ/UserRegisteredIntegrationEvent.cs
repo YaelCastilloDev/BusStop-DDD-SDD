@@ -1,5 +1,6 @@
 namespace BusStop.Infrastructure.Integrations.RabbitMQ;
 
+// TODO: Unversioned integration event. Needs versioning strategy per Gate 5 (Contract Safety).
 public sealed record UserRegisteredIntegrationEvent
 {
     public long UserId { get; init; }
