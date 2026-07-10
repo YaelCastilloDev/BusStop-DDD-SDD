@@ -1,4 +1,4 @@
-using BusStop.Core.Exceptions;
+using BusStop.Core.Errors;
 
 namespace BusStop.Core.CountryAggregate;
 
@@ -13,30 +13,43 @@ public class Country : EntityBase<long>, IAggregateRoot
 
     private Country(string name, string isoCode)
     {
+        Guard.Against.NullOrWhiteSpace(name, nameof(name));
+        Guard.Against.NullOrWhiteSpace(isoCode, nameof(isoCode));
+
         Name = name;
         IsoCode = isoCode;
     }
 
-    public static Country Create(string name, string isoCode)
+    public static Result<Country> Create(string name, string isoCode)
     {
+        var errors = new List<string>();
+
         if (string.IsNullOrWhiteSpace(name))
-            throw new DomainValidationException("Country name is required.", nameof(name));
+            errors.Add(CountryErrors.EmptyName);
         if (string.IsNullOrWhiteSpace(isoCode))
-            throw new DomainValidationException("Country ISO code is required.", nameof(isoCode));
-        return new Country(name, isoCode);
+            errors.Add(CountryErrors.EmptyIsoCode);
+
+        if (errors.Count > 0)
+            return Result<Country>.Error(new ErrorList(errors));
+
+        return Result<Country>.Success(new Country(name, isoCode));
     }
 
-    public void UpdateName(string newName)
+    public Result UpdateName(string newName)
     {
         if (string.IsNullOrWhiteSpace(newName))
-            throw new DomainValidationException("New country name is required.", nameof(newName));
+            return Result.Error(new ErrorList([CountryErrors.EmptyName]));
+
         Name = newName;
+        return Result.Success();
     }
 
-    public void UpdateIsoCode(string newIsoCode)
+    public Result UpdateIsoCode(string newIsoCode)
     {
         if (string.IsNullOrWhiteSpace(newIsoCode))
-            throw new DomainValidationException("New country ISO code is required.", nameof(newIsoCode));
+            return Result.Error(new ErrorList([CountryErrors.EmptyIsoCode]));
+
         IsoCode = newIsoCode;
+        return Result.Success();
     }
 }

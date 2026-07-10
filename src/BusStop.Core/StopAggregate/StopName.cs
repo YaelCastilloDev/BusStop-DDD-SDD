@@ -1,18 +1,21 @@
 using Ardalis.SharedKernel;
-using BusStop.Core.Exceptions;
 
 namespace BusStop.Core.StopAggregate;
 
-public sealed class StopName(string value) : ValueObject
+public sealed class StopName : ValueObject
 {
-  public string Value { get; } = !string.IsNullOrWhiteSpace(value)
-    ? value
-    : throw new DomainValidationException("StopName is required.", nameof(value));
+    public string Value { get; }
 
-  public static StopName From(string value) => new(value);
+    public StopName(string value)
+    {
+        Guard.Against.NullOrWhiteSpace(value, nameof(value));
+        Value = value;
+    }
 
-  protected override IEnumerable<object> GetEqualityComponents()
-  {
-    yield return Value;
-  }
+    public static StopName From(string value) => new(value);
+
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        yield return Value;
+    }
 }

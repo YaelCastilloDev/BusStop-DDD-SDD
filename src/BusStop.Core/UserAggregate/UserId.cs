@@ -1,16 +1,19 @@
 using Ardalis.SharedKernel;
-using BusStop.Core.Exceptions;
 
 namespace BusStop.Core.UserAggregate;
 
-public sealed class UserId(long value) : ValueObject
+public sealed class UserId : ValueObject
 {
-  public long Value { get; } = value > 0
-    ? value
-    : throw new DomainValidationException("UserId must be positive.", nameof(value));
+    public long Value { get; }
 
-  protected override IEnumerable<object> GetEqualityComponents()
-  {
-    yield return Value;
-  }
+    public UserId(long value)
+    {
+        Guard.Against.NegativeOrZero(value, nameof(value));
+        Value = value;
+    }
+
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        yield return Value;
+    }
 }
