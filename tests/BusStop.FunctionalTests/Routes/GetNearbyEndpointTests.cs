@@ -30,16 +30,16 @@ public class GetNearbyEndpointTests : IClassFixture<CustomWebApplicationFactory<
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        var user = User.Create("testuser", "test@example.com");
+        var user = User.Create("testuser", "test@example.com").Value;
         db.Users.Add(user);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var route = Route.Create("Downtown Express", user.Id);
+        var route = Route.Create("Downtown Express", user.Id).Value;
         db.Routes.Add(route);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // 40.7128, -74.0060 (New York City)
-        var stop = Stop.Create("Central Station", 40.7128, -74.0060, route.Id);
+        var stop = Stop.Create("Central Station", 40.7128, -74.0060, route.Id).Value;
         db.Stops.Add(stop);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
@@ -64,16 +64,16 @@ public class GetNearbyEndpointTests : IClassFixture<CustomWebApplicationFactory<
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        var user = User.Create("testuser2", "test2@example.com");
+        var user = User.Create("testuser2", "test2@example.com").Value;
         db.Users.Add(user);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var route = Route.Create("Uptown Local", user.Id);
+        var route = Route.Create("Uptown Local", user.Id).Value;
         db.Routes.Add(route);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // 40.7128, -74.0060 (New York City)
-        var stop = Stop.Create("North Station", 40.7128, -74.0060, route.Id);
+        var stop = Stop.Create("North Station", 40.7128, -74.0060, route.Id).Value;
         db.Stops.Add(stop);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
@@ -98,16 +98,16 @@ public class GetNearbyEndpointTests : IClassFixture<CustomWebApplicationFactory<
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        var user = User.Create("testuser3", "test3@example.com");
+        var user = User.Create("testuser3", "test3@example.com").Value;
         db.Users.Add(user);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var route = Route.Create("Far Away Route", user.Id);
+        var route = Route.Create("Far Away Route", user.Id).Value;
         db.Routes.Add(route);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // 40.7128, -74.0060 (New York City)
-        var stop = Stop.Create("Far Station", 40.7128, -74.0060, route.Id);
+        var stop = Stop.Create("Far Station", 40.7128, -74.0060, route.Id).Value;
         db.Stops.Add(stop);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 

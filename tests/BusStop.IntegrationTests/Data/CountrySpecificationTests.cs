@@ -10,7 +10,7 @@ public class CountrySpecificationTests : IntegrationTestBase
   [Fact]
   public async Task CountryByIdSpec_ReturnsCorrectCountry()
   {
-    var country = Country.Create("Spain", "ES");
+    var country = Country.Create("Spain", "ES").Value;
     DbContext.Countries.Add(country);
     await DbContext.SaveChangesAsync(Current.CancellationToken);
 
@@ -25,9 +25,9 @@ public class CountrySpecificationTests : IntegrationTestBase
   [Fact]
   public async Task CountryAllSpec_ReturnsOrderedByName()
   {
-    DbContext.Countries.Add(Country.Create("Zambia", "ZM"));
-    DbContext.Countries.Add(Country.Create("Argentina", "AR"));
-    DbContext.Countries.Add(Country.Create("Brazil", "BR"));
+    DbContext.Countries.Add(Country.Create("Zambia", "ZM").Value);
+    DbContext.Countries.Add(Country.Create("Argentina", "AR").Value);
+    DbContext.Countries.Add(Country.Create("Brazil", "BR").Value);
     await DbContext.SaveChangesAsync(Current.CancellationToken);
 
     var spec = new CountryAllSpec();

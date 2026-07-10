@@ -25,7 +25,11 @@ public sealed class CreateCommentHandler(
     if (route is null)
       return Result<CommentResponse>.NotFound("Route not found.");
 
-    var comment = Comment.Create(request.Content, user.Id, request.RouteId);
+    var commentResult = Comment.Create(request.Content, user.Id, request.RouteId);
+    if (!commentResult.IsSuccess)
+      return Result<CommentResponse>.Error(new ErrorList(commentResult.Errors));
+
+    var comment = commentResult.Value;
     var created = await repository.AddAsync(comment, cancellationToken);
 
     return ToResponse(created);
@@ -36,4 +40,3 @@ public sealed class CreateCommentHandler(
         c.Reactions.Count(r => r.ReactionType == ReactionType.Like),
         c.Reactions.Count(r => r.ReactionType == ReactionType.Dislike));
 }
-

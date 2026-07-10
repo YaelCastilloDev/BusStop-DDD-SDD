@@ -7,7 +7,7 @@ public class UserConfigurationTests : IntegrationTestBase
   [Fact]
   public async Task Create_PersistsCorrectly()
   {
-    var user = User.Create("test@example.com", "ext-123");
+    var user = User.Create("test@example.com", "ext-123").Value;
     DbContext.Users.Add(user);
     await DbContext.SaveChangesAsync(Current.CancellationToken);
 
@@ -22,11 +22,11 @@ public class UserConfigurationTests : IntegrationTestBase
   [Fact]
   public async Task CompleteOnboarding_UpdatesProfile()
   {
-    var user = User.Create("user@example.com", "ext-456");
+    var user = User.Create("user@example.com", "ext-456").Value;
     DbContext.Users.Add(user);
     await DbContext.SaveChangesAsync(Current.CancellationToken);
 
-    user.CompleteOnboarding(new Username("onboardeduser"), 1);
+    user.CompleteOnboarding(new Username("onboardeduser"), 1).IsSuccess.ShouldBeTrue();
     await DbContext.SaveChangesAsync(Current.CancellationToken);
 
     var saved = await DbContext.Users.FirstOrDefaultAsync(Current.CancellationToken);

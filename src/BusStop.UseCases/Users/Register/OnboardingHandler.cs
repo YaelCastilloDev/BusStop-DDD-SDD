@@ -23,7 +23,10 @@ public sealed class OnboardingHandler(
     if (country is null)
       return Result<UserResponse>.Error("Country not found.");
 
-    user.CompleteOnboarding(new Username(request.Username), request.CountryId);
+    var onboardingResult = user.CompleteOnboarding(new Username(request.Username), request.CountryId);
+    if (!onboardingResult.IsSuccess)
+      return Result<UserResponse>.Error(new ErrorList(onboardingResult.Errors));
+
     await repository.UpdateAsync(user, cancellationToken);
 
     return new UserResponse(user.Id, user.Username?.Value, user.Email, user.ExternalId, user.CreatedAt, user.CountryId);

@@ -22,11 +22,11 @@ public class OnboardingHandlerTests : IntegrationTestBase
   [Fact]
   public async Task Onboarding_Succeeds_WithValidData()
   {
-    var user = User.Create("user@example.com", "kc-sub-onboarding");
+    var user = User.Create("user@example.com", "kc-sub-onboarding").Value;
     await _userRepository.AddAsync(user, Current.CancellationToken);
     await DbContext.SaveChangesAsync(Current.CancellationToken);
 
-    var country = Country.Create("France", "FR");
+    var country = Country.Create("France", "FR").Value;
     await _countryRepository.AddAsync(country, Current.CancellationToken);
     await DbContext.SaveChangesAsync(Current.CancellationToken);
 
@@ -60,7 +60,7 @@ public class OnboardingHandlerTests : IntegrationTestBase
   [Fact]
   public async Task Onboarding_Fails_WithInvalidCountry()
   {
-    var user = User.Create("user2@example.com", "kc-sub-invalid-country");
+    var user = User.Create("user2@example.com", "kc-sub-invalid-country").Value;
     await _userRepository.AddAsync(user, Current.CancellationToken);
     await DbContext.SaveChangesAsync(Current.CancellationToken);
 
