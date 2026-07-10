@@ -5,13 +5,17 @@ using BusStop.UseCases.Users.Register;
 
 namespace BusStop.IntegrationTests.UseCases;
 
+// SPEC-IdentityAccess-RegisterFlow
 public class RegisterUserHandlerTests : IntegrationTestBase
 {
-  private readonly EfRepository<User> _userRepository;
-  private readonly RegisterUserHandler _handler;
+  private EfRepository<User> _userRepository = null!;
+  private RegisterUserHandler _handler = null!;
 
-  public RegisterUserHandlerTests()
+  public RegisterUserHandlerTests(PostgreSqlFixture fixture) : base(fixture) { }
+
+  public override async ValueTask InitializeAsync()
   {
+    await base.InitializeAsync();
     _userRepository = new EfRepository<User>(DbContext);
     _handler = new RegisterUserHandler(_userRepository);
   }

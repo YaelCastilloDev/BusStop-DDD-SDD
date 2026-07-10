@@ -5,8 +5,10 @@ namespace BusStop.IntegrationTests.Data;
 
 public class CountrySeedDataTests : IntegrationTestBase
 {
+    public CountrySeedDataTests(PostgreSqlFixture fixture) : base(fixture) { }
+
     [Fact]
-    public async Task SeedData_PopulatesCountries()
+    public async Task SeedData_PopulatesCountries_WithExpectedCount()
     {
         await SeedData.InitializeAsync(DbContext);
 
@@ -25,7 +27,7 @@ public class CountrySeedDataTests : IntegrationTestBase
     }
 
     [Fact]
-    public async Task SeedData_IsIdempotent()
+    public async Task SeedData_IsIdempotent_WhenCalledTwice()
     {
         await SeedData.InitializeAsync(DbContext);
         var firstCount = await DbContext.Countries.CountAsync(TestContext.Current.CancellationToken);

@@ -7,6 +7,8 @@ namespace BusStop.IntegrationTests.Data;
 
 public class CountrySpecificationTests : IntegrationTestBase
 {
+  public CountrySpecificationTests(PostgreSqlFixture fixture) : base(fixture) { }
+
   [Fact]
   public async Task CountryByIdSpec_ReturnsCorrectCountry()
   {

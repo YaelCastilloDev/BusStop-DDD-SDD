@@ -4,6 +4,7 @@ using BusStop.UseCases.Users.Signup;
 
 namespace BusStop.UnitTests.UseCases.Users.Signup;
 
+// SPEC-IdentityAccess-RegisterFlow
 public class SignupHandlerTests
 {
     private readonly IKeycloakAdminService _keycloakAdmin;

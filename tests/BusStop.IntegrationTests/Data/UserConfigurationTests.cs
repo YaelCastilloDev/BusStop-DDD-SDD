@@ -4,8 +4,10 @@ namespace BusStop.IntegrationTests.Data;
 
 public class UserConfigurationTests : IntegrationTestBase
 {
+  public UserConfigurationTests(PostgreSqlFixture fixture) : base(fixture) { }
+
   [Fact]
-  public async Task Create_PersistsCorrectly()
+  public async Task Create_PersistsCorrectly_WithValidData()
   {
     var user = User.Create("test@example.com", "ext-123").Value;
     DbContext.Users.Add(user);
@@ -20,7 +22,7 @@ public class UserConfigurationTests : IntegrationTestBase
   }
 
   [Fact]
-  public async Task CompleteOnboarding_UpdatesProfile()
+  public async Task CompleteOnboarding_UpdatesProfile_WithValidData()
   {
     var user = User.Create("user@example.com", "ext-456").Value;
     DbContext.Users.Add(user);
