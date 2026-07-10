@@ -1,4 +1,6 @@
-namespace BusStop.Core.UserAggregate.Events;
+using BusStop.Core.UserAggregate.Events;
+
+namespace BusStop.Core.UserAggregate.Handlers;
 
 public class UserRegisteredAuditHandler(ILogger<UserRegisteredAuditHandler> logger) : INotificationHandler<UserRegisteredEvent>
 {
