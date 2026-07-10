@@ -1,16 +1,19 @@
 using Ardalis.SharedKernel;
-using BusStop.Core.Exceptions;
 
 namespace BusStop.Core.NotificationAggregate;
 
-public sealed class UserNotificationId(long value) : ValueObject
+public sealed class UserNotificationId : ValueObject
 {
-  public long Value { get; } = value > 0
-    ? value
-    : throw new DomainValidationException("UserNotificationId must be positive.", nameof(value));
+    public long Value { get; }
 
-  protected override IEnumerable<object> GetEqualityComponents()
-  {
-    yield return Value;
-  }
+    public UserNotificationId(long value)
+    {
+        Guard.Against.NegativeOrZero(value, nameof(value));
+        Value = value;
+    }
+
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        yield return Value;
+    }
 }

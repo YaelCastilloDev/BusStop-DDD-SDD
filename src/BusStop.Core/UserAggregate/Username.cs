@@ -1,18 +1,21 @@
 using Ardalis.SharedKernel;
-using BusStop.Core.Exceptions;
 
 namespace BusStop.Core.UserAggregate;
 
-public sealed class Username(string value) : ValueObject
+public sealed class Username : ValueObject
 {
-  public string Value { get; } = !string.IsNullOrWhiteSpace(value)
-    ? value
-    : throw new DomainValidationException("Username is required.", nameof(value));
+    public string Value { get; }
 
-  public static Username From(string value) => new(value);
+    public Username(string value)
+    {
+        Guard.Against.NullOrWhiteSpace(value, nameof(value));
+        Value = value;
+    }
 
-  protected override IEnumerable<object> GetEqualityComponents()
-  {
-    yield return Value;
-  }
+    public static Username From(string value) => new(value);
+
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        yield return Value;
+    }
 }

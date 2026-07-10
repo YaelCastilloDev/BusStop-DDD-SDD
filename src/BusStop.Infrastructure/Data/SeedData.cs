@@ -235,7 +235,7 @@ public static class SeedData
     };
 
     var countries = seedEntries
-      .Select(kvp => Country.Create(kvp.Value, kvp.Key))
+      .Select(kvp => Country.Create(kvp.Value, kvp.Key).Value)
       .ToList();
 
     dbContext.Countries.AddRange(countries);

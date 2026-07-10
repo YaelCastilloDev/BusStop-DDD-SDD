@@ -1,4 +1,4 @@
-using BusStop.Core.Exceptions;
+using BusStop.Core.Errors;
 using BusStop.Core.RouteAggregate;
 using BusStop.Core.StopAggregate.Events;
 using BusStop.Core.UserAggregate;
@@ -7,59 +7,70 @@ namespace BusStop.Core.StopAggregate;
 
 public class Stop : EntityBase<long>, IAggregateRoot
 {
-  public StopName Name { get; private set; }
-  public Location Location { get; private set; }
-  public RouteId RouteId { get; private set; }
-  public DateTime? DeletedAt { get; private set; }
-  public long? DeletedBy { get; private set; }
+    public StopName Name { get; private set; }
+    public Location Location { get; private set; }
+    public RouteId RouteId { get; private set; }
+    public DateTime? DeletedAt { get; private set; }
+    public long? DeletedBy { get; private set; }
 
 #pragma warning disable CS8618
-  private Stop() { }
+    private Stop() { }
 #pragma warning restore CS8618
 
-  private Stop(StopName name, Location location, RouteId routeId)
-  {
-    Name = name;
-    Location = location;
-    RouteId = routeId;
-  }
+    private Stop(StopName name, Location location, RouteId routeId)
+    {
+        Guard.Against.Null(name, nameof(name));
+        Guard.Against.Null(location, nameof(location));
+        Guard.Against.Null(routeId, nameof(routeId));
 
-  public static Stop Create(string name, double latitude, double longitude, long routeId)
-  {
-    if (string.IsNullOrWhiteSpace(name))
-      throw new DomainValidationException("Stop name is required.", nameof(name));
-    if (latitude < -90 || latitude > 90)
-      throw new DomainValidationException("Latitude must be between -90 and 90.", nameof(latitude));
-    if (longitude < -180 || longitude > 180)
-      throw new DomainValidationException("Longitude must be between -180 and 180.", nameof(longitude));
-    if (routeId <= 0)
-      throw new DomainValidationException("RouteId must be positive.", nameof(routeId));
+        Name = name;
+        Location = location;
+        RouteId = routeId;
+    }
 
-    return new Stop(new StopName(name), new Location(latitude, longitude), new RouteId(routeId));
-  }
+    public static Result<Stop> Create(string name, double latitude, double longitude, long routeId)
+    {
+        var errors = new List<string>();
 
-  public void UpdateName(StopName newName)
-  {
-    if (newName is null)
-      throw new DomainValidationException("New stop name is required.", nameof(newName));
-    Name = newName;
-  }
+        if (string.IsNullOrWhiteSpace(name))
+            errors.Add(StopErrors.EmptyName);
+        if (latitude < -90 || latitude > 90)
+            errors.Add(StopErrors.InvalidLatitude);
+        if (longitude < -180 || longitude > 180)
+            errors.Add(StopErrors.InvalidLongitude);
+        if (routeId <= 0)
+            errors.Add(StopErrors.InvalidRouteId);
 
-  public void UpdateLocation(Location newLocation)
-  {
-    if (newLocation is null)
-      throw new DomainValidationException("New location is required.", nameof(newLocation));
-    Location = newLocation;
-  }
+        if (errors.Count > 0)
+            return Result<Stop>.Error(new ErrorList(errors));
 
-  public void Delete(UserId deletedBy)
-  {
-    if (deletedBy is null)
-      throw new DomainValidationException("DeletedBy is required.", nameof(deletedBy));
-    DeletedAt = DateTime.UtcNow;
-    DeletedBy = deletedBy.Value;
-    RegisterDomainEvent(new StopDeletedEvent(Id));
-  }
+        return Result<Stop>.Success(new Stop(new StopName(name), new Location(latitude, longitude), new RouteId(routeId)));
+    }
 
-  public bool IsDeleted => DeletedAt.HasValue;
+    public void UpdateName(StopName newName)
+    {
+        Guard.Against.Null(newName, nameof(newName));
+        Name = newName;
+    }
+
+    public void UpdateLocation(Location newLocation)
+    {
+        Guard.Against.Null(newLocation, nameof(newLocation));
+        Location = newLocation;
+    }
+
+    public Result Delete(UserId deletedBy)
+    {
+        Guard.Against.Null(deletedBy, nameof(deletedBy));
+
+        if (IsDeleted)
+            return Result.Error(new ErrorList([StopErrors.AlreadyDeleted]));
+
+        DeletedAt = DateTime.UtcNow;
+        DeletedBy = deletedBy.Value;
+        RegisterDomainEvent(new StopDeletedEvent(Id));
+        return Result.Success();
+    }
+
+    public bool IsDeleted => DeletedAt.HasValue;
 }
