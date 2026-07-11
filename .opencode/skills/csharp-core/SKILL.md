@@ -114,3 +114,28 @@ if (!routeResult.IsSuccess)
     return Result<RouteResponse>.Error(new ErrorList(routeResult.Errors));
 var route = routeResult.Value;
 ```
+
+### Shortcut: CreateEntityPipeline for create flows
+When handlers follow the factory → validate → AddAsync → map pattern, use `CreateEntityPipeline.CreateAsync`:
+```csharp
+return await repository.CreateAsync(Route.Create(request.Name, user.Id), r => r.ToResponse(), ct);
+```
+
+### Shortcut: FindRequiredAsync for entity lookups
+Replace `FirstOrDefaultAsync(spec) + null check + NotFound` with `FindRequiredAsync<T>`:
+```csharp
+var routeResult = await routeRepository.FindRequiredAsync(
+    new RouteByIdSpec(new RouteId(id)), "Route not found.", ct);
+if (!routeResult.IsSuccess)
+    return Result<TResponse>.NotFound(routeResult.Errors);
+var route = routeResult.Value;
+```
+
+### Shortcut: ToResponse() mapper extensions
+Map entities to response DTOs via extension methods (defined in UseCases layer, co-located with DTOs):
+```csharp
+// RouteMapper.cs in UseCases/Routes/
+public static RouteResponse ToResponse(this Route route) =>
+    new(route.Id, route.Name.Value, route.CreatedById.Value, route.CreatedAt, route.IsDeleted);
+```
+All handlers use `entity.ToResponse()` instead of inline `new XxxResponse(...)` constructor calls.

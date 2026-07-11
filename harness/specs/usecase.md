@@ -46,12 +46,36 @@ UseCases/{Entity}/
 - Map entities to DTOs inside handlers, not in endpoints.
 
 ## Result Pattern
-Handlers match on `Result<T>` from domain factories. No try-catch needed — factories return Result directly.
+Handlers match on `Result<T>` from domain factories and repository extensions. No try-catch needed — factories and helpers return Result directly.
 ```csharp
+// Raw pattern (for non-create flows, e.g. state mutations):
 var routeResult = Route.Create(request.Name, user.Id);
 if (!routeResult.IsSuccess)
     return Result<RouteResponse>.Error(new ErrorList(routeResult.Errors));
 var route = routeResult.Value;
+```
+
+### Create flows: use CreateEntityPipeline
+```csharp
+return await repository.CreateAsync(Route.Create(request.Name, user.Id), r => r.ToResponse(), ct);
+```
+
+### Entity lookups: use FindRequiredAsync<T> (generic) or GetUserByExternalIdAsync (User)
+```csharp
+var userResult = await userRepository.GetUserByExternalIdAsync(request.Sub, ct);
+if (!userResult.IsSuccess)
+    return Result<TResponse>.NotFound(userResult.Errors);
+var user = userResult.Value;
+
+var routeResult = await routeRepository.FindRequiredAsync(
+    new RouteByIdSpec(new RouteId(id)), "Route not found.", ct);
+if (!routeResult.IsSuccess)
+    return Result<RouteResponse>.NotFound(routeResult.Errors);
+```
+
+### DTO mapping: use ToResponse() mapper extensions
+```csharp
+return created.ToResponse();  // not: new RouteResponse(created.Id, ...)
 ```
 Return `Result` / `Result<T>` for expected failures. Never throw for flow control.
 
