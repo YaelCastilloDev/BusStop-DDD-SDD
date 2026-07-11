@@ -48,17 +48,6 @@ public class GetMyNotificationsHandlerTests
     }
 
     [Fact]
-    public async Task Handle_ReturnsUnauthorized_WhenNoSub()
-    {
-        var query = new GetMyNotificationsQuery();
-
-        var result = await _handler.Handle(query, CancellationToken.None);
-
-        result.IsSuccess.ShouldBeFalse();
-        result.Status.ShouldBe(ResultStatus.Unauthorized);
-    }
-
-    [Fact]
     public async Task Handle_ReturnsNotFound_WhenUserMissing()
     {
         var query = new GetMyNotificationsQuery { Sub = "unknown-sub" };

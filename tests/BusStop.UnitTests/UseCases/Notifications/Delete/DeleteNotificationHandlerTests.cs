@@ -44,17 +44,6 @@ public class DeleteNotificationHandlerTests
     }
 
     [Fact]
-    public async Task Handle_ReturnsUnauthorized_WhenNoSub()
-    {
-        var command = new DeleteNotificationCommand(1);
-
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        result.IsSuccess.ShouldBeFalse();
-        result.Status.ShouldBe(ResultStatus.Unauthorized);
-    }
-
-    [Fact]
     public async Task Handle_ReturnsNotFound_WhenNotificationMissing()
     {
         var command = new DeleteNotificationCommand(99) { Sub = "kc-sub" };

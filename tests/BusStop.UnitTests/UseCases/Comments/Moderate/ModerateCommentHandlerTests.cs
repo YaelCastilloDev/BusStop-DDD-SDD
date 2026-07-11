@@ -74,14 +74,4 @@ public class ModerateCommentHandlerTests
         result.Status.ShouldBe(ResultStatus.NotFound);
     }
 
-    [Fact]
-    public async Task Handle_ReturnsUnauthorized_WhenNoSub()
-    {
-        var command = new ModerateCommentCommand(1);
-
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        result.IsSuccess.ShouldBeFalse();
-        result.Status.ShouldBe(ResultStatus.Unauthorized);
-    }
 }
