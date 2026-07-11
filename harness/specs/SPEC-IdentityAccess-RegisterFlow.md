@@ -61,7 +61,7 @@ Registration via Keycloakify theme is also supported — users created via Keycl
 - `Users/Register/OnboardingCommand.cs` — new: `IRequireAuthenticatedUser` + username + countryId
 - `Users/Register/OnboardingHandler.cs` — new: finds user by Sub, updates profile
 - `Users/GetMe/GetMeQuery.cs` — new: returns current user by Sub claim
-- `Users/GetMe/GetMeHandler.cs` — new: lookup by UserByExternalIdSpec
+- `Users/GetMe/GetMeHandler.cs` — new: lookup by GetUserByExternalIdAsync extension
 - `Users/Create/` — remove (replaced by register flow)
 - `UserResponse.cs` — remove PasswordHash, IsEmailVerified
 

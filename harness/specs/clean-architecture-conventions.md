@@ -91,6 +91,7 @@ UseCases/Routes/Create/
 - **Domain events:** aggregates call `RegisterDomainEvent`; handlers implement `INotificationHandler<T>`.
 - **Result wrapper:** handlers return `Result<T>`; endpoints map results to HTTP responses without throwing for flow control.
 - **Mediator:** source-generated `IMediator` for command/query dispatch. Register in `MediatorConfig.cs`.
+- **CurrentUserBehavior pipeline:** `IRequireAuthenticatedUser` (Core interface) declares `string Sub { get; set; }`. `CurrentUserBehavior<TRequest, TResponse>` (Web pipeline behavior) reads the JWT `sub` claim from `IHttpContextAccessor`, short-circuits with `Result.Unauthorized(...)` if missing, and sets `Sub` on the request DTO. Handlers trust `Sub` is non-nullable — no handler-level Sub validation needed. Registered in `MediatorConfig.AddMediatorSourceGen()`.
 
 ## Error Handling Strategy
 
