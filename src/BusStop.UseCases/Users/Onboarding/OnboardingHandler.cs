@@ -2,7 +2,6 @@ using BusStop.Core.CountryAggregate;
 using BusStop.Core.CountryAggregate.Specifications;
 using BusStop.Core.Interfaces;
 using BusStop.Core.UserAggregate;
-using BusStop.Core.UserAggregate.Specifications;
 
 namespace BusStop.UseCases.Users.Onboarding;
 
@@ -16,13 +15,14 @@ public sealed class OnboardingHandler(
 {
   public async ValueTask<Result<UserResponse>> Handle(OnboardingCommand request, CancellationToken cancellationToken)
   {
-    if (string.IsNullOrEmpty(request.Sub))
-      return Result<UserResponse>.Unauthorized("Authentication required.");
+    var userResult = await repository.GetUserByExternalIdAsync(request.Sub, cancellationToken);
+    if (!userResult.IsSuccess)
+      return Result<UserResponse>.NotFound("User not found.");
+    var user = userResult.Value;
 
-    var user = await repository.FirstOrDefaultAsync(new UserByExternalIdSpec(request.Sub), cancellationToken);
-    if (user is null)
-      return Result<UserResponse>.NotFound("User not found. Please register first.");
-
+    // TODO: Inconsistency — uses Result.Error("Country not found.") instead of Result.NotFound.
+    // Cannot blindly replace with FindRequiredAsync which returns NotFound (contract change).
+    // See REFACTOR-DRY-001 Phase 3 — should eventually standardize to NotFound.
     var country = await countryRepository.FirstOrDefaultAsync(new CountryByIdSpec(request.CountryId), cancellationToken);
     if (country is null)
       return Result<UserResponse>.Error("Country not found.");
@@ -33,6 +33,6 @@ public sealed class OnboardingHandler(
 
     await repository.UpdateAsync(user, cancellationToken);
 
-    return new UserResponse(user.Id, user.Username?.Value, user.Email, user.ExternalId, user.CreatedAt, user.CountryId);
+    return user.ToResponse();
   }
 }

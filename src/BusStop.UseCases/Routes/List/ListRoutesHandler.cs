@@ -10,7 +10,7 @@ public sealed class ListRoutesHandler(IReadRepository<Route> repository) : IQuer
     var spec = new ListRoutesSpec(request.Page, request.PageSize);
     var routes = await repository.ListAsync(spec, cancellationToken);
 
-    var responses = routes.Select(r => new RouteResponse(r.Id, r.Name.Value, r.CreatedById.Value, r.CreatedAt, r.IsDeleted)).ToList();
+    var responses = routes.Select(r => r.ToResponse()).ToList();
 
     return responses;
   }

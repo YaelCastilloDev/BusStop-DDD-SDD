@@ -31,12 +31,7 @@ public static class ResultExtensions
 
     public static async Task ToGetByIdResultAsync<TResponse>(this IEndpoint ep, Result<TResponse> result, CancellationToken ct)
     {
-        if (result.IsSuccess)
-        {
-            await ep.HttpContext.Response.SendAsync(result.Value, cancellation: ct);
-            return;
-        }
-        await ep.HandleErrorResultAsync(result, ct);
+        await ep.ToOkResultAsync(result, ct);
     }
 
     public static async Task ToNoContentResultAsync(this IEndpoint ep, Result result, CancellationToken ct)

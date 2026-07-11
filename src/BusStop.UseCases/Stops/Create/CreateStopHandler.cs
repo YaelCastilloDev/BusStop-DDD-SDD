@@ -10,17 +10,11 @@ public sealed class CreateStopHandler(
 {
   public async ValueTask<Result<StopResponse>> Handle(CreateStopCommand request, CancellationToken cancellationToken)
   {
-    var route = await routeRepository.FirstOrDefaultAsync(new RouteByIdSpec(new RouteId(request.RouteId)), cancellationToken);
-    if (route is null)
+    var routeResult = await routeRepository.FindRequiredAsync(new RouteByIdSpec(new RouteId(request.RouteId)), "Route not found.", cancellationToken);
+    if (!routeResult.IsSuccess)
       return Result<StopResponse>.NotFound("Route not found.");
+    var route = routeResult.Value;
 
-    var stopResult = Stop.Create(request.Name, request.Latitude, request.Longitude, request.RouteId);
-    if (!stopResult.IsSuccess)
-      return Result<StopResponse>.Error(new ErrorList(stopResult.Errors));
-
-    var stop = stopResult.Value;
-    var created = await repository.AddAsync(stop, cancellationToken);
-
-    return new StopResponse(created.Id, created.Name.Value, created.Location.Latitude, created.Location.Longitude, created.RouteId.Value, created.IsDeleted);
+    return await repository.CreateAsync(Stop.Create(request.Name, request.Latitude, request.Longitude, request.RouteId), s => s.ToResponse(), cancellationToken);
   }
 }

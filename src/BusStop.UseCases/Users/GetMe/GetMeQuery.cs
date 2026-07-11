@@ -5,5 +5,5 @@ namespace BusStop.UseCases.Users.GetMe;
 
 public sealed record GetMeQuery() : IQuery<Result<UserResponse>>, IRequireAuthenticatedUser
 {
-    public string? Sub { get; set; }
+    public string Sub { get; set; } = default!;
 }

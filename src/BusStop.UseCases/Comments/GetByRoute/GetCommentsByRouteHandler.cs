@@ -11,18 +11,17 @@ public sealed class GetCommentsByRouteHandler(
 {
   public async ValueTask<Result<List<CommentResponse>>> Handle(GetCommentsByRouteQuery request, CancellationToken cancellationToken)
   {
-    var route = await routeRepository.FirstOrDefaultAsync(new RouteByIdSpec(new RouteId(request.RouteId)), cancellationToken);
-    if (route is null)
+    var routeResult = await routeRepository.FindRequiredAsync(new RouteByIdSpec(new RouteId(request.RouteId)), "Route not found.", cancellationToken);
+    if (!routeResult.IsSuccess)
       return Result<List<CommentResponse>>.NotFound("Route not found.");
+    var route = routeResult.Value;
 
     var spec = new CommentsByRouteSpec(new RouteId(request.RouteId));
     var comments = await repository.ListAsync(spec, cancellationToken);
 
     var responses = comments
       .Where(c => !c.IsModerated)
-      .Select(c => new CommentResponse(c.Id, c.Content.Value, c.UserId.Value, c.RouteId.Value, c.CreatedAt, c.IsModerated,
-          c.Reactions.Count(r => r.ReactionType == ReactionType.Like),
-          c.Reactions.Count(r => r.ReactionType == ReactionType.Dislike)))
+      .Select(c => c.ToResponse())
       .ToList();
 
     return responses;

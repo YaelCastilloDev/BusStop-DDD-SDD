@@ -6,5 +6,5 @@ namespace BusStop.UseCases.Notifications.GetMy;
 
 public sealed record GetMyNotificationsQuery() : IQuery<Result<IEnumerable<NotificationDto>>>, IRequireAuthenticatedUser
 {
-  public string? Sub { get; set; }
+  public string Sub { get; set; } = default!;
 }

@@ -2,7 +2,7 @@ using BusStop.Core.CommentAggregate;
 using BusStop.Core.CommentAggregate.Specifications;
 using BusStop.Core.Interfaces;
 using BusStop.Core.UserAggregate;
-using BusStop.Core.UserAggregate.Specifications;
+using BusStop.UseCases.Users;
 
 namespace BusStop.UseCases.Comments.React;
 
@@ -12,20 +12,15 @@ public sealed class ReactToCommentHandler(
 {
   public async ValueTask<Result> Handle(ReactToCommentCommand request, CancellationToken cancellationToken)
   {
-    if (request.CommentId <= 0)
-      return Result.Error("Comment ID is required.");
-    if (string.IsNullOrEmpty(request.Sub))
-      return Result.Unauthorized("Authentication required.");
+    var userResult = await userRepository.GetUserByExternalIdAsync(request.Sub, cancellationToken);
+    if (!userResult.IsSuccess)
+      return Result.NotFound("User not found.");
+    var user = userResult.Value;
 
-    var user = await userRepository.FirstOrDefaultAsync(new UserByExternalIdSpec(request.Sub), cancellationToken);
-    if (user is null)
-      return Result.NotFound("User not found. Please register first.");
-
-    var spec = new CommentByIdSpec(new CommentId(request.CommentId));
-    var comment = await repository.FirstOrDefaultAsync(spec, cancellationToken);
-
-    if (comment is null)
+    var commentResult = await repository.FindRequiredAsync(new CommentByIdSpec(new CommentId(request.CommentId)), "Comment not found.", cancellationToken);
+    if (!commentResult.IsSuccess)
       return Result.NotFound("Comment not found.");
+    var comment = commentResult.Value;
 
     if (comment.IsModerated)
       return Result.Error("Cannot react to a moderated comment.");
