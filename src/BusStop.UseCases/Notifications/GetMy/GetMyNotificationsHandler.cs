@@ -3,7 +3,7 @@ using BusStop.Core.Interfaces;
 using BusStop.Core.NotificationAggregate;
 using BusStop.Core.NotificationAggregate.Specifications;
 using BusStop.Core.UserAggregate;
-using BusStop.Core.UserAggregate.Specifications;
+using BusStop.UseCases.Users;
 using Mediator;
 
 namespace BusStop.UseCases.Notifications.GetMy;
@@ -15,17 +15,15 @@ public class GetMyNotificationsHandler(
 {
   public async ValueTask<Result<IEnumerable<NotificationDto>>> Handle(GetMyNotificationsQuery request, CancellationToken cancellationToken)
   {
-    if (string.IsNullOrEmpty(request.Sub))
-      return Result.Unauthorized("Authentication required.");
-
-    var user = await userRepository.FirstOrDefaultAsync(new UserByExternalIdSpec(request.Sub), cancellationToken);
-    if (user is null)
+    var userResult = await userRepository.GetUserByExternalIdAsync(request.Sub, cancellationToken);
+    if (!userResult.IsSuccess)
       return Result.NotFound("User not found.");
+    var user = userResult.Value;
 
     var spec = new NotificationsByUserIdSpec(user.Id);
     var notifications = await repository.ListAsync(spec, cancellationToken);
 
-    var dtos = notifications.Select(n => new NotificationDto(n.Id, n.Title, n.Message, n.IsRead, n.CreatedAt));
+    var dtos = notifications.Select(n => n.ToResponse());
 
     return Result.Success(dtos);
   }

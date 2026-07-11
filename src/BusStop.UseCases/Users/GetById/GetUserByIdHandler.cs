@@ -7,12 +7,11 @@ public sealed class GetUserByIdHandler(IReadRepository<User> repository) : IQuer
 {
   public async ValueTask<Result<UserResponse>> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
   {
-    var spec = new UserByIdSpec(new UserId(request.UserId));
-    var user = await repository.FirstOrDefaultAsync(spec, cancellationToken);
-
-    if (user is null)
+    var userResult = await repository.FindRequiredAsync(new UserByIdSpec(new UserId(request.UserId)), "User not found.", cancellationToken);
+    if (!userResult.IsSuccess)
       return Result<UserResponse>.NotFound("User not found.");
+    var user = userResult.Value;
 
-    return new UserResponse(user.Id, user.Username?.Value, user.Email, user.ExternalId, user.CreatedAt, user.CountryId);
+    return user.ToResponse();
   }
 }

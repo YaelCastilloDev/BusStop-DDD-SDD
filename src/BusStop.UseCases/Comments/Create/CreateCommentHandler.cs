@@ -3,7 +3,7 @@ using BusStop.Core.Interfaces;
 using BusStop.Core.RouteAggregate;
 using BusStop.Core.RouteAggregate.Specifications;
 using BusStop.Core.UserAggregate;
-using BusStop.Core.UserAggregate.Specifications;
+using BusStop.UseCases.Users;
 
 namespace BusStop.UseCases.Comments.Create;
 
@@ -14,29 +14,16 @@ public sealed class CreateCommentHandler(
 {
   public async ValueTask<Result<CommentResponse>> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
   {
-    if (string.IsNullOrEmpty(request.Sub))
-      return Result<CommentResponse>.Unauthorized("Authentication required.");
+    var userResult = await userRepository.GetUserByExternalIdAsync(request.Sub, cancellationToken);
+    if (!userResult.IsSuccess)
+      return Result<CommentResponse>.NotFound("User not found.");
+    var user = userResult.Value;
 
-    var user = await userRepository.FirstOrDefaultAsync(new UserByExternalIdSpec(request.Sub), cancellationToken);
-    if (user is null)
-      return Result<CommentResponse>.NotFound("User not found. Please register first.");
-
-    var route = await routeRepository.FirstOrDefaultAsync(new RouteByIdSpec(new RouteId(request.RouteId)), cancellationToken);
-    if (route is null)
+    var routeResult = await routeRepository.FindRequiredAsync(new RouteByIdSpec(new RouteId(request.RouteId)), "Route not found.", cancellationToken);
+    if (!routeResult.IsSuccess)
       return Result<CommentResponse>.NotFound("Route not found.");
+    var route = routeResult.Value;
 
-    var commentResult = Comment.Create(request.Content, user.Id, request.RouteId);
-    if (!commentResult.IsSuccess)
-      return Result<CommentResponse>.Error(new ErrorList(commentResult.Errors));
-
-    var comment = commentResult.Value;
-    var created = await repository.AddAsync(comment, cancellationToken);
-
-    return ToResponse(created);
+    return await repository.CreateAsync(Comment.Create(request.Content, user.Id, request.RouteId), c => c.ToResponse(), cancellationToken);
   }
-
-  private static CommentResponse ToResponse(Comment c) =>
-    new(c.Id, c.Content.Value, c.UserId.Value, c.RouteId.Value, c.CreatedAt, c.IsModerated,
-        c.Reactions.Count(r => r.ReactionType == ReactionType.Like),
-        c.Reactions.Count(r => r.ReactionType == ReactionType.Dislike));
 }

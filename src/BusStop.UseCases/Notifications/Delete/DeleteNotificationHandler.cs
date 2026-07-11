@@ -2,7 +2,7 @@ using Ardalis.Result;
 using BusStop.Core.Interfaces;
 using BusStop.Core.NotificationAggregate;
 using BusStop.Core.UserAggregate;
-using BusStop.Core.UserAggregate.Specifications;
+using BusStop.UseCases.Users;
 using Mediator;
 
 namespace BusStop.UseCases.Notifications.Delete;
@@ -14,12 +14,10 @@ public class DeleteNotificationHandler(
 {
   public async ValueTask<Result> Handle(DeleteNotificationCommand request, CancellationToken cancellationToken)
   {
-    if (string.IsNullOrEmpty(request.Sub))
-      return Result.Unauthorized("Authentication required.");
-
-    var user = await userRepository.FirstOrDefaultAsync(new UserByExternalIdSpec(request.Sub), cancellationToken);
-    if (user is null)
+    var userResult = await userRepository.GetUserByExternalIdAsync(request.Sub, cancellationToken);
+    if (!userResult.IsSuccess)
       return Result.NotFound("User not found.");
+    var user = userResult.Value;
 
     var notification = await repository.GetByIdAsync(request.NotificationId, cancellationToken);
 

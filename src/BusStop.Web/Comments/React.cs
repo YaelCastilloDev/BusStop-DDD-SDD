@@ -28,6 +28,7 @@ public sealed class ReactToCommentValidator : Validator<ReactToCommentRequest>
 {
   public ReactToCommentValidator()
   {
+    RuleFor(x => x.CommentId).GreaterThan(0);
     RuleFor(x => x.ReactionType).Must(x => !string.IsNullOrWhiteSpace(x)).Must(x => x is "Like" or "Dislike");
   }
 }

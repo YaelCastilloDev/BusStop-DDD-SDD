@@ -7,13 +7,12 @@ public sealed class GetRouteByIdHandler(IReadRepository<Route> repository) : IQu
 {
   public async ValueTask<Result<RouteResponse>> Handle(GetRouteByIdQuery request, CancellationToken cancellationToken)
   {
-    var spec = new RouteByIdSpec(new RouteId(request.RouteId));
-    var route = await repository.FirstOrDefaultAsync(spec, cancellationToken);
-
-    if (route is null)
+    var routeResult = await repository.FindRequiredAsync(new RouteByIdSpec(new RouteId(request.RouteId)), "Route not found.", cancellationToken);
+    if (!routeResult.IsSuccess)
       return Result<RouteResponse>.NotFound("Route not found.");
+    var route = routeResult.Value;
 
-    return new RouteResponse(route.Id, route.Name.Value, route.CreatedById.Value, route.CreatedAt, route.IsDeleted);
+    return route.ToResponse();
   }
 }
 

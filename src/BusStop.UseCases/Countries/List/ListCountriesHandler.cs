@@ -10,7 +10,7 @@ public sealed class ListCountriesHandler(IReadRepository<Country> repository) : 
     var spec = new CountryAllSpec();
     var countries = await repository.ListAsync(spec, cancellationToken);
 
-    var responses = countries.Select(c => new CountryResponse(c.Id, c.Name, c.IsoCode)).ToList();
+    var responses = countries.Select(c => c.ToResponse()).ToList();
 
     return responses;
   }

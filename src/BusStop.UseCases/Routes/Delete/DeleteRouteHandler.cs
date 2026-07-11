@@ -2,7 +2,7 @@ using BusStop.Core.Interfaces;
 using BusStop.Core.RouteAggregate;
 using BusStop.Core.RouteAggregate.Specifications;
 using BusStop.Core.UserAggregate;
-using BusStop.Core.UserAggregate.Specifications;
+using BusStop.UseCases.Users;
 
 namespace BusStop.UseCases.Routes.Delete;
 
@@ -12,20 +12,15 @@ public sealed class DeleteRouteHandler(
 {
   public async ValueTask<Result> Handle(DeleteRouteCommand request, CancellationToken cancellationToken)
   {
-    if (request.RouteId <= 0)
-      return Result.Error("Route ID is required.");
-    if (string.IsNullOrEmpty(request.Sub))
-      return Result.Unauthorized("Authentication required.");
+    var userResult = await userRepository.GetUserByExternalIdAsync(request.Sub, cancellationToken);
+    if (!userResult.IsSuccess)
+      return Result.NotFound("User not found.");
+    var user = userResult.Value;
 
-    var user = await userRepository.FirstOrDefaultAsync(new UserByExternalIdSpec(request.Sub), cancellationToken);
-    if (user is null)
-      return Result.NotFound("User not found. Please register first.");
-
-    var spec = new RouteByIdSpec(new RouteId(request.RouteId));
-    var route = await repository.FirstOrDefaultAsync(spec, cancellationToken);
-
-    if (route is null)
+    var routeResult = await repository.FindRequiredAsync(new RouteByIdSpec(new RouteId(request.RouteId)), "Route not found.", cancellationToken);
+    if (!routeResult.IsSuccess)
       return Result.NotFound("Route not found.");
+    var route = routeResult.Value;
 
     var deleteResult = route.Delete(new UserId(user.Id));
     if (!deleteResult.IsSuccess)
