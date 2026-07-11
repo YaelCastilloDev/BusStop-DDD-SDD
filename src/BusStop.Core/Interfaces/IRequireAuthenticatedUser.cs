@@ -2,5 +2,5 @@ namespace BusStop.Core.Interfaces;
 
 public interface IRequireAuthenticatedUser
 {
-    string? Sub { get; set; }
+    string Sub { get; set; }
 }
