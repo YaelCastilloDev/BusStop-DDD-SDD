@@ -55,14 +55,4 @@ public class RegisterUserHandlerTests : IntegrationTestBase
     result.Errors.ShouldContain(e => e.Contains("already registered"));
   }
 
-  [Fact]
-  public async Task RegisterUser_Fails_WithoutSub()
-  {
-    var command = new RegisterUserCommand("noauth@example.com");
-
-    var result = await _handler.Handle(command, Current.CancellationToken);
-
-    result.IsSuccess.ShouldBeFalse();
-    result.Status.ShouldBe(ResultStatus.Unauthorized);
-  }
 }

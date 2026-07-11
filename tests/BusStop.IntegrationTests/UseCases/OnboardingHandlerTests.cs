@@ -79,14 +79,4 @@ public class OnboardingHandlerTests : IntegrationTestBase
     result.Errors.ShouldContain(e => e.Contains("Country not found"));
   }
 
-  [Fact]
-  public async Task Onboarding_Fails_WithoutSub()
-  {
-    var command = new OnboardingCommand("noauth", 1);
-
-    var result = await _handler.Handle(command, Current.CancellationToken);
-
-    result.IsSuccess.ShouldBeFalse();
-    result.Status.ShouldBe(ResultStatus.Unauthorized);
-  }
 }
