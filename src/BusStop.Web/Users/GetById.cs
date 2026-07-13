@@ -24,3 +24,11 @@ public sealed class GetById(IMediator mediator) : Endpoint<GetByIdRequest, UserR
 }
 
 public sealed record GetByIdRequest(long Id);
+
+public sealed class GetUserByIdValidator : Validator<GetByIdRequest>
+{
+  public GetUserByIdValidator()
+  {
+    RuleFor(x => x.Id).GreaterThan(0);
+  }
+}
