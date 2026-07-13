@@ -3,6 +3,7 @@ using System;
 using BusStop.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BusStop.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260713041846_AddModerationAction")]
+    partial class AddModerationAction
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -119,8 +122,6 @@ namespace BusStop.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("IssuedBy");
-
                     b.HasIndex("UserId");
 
                     b.HasIndex("TargetType", "TargetId");
@@ -178,12 +179,6 @@ namespace BusStop.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<long?>("DeletedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("ModeratedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<long?>("ModeratedBy")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Name")

@@ -1,4 +1,5 @@
 ﻿using BusStop.Core.CountryAggregate;
+using BusStop.Infrastructure.Data.Config;
 
 namespace BusStop.Infrastructure.Data;
 
@@ -6,6 +7,28 @@ public static class SeedData
 {
   public static async Task InitializeAsync(AppDbContext dbContext)
   {
+    if (!await dbContext.TargetTypes.AnyAsync())
+    {
+      dbContext.TargetTypes.AddRange(
+        new TargetTypeLookup { Id = 1, Name = "Comment" },
+        new TargetTypeLookup { Id = 2, Name = "Route" }
+      );
+    }
+
+    if (!await dbContext.ModerationCategories.AnyAsync())
+    {
+      dbContext.ModerationCategories.AddRange(
+        new ModerationCategoryLookup { Id = 1, Name = "HateSpeech" },
+        new ModerationCategoryLookup { Id = 2, Name = "Misinformation" },
+        new ModerationCategoryLookup { Id = 3, Name = "Spam" },
+        new ModerationCategoryLookup { Id = 4, Name = "Harassment" },
+        new ModerationCategoryLookup { Id = 5, Name = "InappropriateContent" },
+        new ModerationCategoryLookup { Id = 6, Name = "Other" }
+      );
+    }
+
+    await dbContext.SaveChangesAsync();
+
     if (await dbContext.Countries.AnyAsync())
       return;
 
