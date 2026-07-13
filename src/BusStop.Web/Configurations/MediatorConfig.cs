@@ -1,4 +1,5 @@
 ﻿using Ardalis.SharedKernel;
+using BusStop.Core.Interfaces;
 using BusStop.Infrastructure;
 
 namespace BusStop.Web.Configurations;
@@ -9,6 +10,10 @@ public static class MediatorConfig
     Microsoft.Extensions.Logging.ILogger logger)
   {
     logger.LogInformation("Registering Mediator SourceGen and Behaviors");
+
+    services.AddScoped<ScopedCurrentUser>();
+    services.AddScoped<ICurrentUser>(sp => sp.GetRequiredService<ScopedCurrentUser>());
+
     services.AddMediator(options =>
     {
       options.ServiceLifetime = ServiceLifetime.Scoped;
