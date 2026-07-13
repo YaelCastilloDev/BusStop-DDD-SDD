@@ -24,7 +24,9 @@ public sealed class RouteConfiguration : IEntityTypeConfiguration<Route>
     builder.Property(r => r.CreatedAt).IsRequired();
     builder.Property(r => r.DeletedAt).IsRequired(false);
     builder.Property(r => r.DeletedBy).IsRequired(false);
+    builder.Property(r => r.ModeratedAt).IsRequired(false);
+    builder.Property(r => r.ModeratedBy).IsRequired(false);
 
-    builder.HasQueryFilter(r => r.DeletedAt == null);
+    builder.HasQueryFilter(r => r.DeletedAt == null && r.ModeratedAt == null);
   }
 }
