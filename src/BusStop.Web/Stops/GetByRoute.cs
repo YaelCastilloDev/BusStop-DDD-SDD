@@ -24,3 +24,11 @@ public sealed class GetByRoute(IMediator mediator) : Endpoint<GetStopsByRouteReq
 }
 
 public sealed record GetStopsByRouteRequest(long RouteId);
+
+public sealed class GetStopsByRouteValidator : Validator<GetStopsByRouteRequest>
+{
+  public GetStopsByRouteValidator()
+  {
+    RuleFor(x => x.RouteId).GreaterThan(0);
+  }
+}

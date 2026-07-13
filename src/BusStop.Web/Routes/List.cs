@@ -24,3 +24,18 @@ public sealed class List(IMediator mediator) : Endpoint<ListRequest, List<RouteR
 }
 
 public sealed record ListRequest(int? Page, int? PageSize);
+
+public sealed class ListRoutesValidator : Validator<ListRequest>
+{
+  public ListRoutesValidator()
+  {
+    When(x => x.Page.HasValue, () =>
+    {
+      RuleFor(x => x.Page!.Value).GreaterThan(0);
+    });
+    When(x => x.PageSize.HasValue, () =>
+    {
+      RuleFor(x => x.PageSize!.Value).InclusiveBetween(1, 100);
+    });
+  }
+}

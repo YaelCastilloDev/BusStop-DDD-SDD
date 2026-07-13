@@ -24,3 +24,11 @@ public sealed class GetByRoute(IMediator mediator) : Endpoint<GetCommentsByRoute
 }
 
 public sealed record GetCommentsByRouteRequest(long RouteId);
+
+public sealed class GetCommentsByRouteValidator : Validator<GetCommentsByRouteRequest>
+{
+  public GetCommentsByRouteValidator()
+  {
+    RuleFor(x => x.RouteId).GreaterThan(0);
+  }
+}
