@@ -1,0 +1,13 @@
+{
+  "dashboard": "Dashboard",
+  "mapExplorer": "Map Explorer",
+  "stops": "Stops",
+  "routes": "Routes",
+  "settings": "Settings",
+  "collapse": "Collapse sidebar",
+  "expand": "Expand sidebar",
+  "shareEmbed": "Share or embed map",
+  "print": "Print",
+  "addMissingPlace": "Add a missing place",
+  "cancelAddStop": "Cancel registration"
+}

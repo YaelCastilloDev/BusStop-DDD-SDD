@@ -1,0 +1,13 @@
+{
+  "register": "Register",
+  "save": "Save",
+  "cancel": "Cancel",
+  "close": "Close",
+  "loading": "Loading...",
+  "comingSoon": "Coming soon",
+  "error": "An error occurred",
+  "retry": "Retry",
+  "signIn": "Sign In",
+  "logout": "Log out",
+  "toggleSidebar": "Toggle sidebar"
+}
