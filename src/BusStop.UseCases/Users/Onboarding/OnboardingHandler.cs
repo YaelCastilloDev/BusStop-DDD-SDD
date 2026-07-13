@@ -2,6 +2,7 @@ using BusStop.Core.CountryAggregate;
 using BusStop.Core.CountryAggregate.Specifications;
 using BusStop.Core.Interfaces;
 using BusStop.Core.UserAggregate;
+using BusStop.Core.UserAggregate.Specifications;
 
 namespace BusStop.UseCases.Users.Onboarding;
 
@@ -11,21 +12,28 @@ namespace BusStop.UseCases.Users.Onboarding;
 // A UserByUsernameSpec and guard clause should be added before closing this spec.
 public sealed class OnboardingHandler(
   IRepository<User> repository,
+  ICurrentUser currentUser,
   IReadRepository<Country> countryRepository) : ICommandHandler<OnboardingCommand, Result<UserResponse>>
 {
   public async ValueTask<Result<UserResponse>> Handle(OnboardingCommand request, CancellationToken cancellationToken)
   {
-    var userResult = await repository.GetUserByExternalIdAsync(request.Sub, cancellationToken);
+    if (currentUser.Id <= 0)
+      return Result<UserResponse>.NotFound("User not found.");
+
+    var userResult = await repository.FindRequiredAsync(new UserByIdSpec(new UserId(currentUser.Id)), "User not found.", cancellationToken);
     if (!userResult.IsSuccess)
       return Result<UserResponse>.NotFound("User not found.");
     var user = userResult.Value;
 
-    // TODO: Inconsistency — uses Result.Error("Country not found.") instead of Result.NotFound.
-    // Cannot blindly replace with FindRequiredAsync which returns NotFound (contract change).
-    // See REFACTOR-DRY-001 Phase 3 — should eventually standardize to NotFound.
-    var country = await countryRepository.FirstOrDefaultAsync(new CountryByIdSpec(request.CountryId), cancellationToken);
-    if (country is null)
-      return Result<UserResponse>.Error("Country not found.");
+    var countryResult = await countryRepository.FindRequiredAsync(
+      new CountryByIdSpec(request.CountryId),
+      "Country not found.",
+      cancellationToken);
+
+    if (!countryResult.IsSuccess)
+      return Result<UserResponse>.NotFound("Country not found.");
+
+    var country = countryResult.Value;
 
     var onboardingResult = user.CompleteOnboarding(new Username(request.Username), request.CountryId);
     if (!onboardingResult.IsSuccess)

@@ -1,32 +1,31 @@
 using Ardalis.Result;
 using BusStop.Core.Interfaces;
 using BusStop.Core.NotificationAggregate;
-using BusStop.Core.UserAggregate;
-using BusStop.UseCases.Users;
-using Mediator;
+using BusStop.Core.NotificationAggregate.Specifications;
 
 namespace BusStop.UseCases.Notifications.Delete;
 
 public class DeleteNotificationHandler(
   IRepository<UserNotification> repository,
-  IReadRepository<User> userRepository)
+  ICurrentUser currentUser)
   : ICommandHandler<DeleteNotificationCommand, Result>
 {
   public async ValueTask<Result> Handle(DeleteNotificationCommand request, CancellationToken cancellationToken)
   {
-    var userResult = await userRepository.GetUserByExternalIdAsync(request.Sub, cancellationToken);
-    if (!userResult.IsSuccess)
+    if (currentUser.Id <= 0)
       return Result.NotFound("User not found.");
-    var user = userResult.Value;
 
-    var notification = await repository.GetByIdAsync(request.NotificationId, cancellationToken);
+    var notificationResult = await repository.FindRequiredAsync(
+      new UserNotificationByIdSpec(request.NotificationId),
+      "Notification not found.",
+      cancellationToken);
 
-    if (notification is null)
-    {
+    if (!notificationResult.IsSuccess)
       return Result.NotFound();
-    }
 
-    if (notification.UserId.Value != user.Id)
+    var notification = notificationResult.Value;
+
+    if (notification.UserId.Value != currentUser.Id)
     {
       return Result.Forbidden();
     }
