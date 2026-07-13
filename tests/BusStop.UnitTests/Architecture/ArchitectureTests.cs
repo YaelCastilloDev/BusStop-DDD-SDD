@@ -13,6 +13,7 @@ public class ArchitectureTests
     private static readonly Assembly CoreAssembly = typeof(Stop).Assembly;
     private static readonly Assembly UseCasesAssembly = typeof(SignupCommand).Assembly;
     private static readonly Assembly InfrastructureAssembly = typeof(AppDbContext).Assembly;
+    private static readonly Assembly WebAssembly = Assembly.Load("BusStop.Web");
 
     // ── Layer Dependencies ────────────────────────────────────────
 
@@ -274,5 +275,86 @@ public class ArchitectureTests
             .GetResult();
 
         result.IsSuccessful.ShouldBeTrue();
+    }
+
+    // ── Pattern Compliance ──────────────────────────────────────────
+
+    [Fact]
+    public void AllAggregateRoots_MustFollow_CreatePattern()
+    {
+        var aggTypes = CoreAssembly.GetTypes()
+            .Where(t => t.IsClass && !t.IsAbstract && typeof(IAggregateRoot).IsAssignableFrom(t))
+            .ToList();
+
+        var violations = new List<string>();
+
+        foreach (var type in aggTypes)
+        {
+            var hasPrivateCtor = type.GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic)
+                .Any(c => c.GetParameters().Length == 0 && c.IsPrivate);
+            if (!hasPrivateCtor)
+                violations.Add($"{type.Name}: missing private parameterless constructor");
+
+            var createMethod = type.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
+                .FirstOrDefault(m => m.Name == "Create" &&
+                    m.ReturnType.IsGenericType &&
+                    m.ReturnType.GetGenericTypeDefinition().Name == "Result`1");
+            if (createMethod is null)
+                violations.Add($"{type.Name}: missing public static Create method returning Result<T>");
+
+            var voidMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+                .Where(m => m.ReturnType == typeof(void) && !m.IsSpecialName)
+                .Select(m => m.Name)
+                .ToList();
+            foreach (var m in voidMethods)
+                violations.Add($"{type.Name}.{m}(): returns void instead of Result");
+        }
+
+        violations.ShouldBeEmpty(string.Join("\n", violations));
+    }
+
+    [Fact]
+    public void AllEndpoints_MustHave_Validator()
+    {
+        var violations = new List<string>();
+
+        Type[] types;
+        try
+        {
+            types = WebAssembly.GetTypes();
+        }
+        catch (ReflectionTypeLoadException ex)
+        {
+            types = ex.Types.Where(t => t is not null).ToArray()!;
+        }
+
+        foreach (var type in types.Where(t => t is { IsAbstract: false, IsClass: true }))
+        {
+            if (type.BaseType is not { IsGenericType: true })
+                continue;
+
+            var baseName = type.BaseType.GetGenericTypeDefinition().Name;
+
+            if (baseName == "EndpointWithoutRequest`1")
+                continue;
+
+            if (baseName is "Endpoint`1" or "Endpoint`2")
+            {
+                var requestType = type.BaseType.GetGenericArguments()[0];
+
+                if (requestType.Name == "EmptyRequest")
+                    continue;
+
+                var hasValidator = types
+                    .Any(t => t.BaseType is { IsGenericType: true } bt &&
+                        bt.GetGenericTypeDefinition().Name == "Validator`1" &&
+                        bt.GetGenericArguments()[0] == requestType);
+
+                if (!hasValidator)
+                    violations.Add($"{type.Name}: missing Validator<{requestType.Name}>");
+            }
+        }
+
+        violations.ShouldBeEmpty(string.Join("\n", violations));
     }
 }

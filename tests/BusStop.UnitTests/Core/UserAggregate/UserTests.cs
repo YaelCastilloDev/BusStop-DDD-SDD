@@ -108,6 +108,18 @@ public class UserTests
     }
 
     [Fact]
+    public void UpdateUsername_Succeeds_WhenValidUsername()
+    {
+        var userResult = User.Create("test@example.com", "keycloak-sub");
+        var user = userResult.Value;
+
+        var result = user.UpdateUsername(new Username("new_username"));
+
+        result.IsSuccess.ShouldBeTrue();
+        user.Username!.Value.ShouldBe("new_username");
+    }
+
+    [Fact]
     public void UpdateEmail_Succeeds_WhenValidEmail()
     {
         var userResult = User.Create("test@example.com", "keycloak-sub");

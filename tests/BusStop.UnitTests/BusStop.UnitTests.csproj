@@ -26,7 +26,6 @@
     <PackageReference Include="ReportGenerator" />
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="Mediator.Abstractions" />
-    <PackageReference Include="Mediator.SourceGenerator" />
     <PackageReference Include="Microsoft.Extensions.Configuration" />
     <PackageReference Include="Microsoft.Extensions.Http" />
     <PackageReference Include="NetArchTest.Rules" />
@@ -46,6 +45,7 @@
     <ProjectReference Include="..\..\src\BusStop.Core\BusStop.Core.csproj" />
     <ProjectReference Include="..\..\src\BusStop.UseCases\BusStop.UseCases.csproj" />
     <ProjectReference Include="..\..\src\BusStop.Infrastructure\BusStop.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\BusStop.Web\BusStop.Web.csproj" />
   </ItemGroup>
 
 </Project>

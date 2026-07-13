@@ -158,4 +158,29 @@ public class StopTests
 
         Should.Throw<ArgumentNullException>(() => stop.UpdateLocation(null!));
     }
+
+    [Fact]
+    public void UpdateName_Succeeds_WhenValidName()
+    {
+        var stopResult = Stop.Create("Main Street", 45.5, -122.6, 1);
+        var stop = stopResult.Value;
+
+        var result = stop.UpdateName(new StopName("Broadway"));
+
+        result.IsSuccess.ShouldBeTrue();
+        stop.Name.Value.ShouldBe("Broadway");
+    }
+
+    [Fact]
+    public void UpdateLocation_Succeeds_WhenValidLocation()
+    {
+        var stopResult = Stop.Create("Main Street", 45.5, -122.6, 1);
+        var stop = stopResult.Value;
+
+        var result = stop.UpdateLocation(new Location(40.7, -74.0));
+
+        result.IsSuccess.ShouldBeTrue();
+        stop.Location.Latitude.ShouldBe(40.7);
+        stop.Location.Longitude.ShouldBe(-74.0);
+    }
 }

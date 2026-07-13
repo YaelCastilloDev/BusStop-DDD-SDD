@@ -120,7 +120,8 @@ public class CommentTests
         var commentResult = Comment.Create("Great stop!", 1, 10);
         var comment = commentResult.Value;
 
-        comment.AddReaction(new UserId(1), ReactionType.Like);
+        var reactionResult = comment.AddReaction(new UserId(1), ReactionType.Like);
+        reactionResult.IsSuccess.ShouldBeTrue();
 
         comment.Reactions.ShouldHaveSingleItem();
         comment.Reactions.Single().UserId.Value.ShouldBe(1);
@@ -132,9 +133,11 @@ public class CommentTests
     {
         var commentResult = Comment.Create("Great stop!", 1, 10);
         var comment = commentResult.Value;
-        comment.AddReaction(new UserId(1), ReactionType.Like);
+        var reactionResult1 = comment.AddReaction(new UserId(1), ReactionType.Like);
+        reactionResult1.IsSuccess.ShouldBeTrue();
 
-        comment.AddReaction(new UserId(1), ReactionType.Dislike);
+        var reactionResult2 = comment.AddReaction(new UserId(1), ReactionType.Dislike);
+        reactionResult2.IsSuccess.ShouldBeTrue();
 
         comment.Reactions.ShouldHaveSingleItem();
         comment.Reactions.Single().ReactionType.ShouldBe(ReactionType.Dislike);
