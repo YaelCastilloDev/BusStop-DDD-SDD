@@ -53,10 +53,11 @@ public class User : EntityBase<long>, IAggregateRoot
         return Result.Success();
     }
 
-    public void UpdateUsername(Username newUsername)
+    public Result UpdateUsername(Username newUsername)
     {
         Guard.Against.Null(newUsername, nameof(newUsername));
         Username = newUsername;
+        return Result.Success();
     }
 
     public Result UpdateEmail(string newEmail)
