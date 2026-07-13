@@ -45,9 +45,12 @@ public class UserNotification : EntityBase<long>, IAggregateRoot
         return Result<UserNotification>.Success(new UserNotification(new UserId(userId), title, message));
     }
 
-    public void MarkAsRead()
+    public Result MarkAsRead()
     {
-        if (!IsRead)
-            IsRead = true;
+        if (IsRead)
+            return Result.Error(new ErrorList([NotificationErrors.AlreadyRead]));
+
+        IsRead = true;
+        return Result.Success();
     }
 }

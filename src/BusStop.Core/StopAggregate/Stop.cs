@@ -47,16 +47,18 @@ public class Stop : EntityBase<long>, IAggregateRoot
         return Result<Stop>.Success(new Stop(new StopName(name), new Location(latitude, longitude), new RouteId(routeId)));
     }
 
-    public void UpdateName(StopName newName)
+    public Result UpdateName(StopName newName)
     {
         Guard.Against.Null(newName, nameof(newName));
         Name = newName;
+        return Result.Success();
     }
 
-    public void UpdateLocation(Location newLocation)
+    public Result UpdateLocation(Location newLocation)
     {
         Guard.Against.Null(newLocation, nameof(newLocation));
         Location = newLocation;
+        return Result.Success();
     }
 
     public Result Delete(UserId deletedBy)
