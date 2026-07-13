@@ -59,16 +59,17 @@ public class Comment : EntityBase<long>, IAggregateRoot
 
         ModeratedAt = DateTime.UtcNow;
         ModeratedBy = moderatedBy.Value;
-        RegisterDomainEvent(new CommentModeratedEvent(Id, UserId.Value));
+        RegisterDomainEvent(new CommentModeratedEvent(Id, UserId.Value, moderatedBy.Value));
         return Result.Success();
     }
 
     public bool IsModerated => ModeratedAt.HasValue;
 
-    public void AddReaction(UserId userId, ReactionType reactionType)
+    public Result AddReaction(UserId userId, ReactionType reactionType)
     {
         Guard.Against.Null(userId, nameof(userId));
         _reactions.RemoveAll(r => r.UserId == userId);
         _reactions.Add(CommentReaction.From(userId, reactionType));
+        return Result.Success();
     }
 }

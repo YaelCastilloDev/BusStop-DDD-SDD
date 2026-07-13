@@ -11,6 +11,8 @@ public class Route : EntityBase<long>, IAggregateRoot
     public DateTime CreatedAt { get; private set; }
     public DateTime? DeletedAt { get; private set; }
     public long? DeletedBy { get; private set; }
+    public DateTime? ModeratedAt { get; private set; }
+    public long? ModeratedBy { get; private set; }
 
 #pragma warning disable CS8618
     private Route() { }
@@ -41,10 +43,11 @@ public class Route : EntityBase<long>, IAggregateRoot
         return Result<Route>.Success(new Route(new RouteName(name), new UserId(createdById)));
     }
 
-    public void UpdateName(RouteName newName)
+    public Result UpdateName(RouteName newName)
     {
         Guard.Against.Null(newName, nameof(newName));
         Name = newName;
+        return Result.Success();
     }
 
     public Result Delete(UserId deletedBy)
@@ -60,5 +63,19 @@ public class Route : EntityBase<long>, IAggregateRoot
         return Result.Success();
     }
 
+    public Result Moderate(UserId moderatedBy)
+    {
+        Guard.Against.Null(moderatedBy, nameof(moderatedBy));
+
+        if (IsModerated)
+            return Result.Error(new ErrorList([RouteErrors.AlreadyModerated]));
+
+        ModeratedAt = DateTime.UtcNow;
+        ModeratedBy = moderatedBy.Value;
+        RegisterDomainEvent(new RouteModeratedEvent(Id, moderatedBy.Value));
+        return Result.Success();
+    }
+
     public bool IsDeleted => DeletedAt.HasValue;
+    public bool IsModerated => ModeratedAt.HasValue;
 }

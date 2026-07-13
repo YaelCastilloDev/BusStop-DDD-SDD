@@ -1,6 +1,6 @@
-namespace BusStop.Core.CommentAggregate.Handlers;
-
 using BusStop.Core.CommentAggregate.Events;
+
+namespace BusStop.Core.CommentAggregate.Handlers;
 
 public class CommentModeratedHandler(ILogger<CommentModeratedHandler> logger) : INotificationHandler<CommentModeratedEvent>
 {
