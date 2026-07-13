@@ -1,5 +1,7 @@
 using Ardalis.Result;
 using Ardalis.SharedKernel;
+using Ardalis.Specification;
+using BusStop.Core.ModerationActionAggregate;
 using BusStop.Core.NotificationAggregate;
 using BusStop.Core.NotificationAggregate.Interfaces;
 using BusStop.Core.UserAggregate;
@@ -9,7 +11,7 @@ using NSubstitute;
 
 namespace BusStop.UnitTests.UseCases.Notifications.ConsumeModerated;
 
-// SPEC-NotificationContext-Moderation
+// SPEC-TransitCatalog-ModerationAction
 public class ProcessModerationNotificationHandlerTests
 {
     private readonly IRepository<UserNotification> _notificationRepository;
@@ -29,11 +31,11 @@ public class ProcessModerationNotificationHandlerTests
     [Fact]
     public async Task Handle_Succeeds_WhenValidData()
     {
-        var command = new ProcessModerationNotificationCommand(1, 42, "Inappropriate content");
+        var command = new ProcessModerationNotificationCommand(1, TargetType.Comment, 42, "Inappropriate content", ModerationCategory.HateSpeech);
         var user = User.Create("test@example.com", "kc-sub").Value;
         typeof(EntityBase<long>).GetProperty("Id")!.SetValue(user, 1L);
 
-        _userRepository.GetByIdAsync(command.UserId, Arg.Any<CancellationToken>())
+        _userRepository.FirstOrDefaultAsync(Arg.Any<ISpecification<User>>(), Arg.Any<CancellationToken>())
             .Returns(user);
         _notificationRepository.AddAsync(Arg.Any<UserNotification>(), Arg.Any<CancellationToken>())
             .Returns(ci => ci.Arg<UserNotification>());
@@ -46,11 +48,33 @@ public class ProcessModerationNotificationHandlerTests
     }
 
     [Fact]
+    public async Task Handle_NotificationMessageIncludesCategoryAndTargetType()
+    {
+        var command = new ProcessModerationNotificationCommand(1, TargetType.Route, 42, "Inappropriate route", ModerationCategory.InappropriateContent);
+        var user = User.Create("test@example.com", "kc-sub").Value;
+        typeof(EntityBase<long>).GetProperty("Id")!.SetValue(user, 1L);
+
+        _userRepository.FirstOrDefaultAsync(Arg.Any<ISpecification<User>>(), Arg.Any<CancellationToken>())
+            .Returns(user);
+        _notificationRepository.AddAsync(Arg.Any<UserNotification>(), Arg.Any<CancellationToken>())
+            .Returns(ci => ci.Arg<UserNotification>());
+
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        await _emailSender.Received(1).SendEmailAsync(
+            user.Email,
+            Arg.Is<string>(title => title.Contains("Route", StringComparison.OrdinalIgnoreCase)),
+            Arg.Is<string>(message => message.Contains("InappropriateContent", StringComparison.OrdinalIgnoreCase) && message.Contains("Inappropriate route")),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task Handle_ReturnsNotFound_WhenUserMissing()
     {
-        var command = new ProcessModerationNotificationCommand(99, 42, "reason");
+        var command = new ProcessModerationNotificationCommand(99, TargetType.Comment, 42, "reason", ModerationCategory.Spam);
 
-        _userRepository.GetByIdAsync(command.UserId, Arg.Any<CancellationToken>())
+        _userRepository.FirstOrDefaultAsync(Arg.Any<ISpecification<User>>(), Arg.Any<CancellationToken>())
             .Returns((User?)null);
 
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -64,7 +88,7 @@ public class ProcessModerationNotificationHandlerTests
     [Fact]
     public async Task Handle_ReturnsNotFound_WhenZeroUserId()
     {
-        var command = new ProcessModerationNotificationCommand(0, 42, "reason");
+        var command = new ProcessModerationNotificationCommand(0, TargetType.Comment, 42, "reason", ModerationCategory.Spam);
 
         var result = await _handler.Handle(command, CancellationToken.None);
 

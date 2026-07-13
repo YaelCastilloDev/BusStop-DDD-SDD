@@ -82,7 +82,8 @@ public class UserNotificationTests
         var notificationResult = UserNotification.Create(1, "Test Title", "Test Message");
         var notification = notificationResult.Value;
 
-        notification.MarkAsRead();
+        var result = notification.MarkAsRead();
+        result.IsSuccess.ShouldBeTrue();
 
         notification.IsRead.ShouldBeTrue();
     }
@@ -92,10 +93,13 @@ public class UserNotificationTests
     {
         var notificationResult = UserNotification.Create(1, "Test Title", "Test Message");
         var notification = notificationResult.Value;
-        notification.MarkAsRead();
 
-        notification.MarkAsRead();
+        var result1 = notification.MarkAsRead();
+        result1.IsSuccess.ShouldBeTrue();
 
+        var result2 = notification.MarkAsRead();
+        result2.IsSuccess.ShouldBeFalse();
+        result2.Errors.ShouldContain(e => e.Contains(NotificationErrors.AlreadyRead));
         notification.IsRead.ShouldBeTrue();
     }
 }

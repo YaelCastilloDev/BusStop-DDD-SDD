@@ -1,6 +1,7 @@
 using Ardalis.Result;
 using BusStop.Core.Errors;
 using BusStop.Core.RouteAggregate;
+using BusStop.Core.RouteAggregate.Events;
 using BusStop.Core.UserAggregate;
 
 namespace BusStop.UnitTests.Core.RouteAggregate;
@@ -108,5 +109,83 @@ public class RouteTests
         var route = routeResult.Value;
 
         Should.Throw<ArgumentNullException>(() => route.UpdateName(null!));
+    }
+
+    [Fact]
+    public void UpdateName_Succeeds_WhenValidName()
+    {
+        var routeResult = Route.Create("Line A", 1);
+        var route = routeResult.Value;
+
+        var result = route.UpdateName(new RouteName("Line B"));
+
+        result.IsSuccess.ShouldBeTrue();
+        route.Name.Value.ShouldBe("Line B");
+    }
+
+    [Fact]
+    public void Moderate_Succeeds_WhenNotModerated()
+    {
+        var routeResult = Route.Create("Line A", 1);
+        var route = routeResult.Value;
+
+        var result = route.Moderate(new UserId(5));
+
+        result.IsSuccess.ShouldBeTrue();
+        route.IsModerated.ShouldBeTrue();
+        route.IsDeleted.ShouldBeFalse();
+        route.ModeratedBy.ShouldBe(5);
+        route.ModeratedAt.ShouldNotBeNull();
+        route.DeletedBy.ShouldBeNull();
+        route.DeletedAt.ShouldBeNull();
+    }
+
+    [Fact]
+    public void Moderate_ReturnsError_WhenAlreadyModerated()
+    {
+        var routeResult = Route.Create("Line A", 1);
+        var route = routeResult.Value;
+        route.Moderate(new UserId(5));
+
+        var result = route.Moderate(new UserId(6));
+
+        result.IsSuccess.ShouldBeFalse();
+        result.Errors.ShouldContain(e => e.Contains(RouteErrors.AlreadyModerated));
+    }
+
+    [Fact]
+    public void Moderate_RaisesRouteModeratedEvent()
+    {
+        var routeResult = Route.Create("Line A", 1);
+        var route = routeResult.Value;
+
+        route.Moderate(new UserId(5));
+
+        route.DomainEvents.ShouldContain(e => e is RouteModeratedEvent);
+        var moderatedEvent = route.DomainEvents.OfType<RouteModeratedEvent>().Single();
+        moderatedEvent.RouteId.ShouldBe(route.Id);
+        moderatedEvent.ModeratorUserId.ShouldBe(5);
+    }
+
+    [Fact]
+    public void Moderate_Throws_WhenNullModeratedBy()
+    {
+        var routeResult = Route.Create("Line A", 1);
+        var route = routeResult.Value;
+
+        Should.Throw<ArgumentNullException>(() => route.Moderate(null!));
+    }
+
+    [Fact]
+    public void IsModerated_ReturnsTrue_AfterModerate()
+    {
+        var routeResult = Route.Create("Line A", 1);
+        var route = routeResult.Value;
+
+        route.IsModerated.ShouldBeFalse();
+        route.IsDeleted.ShouldBeFalse();
+        route.Moderate(new UserId(5));
+        route.IsModerated.ShouldBeTrue();
+        route.IsDeleted.ShouldBeFalse();
     }
 }

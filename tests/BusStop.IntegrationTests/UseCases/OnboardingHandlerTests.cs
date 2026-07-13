@@ -1,8 +1,10 @@
 using BusStop.Core.CountryAggregate;
+using BusStop.Core.Interfaces;
 using BusStop.Core.UserAggregate;
 using BusStop.Infrastructure.Data;
 using BusStop.UseCases.Users;
 using BusStop.UseCases.Users.Onboarding;
+using NSubstitute;
 
 namespace BusStop.IntegrationTests.UseCases;
 
@@ -11,6 +13,7 @@ public class OnboardingHandlerTests : IntegrationTestBase
 {
   private EfRepository<User> _userRepository = null!;
   private EfRepository<Country> _countryRepository = null!;
+  private ICurrentUser _currentUser = null!;
   private OnboardingHandler _handler = null!;
 
   public OnboardingHandlerTests(PostgreSqlFixture fixture) : base(fixture) { }
@@ -20,7 +23,8 @@ public class OnboardingHandlerTests : IntegrationTestBase
     await base.InitializeAsync();
     _userRepository = new EfRepository<User>(DbContext);
     _countryRepository = new EfRepository<Country>(DbContext);
-    _handler = new OnboardingHandler(_userRepository, _countryRepository);
+    _currentUser = Substitute.For<ICurrentUser>();
+    _handler = new OnboardingHandler(_userRepository, _currentUser, _countryRepository);
   }
 
   [Fact]
@@ -33,6 +37,8 @@ public class OnboardingHandlerTests : IntegrationTestBase
     var country = Country.Create("France", "FR").Value;
     await _countryRepository.AddAsync(country, Current.CancellationToken);
     await DbContext.SaveChangesAsync(Current.CancellationToken);
+
+    _currentUser.Id.Returns(user.Id);
 
     var command = new OnboardingCommand("john", country.Id)
     {
@@ -50,6 +56,8 @@ public class OnboardingHandlerTests : IntegrationTestBase
   [Fact]
   public async Task Onboarding_Fails_WhenUserNotRegistered()
   {
+    _currentUser.Id.Returns(99999L);
+
     var command = new OnboardingCommand("nouser", 1)
     {
       Sub = "nonexistent-sub"
@@ -68,6 +76,8 @@ public class OnboardingHandlerTests : IntegrationTestBase
     await _userRepository.AddAsync(user, Current.CancellationToken);
     await DbContext.SaveChangesAsync(Current.CancellationToken);
 
+    _currentUser.Id.Returns(user.Id);
+
     var command = new OnboardingCommand("jane", 99999)
     {
       Sub = "kc-sub-invalid-country"
@@ -78,5 +88,4 @@ public class OnboardingHandlerTests : IntegrationTestBase
     result.IsSuccess.ShouldBeFalse();
     result.Errors.ShouldContain(e => e.Contains("Country not found"));
   }
-
 }
