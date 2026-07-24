@@ -8,8 +8,10 @@ description: BusStop frontend internationalization rules using i18next. Use when
 ## 1. i18next & Namespaces
 - Use `react-i18next` with namespace-based organization for scalability.
 - Each feature domain gets its own namespace (e.g., `map`, `auth`, `common`).
-- No hardcoded strings in components — always use `t('namespace:key')`.
+- No hardcoded strings in components — always use `useTranslation('namespace')` + `t('key')`.
 - The `useTranslation` hook must specify the primary namespace: `useTranslation('map')`.
+- Resources are **bundled JSON imports** (not lazy loaded from `/public`). Each language/namespace combo is imported in `src/lib/i18n/index.ts`.
+- Type-safe keys via `declare module 'i18next'` and `CustomTypeOptions` in `index.ts`.
 
 ## 2. Language Detection
 - Auto-detect via `i18next-browser-languagedetector`.

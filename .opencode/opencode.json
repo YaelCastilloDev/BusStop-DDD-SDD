@@ -4,6 +4,6 @@
     "harness/"
   ],
   "skills": {
-    "paths": [".opencode/skills"]
+    "paths": [".opencode/skills", ".opencode/skills/frontend"]
   }
 }
