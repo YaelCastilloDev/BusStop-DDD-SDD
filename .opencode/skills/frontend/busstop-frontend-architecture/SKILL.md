@@ -11,7 +11,7 @@ The frontend strictly separates concerns to ensure maintainability, testability,
 ## 1. Feature Slices (`src/features/`)
 - Group code by business feature rather than technical type.
 - Each feature must be self-contained: it can expose a public API (e.g., `index.ts`) and hide its internals.
-- Example: `src/features/RouteTracking/` containing its own components, hooks, and localized state.
+- Example: `src/features/map/` containing its own `components/`, `hooks/`, `data/`, `types.ts`, and a barrel `index.ts`.
 - **Cross-feature dependencies:** Avoid direct deep imports between features. Always import from the feature's `index.ts`.
 
 ## 2. Domain Models

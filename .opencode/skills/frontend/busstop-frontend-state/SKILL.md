@@ -8,13 +8,14 @@ description: BusStop frontend state management rules using TanStack React Query,
 ## 1. Server State: TanStack React Query
 - MUST be used for all API calls, data fetching, caching, and revalidation.
 - Do not use `useEffect` + `useState` for API calls.
-- Separate queries and mutations into custom hooks (e.g., `useGetRoutes`, `useCreateStop`).
-- Keep query keys organized, preferably using a query key factory.
+- Separate queries and mutations into custom hooks (e.g., `useRoutes`, `useCreateRoute`).
+- Keep query keys hierarchical and feature-scoped: `['routes']`, `['routes', id]`.
 
 ## 2. Global UI State: Zustand
 - Use Zustand for application-wide UI state (e.g., sidebar open/closed, current active theme, selected map entity).
 - Create small, focused stores rather than one monolithic store.
 - Do NOT use Zustand for server data. Server data belongs in React Query.
+- Persist UI preferences (sidebar collapsed, theme) via cookies using `getCookie`/`setCookie` from `@/lib/cookies`.
 
 ## 3. Local State: React Hooks
 - Use `useState` and `useReducer` for state that is strictly confined to a single component or its immediate children.
