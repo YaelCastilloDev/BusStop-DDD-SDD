@@ -1,36 +1,80 @@
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { createFileRoute } from '@tanstack/react-router'
-import { useState, type FormEvent } from 'react'
-import { useAuth } from '@/lib/adapters/auth'
 import { AuthCardLayout } from '@/keycloak-theme/login/components/AuthCardLayout'
-import { SocialAuthButtons } from '@/components/auth/social-auth-buttons'
-import { SectionDivider } from '@/components/auth/section-divider'
+import { useAuth } from '@/lib/adapters/auth'
+import { useAuthRedirect } from '@/hooks/use-auth-redirect'
 import { AuthFormError } from '@/components/auth/auth-form-error'
 import { FormField } from '@/components/auth/form-field'
+import { SectionDivider } from '@/components/auth/section-divider'
+import { SocialAuthButtons } from '@/components/auth/social-auth-buttons'
 import { SubmitButton } from '@/components/auth/submit-button'
-import { useAuthRedirect } from '@/hooks/use-auth-redirect'
+import { VerifyEmailNotice } from '@/components/auth/verify-email-notice'
+import {
+  loginSchema,
+  type LoginFormValues,
+} from '@/features/auth/schemas/auth-schemas'
 
 export const Route = createFileRoute('/login')({
   component: LoginPage,
 })
 
+function isUnverifiedAccountError(message: string): boolean {
+  const normalized = message.toLowerCase()
+  return (
+    normalized.includes('not fully set up') || normalized.includes('verify')
+  )
+}
+
 function LoginPage() {
-  const { directLogin, isLoading, isAuthenticated, error } = useAuth()
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [submitting, setSubmitting] = useState(false)
+  const { directLogin, discardSession, isAuthenticated } = useAuth()
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null)
+
+  const {
+    register,
+    handleSubmit,
+    setError,
+    clearErrors,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: '', password: '' },
+  })
 
   useAuthRedirect(isAuthenticated)
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
-    if (!username.trim() || !password) return
+  const onSubmit = async (values: LoginFormValues) => {
+    clearErrors('root')
+    const email = values.email.trim()
 
-    setSubmitting(true)
     try {
-      await directLogin(username, password)
-    } catch {
-      setSubmitting(false)
+      const profile = await directLogin(email, values.password)
+
+      if (!profile?.emailVerified) {
+        discardSession()
+        setUnverifiedEmail(email)
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Login failed'
+      if (isUnverifiedAccountError(message)) {
+        discardSession()
+        setUnverifiedEmail(email)
+        return
+      }
+      setError('root', { message })
     }
+  }
+
+  if (unverifiedEmail) {
+    return (
+      <AuthCardLayout>
+        <VerifyEmailNotice
+          email={unverifiedEmail}
+          onBackToSignIn={() => setUnverifiedEmail(null)}
+        />
+      </AuthCardLayout>
+    )
   }
 
   return (
@@ -38,7 +82,10 @@ function LoginPage() {
       footer={
         <>
           <span className='text-muted-foreground'>Don't have an account?</span>
-          <a href='/register' className='text-primary text-sm font-medium hover:underline'>
+          <a
+            href='/register'
+            className='text-sm font-medium text-primary hover:underline'
+          >
             Create an account
           </a>
         </>
@@ -48,17 +95,22 @@ function LoginPage() {
 
       <SectionDivider label='Sign In' />
 
-      <form onSubmit={handleSubmit} className='flex flex-col mt-6'>
-        <AuthFormError error={error} />
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className='mt-6 flex flex-col'
+        noValidate
+      >
+        <AuthFormError error={errors.root?.message ?? null} />
 
         <FormField
-          id='username'
+          id='email'
           label='Email'
+          type='email'
           autoFocus
           autoComplete='username'
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          disabled={submitting || isLoading}
+          disabled={isSubmitting}
+          error={errors.email?.message}
+          {...register('email')}
         />
 
         <FormField
@@ -66,16 +118,16 @@ function LoginPage() {
           label='Password'
           type='password'
           autoComplete='current-password'
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          disabled={submitting || isLoading}
+          disabled={isSubmitting}
+          error={errors.password?.message}
+          {...register('password')}
         />
 
         <SubmitButton
-          loading={submitting || isLoading}
+          loading={isSubmitting}
           loadingText='Signing in...'
           text='Sign In'
-          disabled={!username.trim() || !password}
+          disabled={false}
         />
       </form>
     </AuthCardLayout>

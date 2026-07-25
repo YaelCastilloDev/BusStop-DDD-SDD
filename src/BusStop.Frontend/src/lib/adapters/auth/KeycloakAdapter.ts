@@ -1,8 +1,8 @@
 import Keycloak from 'keycloak-js'
-import type { IAuthAdapter } from './IAuthAdapter'
-import type { DirectRegisterRequest, UserProfile } from './types'
 import { createLogger } from '@/lib/logger'
-import { KeycloakHttpClient, parseTokenError, parseUserCreationError } from './keycloak-http-client'
+import type { IAuthAdapter } from './IAuthAdapter'
+import { KeycloakHttpClient, parseTokenError } from './keycloak-http-client'
+import type { UserProfile } from './types'
 
 const TOKEN_MIN_VALIDITY_SECONDS = 30
 
@@ -70,7 +70,8 @@ export class KeycloakAdapter implements IAuthAdapter {
       return authenticated
     } catch (error) {
       this._initialized = true
-      const errorMessage = error instanceof Error ? error.message : String(error)
+      const errorMessage =
+        error instanceof Error ? error.message : String(error)
       logger.error('Keycloak init failed', errorMessage)
       return false
     }
@@ -111,28 +112,11 @@ export class KeycloakAdapter implements IAuthAdapter {
     })
   }
 
-  async directRegister(userData: DirectRegisterRequest): Promise<void> {
-    const adminUsername = import.meta.env.VITE_KEYCLOAK_ADMIN_USERNAME ?? 'admin1'
-    const adminPassword = import.meta.env.VITE_KEYCLOAK_ADMIN_PASSWORD ?? 'password'
-
-    const adminResponse = await this.http.requestToken(adminUsername, adminPassword)
-
-    if (!adminResponse.ok) {
-      logger.error('direct register: admin auth failed', `HTTP ${adminResponse.status}`)
-      throw new Error('Registration is not available right now. Please try again later.')
-    }
-
-    const adminData: { access_token: string } = await adminResponse.json()
-    const adminToken = adminData.access_token
-
-    const userResponse = await this.http.createUser(adminToken, userData)
-
-    if (!userResponse.ok) {
-      const errorMessage = await parseUserCreationError(userResponse)
-      throw new Error(errorMessage)
-    }
-
-    await this.directLogin(userData.username, userData.password)
+  discardSession(): void {
+    this.keycloak.token = undefined
+    this.keycloak.refreshToken = undefined
+    this.keycloak.idToken = undefined
+    this.keycloak.authenticated = false
   }
 
   async getToken(): Promise<string | undefined> {
@@ -144,7 +128,10 @@ export class KeycloakAdapter implements IAuthAdapter {
       await this.keycloak.updateToken(TOKEN_MIN_VALIDITY_SECONDS)
       return this.keycloak.token
     } catch (error) {
-      logger.warn('token refresh failed', error instanceof Error ? error.message : error)
+      logger.warn(
+        'token refresh failed',
+        error instanceof Error ? error.message : error
+      )
       return undefined
     }
   }
@@ -167,6 +154,7 @@ export class KeycloakAdapter implements IAuthAdapter {
       email: (profile.email as string) ?? '',
       firstName: (profile.given_name as string) ?? '',
       lastName: (profile.family_name as string) ?? '',
+      emailVerified: (profile.email_verified as boolean) ?? false,
     }
   }
 

@@ -10,18 +10,7 @@ export interface UserProfile {
   email: string
   firstName: string
   lastName: string
+  emailVerified: boolean
 }
 
-export type BusStopRole =
-  | 'RegisteredUser'
-  | 'Curator'
-  | 'SubAdmin'
-  | 'Admin'
-
-export interface DirectRegisterRequest {
-  firstName: string
-  lastName: string
-  email: string
-  username: string
-  password: string
-}
+export type BusStopRole = 'RegisteredUser' | 'Curator' | 'SubAdmin' | 'Admin'

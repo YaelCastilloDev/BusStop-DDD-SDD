@@ -9,8 +9,8 @@ import {
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { I18nextProvider } from 'react-i18next'
 import { toast } from 'sonner'
-import i18n from '@/lib/i18n'
 import { getAuthToken } from '@/lib/adapters/auth'
+import i18n from '@/lib/i18n'
 import { DirectionProvider } from './context/direction-provider'
 import { FontProvider } from './context/font-provider'
 // Generated Routes
@@ -55,6 +55,8 @@ const queryClient = new QueryClient({
     },
   }),
 })
+
+axios.defaults.baseURL = import.meta.env.VITE_API_URL
 
 axios.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
