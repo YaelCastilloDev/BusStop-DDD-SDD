@@ -1,4 +1,4 @@
-import type { DirectRegisterRequest, UserProfile } from './types'
+import type { UserProfile } from './types'
 
 export interface IAuthAdapter {
   init(): Promise<boolean>
@@ -6,7 +6,7 @@ export interface IAuthAdapter {
   directLogin(username: string, password: string): Promise<void>
   logout(): Promise<void>
   register(): Promise<void>
-  directRegister(userData: DirectRegisterRequest): Promise<void>
+  discardSession(): void
   getToken(): Promise<string | undefined>
   isAuthenticated(): boolean
   hasRole(role: string): boolean

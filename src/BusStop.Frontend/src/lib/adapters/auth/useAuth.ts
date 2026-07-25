@@ -1,8 +1,12 @@
 import { useEffect, useCallback } from 'react'
-import { useAuthStore, type AuthStore } from './auth-store'
-import { getAuthAdapter, isInitStarted, markInitStarted } from './adapter-instance'
 import type { IAuthAdapter } from './IAuthAdapter'
-import type { BusStopRole, DirectRegisterRequest } from './types'
+import {
+  getAuthAdapter,
+  isInitStarted,
+  markInitStarted,
+} from './adapter-instance'
+import { useAuthStore, type AuthStore } from './auth-store'
+import type { BusStopRole } from './types'
 
 function getErrorMessage(err: unknown, fallback: string): string {
   return err instanceof Error ? err.message : fallback
@@ -62,19 +66,23 @@ export function useAuth() {
     }
   }, [])
 
-  const directLogin = useCallback(async (username: string, password: string) => {
-    store.setLoading(true)
-    try {
-      await auth.directLogin(username, password)
-      const user = auth.getUserProfile()
-      store.setAuthenticated(user)
-    } catch (err) {
-      const message = getErrorMessage(err, 'Login failed')
-      store.setError(message)
-      store.setLoading(false)
-      throw err
-    }
-  }, [])
+  const directLogin = useCallback(
+    async (username: string, password: string) => {
+      store.setLoading(true)
+      try {
+        await auth.directLogin(username, password)
+        const user = auth.getUserProfile()
+        store.setAuthenticated(user)
+        return user
+      } catch (err) {
+        const message = getErrorMessage(err, 'Login failed')
+        store.setError(message)
+        store.setLoading(false)
+        throw err
+      }
+    },
+    []
+  )
 
   const logout = useCallback(async () => {
     try {
@@ -94,31 +102,18 @@ export function useAuth() {
     }
   }, [])
 
-  const directRegister = useCallback(async (userData: DirectRegisterRequest) => {
-    store.setLoading(true)
-    store.setError(null)
-    try {
-      await auth.directRegister(userData)
-      const user = auth.getUserProfile()
-      store.setAuthenticated(user)
-    } catch (err) {
-      const message = getErrorMessage(err, 'Registration failed')
-      store.setError(message)
-      store.setLoading(false)
-      throw err
-    }
+  const discardSession = useCallback(() => {
+    auth.discardSession()
+    store.clear()
   }, [])
 
   const getToken = useCallback(async () => {
     return auth.getToken()
   }, [])
 
-  const hasRole = useCallback(
-    (role: BusStopRole | string) => {
-      return auth.hasRole(role)
-    },
-    []
-  )
+  const hasRole = useCallback((role: BusStopRole | string) => {
+    return auth.hasRole(role)
+  }, [])
 
   return {
     isAuthenticated: store.isAuthenticated,
@@ -129,7 +124,7 @@ export function useAuth() {
     directLogin,
     logout,
     register,
-    directRegister,
+    discardSession,
     getToken,
     hasRole,
   }
