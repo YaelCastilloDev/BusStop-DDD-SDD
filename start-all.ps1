@@ -83,6 +83,30 @@ if (-not $SkipDocker) {
     }
 }
 
+# ── 3b. Create busstop database ───────────────────────────
+Write-Host ""
+Write-Host "  Ensuring busstop database exists..." -ForegroundColor Yellow
+
+$maxPgRetries = 30
+$pgReady = $false
+for ($i = 0; $i -lt $maxPgRetries; $i++) {
+    $result = docker exec keycloak-db psql -U busstop -t -c "SELECT 1" 2>&1
+    if ("$result" -match "1") { $pgReady = $true; break }
+    Write-Host "  Waiting for PostgreSQL... ($($i+1)/$maxPgRetries)" -ForegroundColor Gray
+    Start-Sleep -Seconds 2
+}
+if ($pgReady) {
+    $dbExists = docker exec keycloak-db psql -U busstop -t -c "SELECT 1 FROM pg_database WHERE datname='busstop'" 2>&1
+    if ("$dbExists" -notmatch "1") {
+        docker exec keycloak-db psql -U busstop -c "CREATE DATABASE busstop;"
+        Write-Host "  busstop database created" -ForegroundColor Green
+    } else {
+        Write-Host "  busstop database already exists" -ForegroundColor Green
+    }
+} else {
+    Write-Host "  WARNING: PostgreSQL not ready — busstop DB will be created by EF migrations" -ForegroundColor Yellow
+}
+
 # ── 4. Wait for Keycloak ──────────────────────────────────
 Write-Host ""
 Write-Host "[4/5] Waiting for Keycloak to be ready..." -ForegroundColor Yellow
