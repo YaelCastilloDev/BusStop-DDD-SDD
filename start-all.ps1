@@ -173,6 +173,8 @@ Write-Host "  Keycloak Admin  : http://localhost:8080/admin" -ForegroundColor Wh
 Write-Host "  API (swagger)   : https://localhost:57679/swagger" -ForegroundColor White
 Write-Host "  Frontend        : http://localhost:5173" -ForegroundColor White
 Write-Host "  Aspire Dashboard: http://localhost:18888" -ForegroundColor White
+Write-Host "  Prometheus      : http://localhost:9090" -ForegroundColor White
+Write-Host "  Grafana         : http://localhost:3000 (admin/admin)" -ForegroundColor White
 Write-Host ""
 Write-Host "  Realm         : auth-demo" -ForegroundColor White
 Write-Host "  Test users (password: password):" -ForegroundColor White
