@@ -7,7 +7,7 @@ namespace BusStop.IntegrationTests;
 [Collection("PostgreSQL")]
 public abstract class IntegrationTestBase : IAsyncLifetime
 {
-    private readonly PostgreSqlFixture _fixture;
+    protected readonly PostgreSqlFixture _fixture;
     private AppDbContext? _dbContext;
     private readonly string _databaseName;
     private string? _dbConnectionString;
@@ -37,6 +37,18 @@ public abstract class IntegrationTestBase : IAsyncLifetime
 
         _dbContext = new AppDbContext(options);
         await _dbContext.Database.EnsureCreatedAsync();
+
+        await VerifyPgStatStatementsEnabled();
+    }
+
+    private async Task VerifyPgStatStatementsEnabled()
+    {
+        await using var conn = new NpgsqlConnection(_dbConnectionString);
+        await conn.OpenAsync();
+        await using var cmd = conn.CreateCommand();
+        cmd.CommandText = "SELECT count(*) FROM pg_stat_statements";
+        var result = await cmd.ExecuteScalarAsync();
+        result.ShouldNotBeNull();
     }
 
     public virtual async ValueTask DisposeAsync()
