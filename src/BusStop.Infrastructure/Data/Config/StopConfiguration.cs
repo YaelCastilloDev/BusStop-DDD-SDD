@@ -1,5 +1,5 @@
-using BusStop.Core.StopAggregate;
 using BusStop.Core.RouteAggregate;
+using BusStop.Core.StopAggregate;
 using BusStop.Core.UserAggregate;
 
 namespace BusStop.Infrastructure.Data.Config;

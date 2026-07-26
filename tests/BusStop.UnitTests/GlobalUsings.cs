@@ -1,9 +1,9 @@
 ﻿global using System.Runtime.CompilerServices;
 global using Ardalis.GuardClauses;
 global using Ardalis.SharedKernel;
-global using Shouldly;
 global using Mediator;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.Logging;
 global using NSubstitute;
+global using Shouldly;
 global using Xunit;
