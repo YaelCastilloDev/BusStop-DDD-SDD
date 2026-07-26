@@ -7,6 +7,9 @@ using Microsoft.Extensions.ServiceDiscovery;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using Polly;
+using Polly.Retry;
+using Polly.Timeout;
 
 namespace Microsoft.Extensions.Hosting;
 
@@ -34,6 +37,8 @@ public static class Extensions
       // Turn on service discovery by default
       http.AddServiceDiscovery();
     });
+
+    builder.Services.AddResiliencePipelines();
 
     // Uncomment the following to restrict the allowed schemes for service discovery.
     // builder.Services.Configure<ServiceDiscoveryOptions>(options =>
@@ -104,6 +109,35 @@ public static class Extensions
         .AddCheck("self", () => HealthCheckResult.Healthy(), ["live"]);
 
     return builder;
+  }
+
+  public static IServiceCollection AddResiliencePipelines(this IServiceCollection services)
+  {
+    services.AddResiliencePipeline("idempotent-mediator", (builder, context) =>
+    {
+      builder.AddRetry(new RetryStrategyOptions
+      {
+        MaxRetryAttempts = 3,
+        Delay = TimeSpan.FromSeconds(1),
+        BackoffType = DelayBackoffType.Exponential,
+        ShouldHandle = new PredicateBuilder().Handle<Exception>()
+      });
+
+      builder.AddTimeout(new TimeoutStrategyOptions
+      {
+        Timeout = TimeSpan.FromSeconds(30)
+      });
+    });
+
+    services.AddResiliencePipeline("non-idempotent-mediator", (builder, context) =>
+    {
+      builder.AddTimeout(new TimeoutStrategyOptions
+      {
+        Timeout = TimeSpan.FromSeconds(30)
+      });
+    });
+
+    return services;
   }
 
   public static WebApplication MapDefaultEndpoints(this WebApplication app)

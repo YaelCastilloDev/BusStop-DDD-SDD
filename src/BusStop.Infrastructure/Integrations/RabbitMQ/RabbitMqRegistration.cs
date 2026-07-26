@@ -43,6 +43,19 @@ public static class RabbitMqRegistration
                     });
                 }
 
+                cfg.UseMessageRetry(r => r.Exponential(5, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(16), TimeSpan.FromSeconds(2)));
+
+                cfg.UseCircuitBreaker(cb =>
+                {
+                    cb.TrackingPeriod = TimeSpan.FromMinutes(1);
+                    cb.TripThreshold = 15;
+                    cb.ActiveThreshold = 10;
+                    cb.ResetInterval = TimeSpan.FromMinutes(1);
+                });
+
+                cfg.UseDelayedRedelivery(r =>
+                    r.Intervals(TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(15)));
+
                 cfg.ConfigureEndpoints(context);
             });
         });

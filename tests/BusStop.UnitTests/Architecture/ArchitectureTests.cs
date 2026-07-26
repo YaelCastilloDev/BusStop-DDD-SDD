@@ -1,9 +1,12 @@
 using System.Reflection;
 using Ardalis.SharedKernel;
 using Ardalis.Specification;
+using BusStop.Core.Interfaces;
 using BusStop.Core.StopAggregate;
 using BusStop.Infrastructure.Data;
 using BusStop.UseCases.Users.Signup;
+using BusStop.Web.Configurations;
+using Mediator;
 using NetArchTest.Rules;
 
 namespace BusStop.UnitTests.Architecture;
@@ -356,5 +359,125 @@ public class ArchitectureTests
         }
 
         violations.ShouldBeEmpty(string.Join("\n", violations));
+    }
+
+    // ── Resilience Patterns ───────────────────────────────────────
+
+    [Fact]
+    public void AllQueryRequestTypes_ShouldImplement_IIdempotentRequest()
+    {
+        var violations = new List<string>();
+
+        var queryTypes = Types.InAssembly(UseCasesAssembly)
+            .That()
+            .ImplementInterface(typeof(IQuery<>))
+            .And()
+            .AreClasses()
+            .And()
+            .AreNotAbstract()
+            .GetTypes();
+
+        foreach (var type in queryTypes)
+        {
+            if (!typeof(IIdempotentRequest).IsAssignableFrom(type))
+                violations.Add($"{type.Name}: implements IQuery<> but not IIdempotentRequest");
+        }
+
+        violations.ShouldBeEmpty(string.Join("\n", violations));
+    }
+
+    [Fact]
+    public void NoCommandRequestTypes_ShouldImplement_IIdempotentRequest()
+    {
+        var violations = new List<string>();
+
+        var commandTypes = Types.InAssembly(UseCasesAssembly)
+            .That()
+            .ImplementInterface(typeof(ICommand<>))
+            .And()
+            .AreClasses()
+            .And()
+            .AreNotAbstract()
+            .GetTypes();
+
+        foreach (var type in commandTypes)
+        {
+            if (typeof(IIdempotentRequest).IsAssignableFrom(type))
+                violations.Add($"{type.Name}: implements ICommand<> but also implements IIdempotentRequest (should not)");
+        }
+
+        violations.ShouldBeEmpty(string.Join("\n", violations));
+    }
+
+    [Fact]
+    public void ResilienceBehavior_ShouldExist_InWebAssembly()
+    {
+        var result = Types.InAssembly(WebAssembly)
+            .That()
+            .HaveName("ResilienceBehavior`2")
+            .Should()
+            .ImplementInterface(typeof(Mediator.IPipelineBehavior<,>))
+            .GetResult();
+
+        result.IsSuccessful.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void MediatorConfig_Registers_ResilienceBehavior_WithoutErrors()
+    {
+        // Verify that MediatorConfig.AddMediatorSourceGen executes successfully,
+        // confirming that ResilienceBehavior (listed in its PipelineBehaviors array)
+        // is a valid type that can be registered in the DI container.
+        var services = new Microsoft.Extensions.DependencyInjection.ServiceCollection();
+        var logger = Substitute.For<Microsoft.Extensions.Logging.ILogger>();
+
+        var exception = Record.Exception(() =>
+            MediatorConfig.AddMediatorSourceGen(services, logger));
+
+        exception.ShouldBeNull(
+            "MediatorConfig.AddMediatorSourceGen must register ResilienceBehavior without errors");
+    }
+
+    [Fact]
+    public void Core_ShouldNot_DependOn_Polly()
+    {
+        var result = Types.InAssembly(CoreAssembly)
+            .ShouldNot()
+            .HaveDependencyOn("Polly.Core")
+            .GetResult();
+
+        result.IsSuccessful.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Core_ShouldNot_DependOn_Web()
+    {
+        var result = Types.InAssembly(CoreAssembly)
+            .ShouldNot()
+            .HaveDependencyOn("BusStop.Web")
+            .GetResult();
+
+        result.IsSuccessful.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void ResilienceBehavior_ShouldDependOn_Polly()
+    {
+        var result = Types.InAssembly(WebAssembly)
+            .That()
+            .HaveName("ResilienceBehavior`2")
+            .Should()
+            .HaveDependencyOn("Polly")
+            .GetResult();
+
+        result.IsSuccessful.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void IIdempotentRequest_ShouldResideIn_CoreAssembly()
+    {
+        var type = typeof(IIdempotentRequest);
+        type.Assembly.ShouldBe(CoreAssembly,
+            "IIdempotentRequest must be defined in BusStop.Core assembly");
     }
 }

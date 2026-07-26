@@ -4,7 +4,7 @@ using Mediator;
 
 namespace BusStop.UseCases.Notifications.GetMy;
 
-public sealed record GetMyNotificationsQuery() : IQuery<Result<IEnumerable<NotificationDto>>>, IRequireAuthenticatedUser
+public sealed record GetMyNotificationsQuery() : IQuery<Result<IEnumerable<NotificationDto>>>, IRequireAuthenticatedUser, IIdempotentRequest
 {
   public string Sub { get; set; } = default!;
 }

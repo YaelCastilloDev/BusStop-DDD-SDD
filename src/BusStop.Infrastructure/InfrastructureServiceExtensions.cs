@@ -23,7 +23,11 @@ public static class InfrastructureServiceExtensions
     services.AddDbContext<AppDbContext>((provider, options) =>
     {
       var eventDispatchInterceptor = provider.GetRequiredService<EventDispatchInterceptor>();
-      options.UseNpgsql(connectionString, o => o.UseNetTopologySuite());
+      options.UseNpgsql(connectionString, o =>
+      {
+        o.UseNetTopologySuite();
+        o.EnableRetryOnFailure(2, TimeSpan.FromSeconds(15), null);
+      });
       options.AddInterceptors(eventDispatchInterceptor);
     });
 
