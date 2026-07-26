@@ -1,7 +1,7 @@
-# GitHub Copilot Instructions for Clean Architecture Template
+# GitHub Copilot Instructions for BusStop
 
 ## Project Overview
-This is a **Clean Architecture template** for .NET 9 that demonstrates Domain-Driven Design (DDD) patterns. It's a starter template, not a reference application - delete sample code once you understand the patterns.
+This is the **BusStop** project for .NET 10, built on Clean Architecture and Domain-Driven Design (DDD) patterns.
 
 ## Architecture & Project Structure
 
@@ -33,7 +33,7 @@ This is a **Clean Architecture template** for .NET 9 that demonstrates Domain-Dr
 - One endpoint per file: `Create.cs`, `Update.cs`, `Delete.cs`, `GetById.cs`
 - Separate request/response/validator files: `Create.CreateRequest.cs`, `Create.CreateValidator.cs`
 - Use `Endpoint<TRequest, TResponse>` base class
-- Example: `src/Clean.Architecture.Web/Contributors/Create.cs`
+- Example: `src/BusStop.Web/Routes/Create.cs`
 
 ### Domain Model (Core)
 - Entities use encapsulation - minimize public setters
@@ -57,30 +57,25 @@ This is a **Clean Architecture template** for .NET 9 that demonstrates Domain-Dr
 
 ### Build & Test
 ```bash
-dotnet build Clean.Architecture.slnx
-dotnet test Clean.Architecture.slnx
+dotnet build BusStop.slnx
+dotnet test BusStop.slnx
 ```
 
 ### Entity Framework Migrations
 ```bash
 # From Web project directory
-dotnet ef migrations add MigrationName -c AppDbContext -p ../Clean.Architecture.Infrastructure/Clean.Architecture.Infrastructure.csproj -s Clean.Architecture.Web.csproj -o Data/Migrations
+dotnet ef migrations add MigrationName -c AppDbContext -p ../BusStop.Infrastructure/BusStop.Infrastructure.csproj -s BusStop.Web.csproj -o Data/Migrations
 
-dotnet ef database update -c AppDbContext -p ../Clean.Architecture.Infrastructure/Clean.Architecture.Infrastructure.csproj -s Clean.Architecture.Web.csproj
+dotnet ef database update -c AppDbContext -p ../BusStop.Infrastructure/BusStop.Infrastructure.csproj -s BusStop.Web.csproj
 ```
 
-### Template Installation & Usage
-```bash
-dotnet new install Ardalis.CleanArchitecture.Template
-dotnet new clean-arch -o Your.ProjectName
-```
 
 ## Key Dependencies & Patterns
 
 ### Primary Libraries
 - **FastEndpoints**: API endpoints (replaced Controllers/Minimal APIs)
 - **Mediator**: Command/query handling in UseCases
-- **EF Core**: Data access (SQLite default, easily changed to SQL Server)
+- **EF Core**: Data access (PostgreSQL with PostGIS)
 - **Ardalis.Specification**: Repository query specifications
 - **Ardalis.Result**: Error handling pattern
 - **Serilog**: Structured logging
@@ -99,7 +94,7 @@ dotnet new clean-arch -o Your.ProjectName
 
 ### Web Project Structure
 ```
-Contributors/
+Routes/
   Create.cs                    # Endpoint
   Create.CreateRequest.cs      # Request DTO
   Create.CreateResponse.cs     # Response DTO  
@@ -107,16 +102,9 @@ Contributors/
   Update.cs, Delete.cs, etc.
 ```
 
-### Sample vs Template
-- `/sample` folder: Complete working example (NimblePros.SampleToDo)
-- `/src` folder: Clean template ready for your project
-- Study sample for patterns, use src for new projects
 
 ## Common Gotchas
 
-- Don't include hyphens in project names (template limitation)
-- Replace `Ardalis.SharedKernel` with your own shared kernel
-- Database path in `appsettings.json` for SQLite
 - Use absolute paths in EF migration commands
 - FastEndpoints uses different validation approach than Controller-based APIs
 
