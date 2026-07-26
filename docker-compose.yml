@@ -12,7 +12,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://aspire-dashboard:18889"
-      ConnectionStrings__PostgresConnection: "Host=postgres;Port=5432;Database=busstop;Username=${DB_USER};Password=${DB_PASSWORD}"
+      ConnectionStrings__PostgresConnection: "Host=pgbouncer;Port=6432;Database=busstop;Username=${DB_USER};Password=${DB_PASSWORD};Pooling=false"
       ConnectionStrings__messaging: "amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672"
       RabbitMQ__Host: "rabbitmq"
       Keycloak__AuthorizationUrl: "http://keycloak:8080/realms/auth-demo/protocol/openid-connect/auth"
@@ -26,8 +26,29 @@ services:
       Keycloak__Admin__ClientSecret: "${KEYCLOAK_CLIENT_SECRET}"
     restart: unless-stopped
     depends_on:
-      - postgres
+      - pgbouncer
       - keycloak
+
+  pgbouncer:
+    image: bitnami/pgbouncer:1.23.1
+    container_name: pgbouncer
+    environment:
+      PGBOUNCER_DATABASE: busstop
+      PGBOUNCER_PORT: 6432
+      POSTGRESQL_HOST: postgres
+      POSTGRESQL_PORT: 5432
+      POSTGRESQL_USERNAME: ${DB_USER}
+      POSTGRESQL_PASSWORD: ${DB_PASSWORD}
+      PGBOUNCER_POOL_MODE: transaction
+      PGBOUNCER_MAX_CLIENT_CONN: 1000
+      PGBOUNCER_DEFAULT_POOL_SIZE: 25
+      PGBOUNCER_RESERVE_POOL_SIZE: 5
+      PGBOUNCER_IGNORE_STARTUP_PARAMETERS: extra_float_digits
+    ports:
+      - "6432:6432"
+    depends_on:
+      - postgres
+    restart: unless-stopped
 
   aspire-dashboard:
     container_name: aspire-dashboard
@@ -50,12 +71,14 @@ services:
   postgres:
     image: postgis/postgis:17-3.5
     container_name: keycloak-db
+    command: postgres -c shared_preload_libraries=pg_stat_statements -c pg_stat_statements.track=all
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: keycloak-auth
     volumes:
       - ./containers/database:/var/lib/postgresql/data
+      - ./containers/postgres/init-exporter.sql:/docker-entrypoint-initdb.d/init-exporter.sql:ro
     restart: unless-stopped
     ports:
       - 5432:5432
@@ -97,3 +120,64 @@ services:
     depends_on:
       - keycloak
     restart: unless-stopped
+
+  pg-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.17.0
+    container_name: pg-exporter
+    environment:
+      DATA_SOURCE_URI: "postgres:5432/postgres?sslmode=disable"
+      DATA_SOURCE_USER: exporter
+      DATA_SOURCE_PASS: exporter
+    ports:
+      - "9187:9187"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v3.3.0
+    container_name: prometheus
+    volumes:
+      - ./containers/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"
+    ports:
+      - "9090:9090"
+    depends_on:
+      - pg-exporter
+      - otel-collector
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.5.0
+    container_name: grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+    volumes:
+      - ./containers/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./containers/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.121.0
+    container_name: otel-collector
+    volumes:
+      - ./containers/otel-collector/config.yml:/etc/otelcol-contrib/config.yaml:ro
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    restart: unless-stopped
+
+volumes:
+  prometheus_data:
+  grafana_data:
