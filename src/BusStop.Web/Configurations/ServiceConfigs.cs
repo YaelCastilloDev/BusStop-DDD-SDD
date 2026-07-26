@@ -1,6 +1,6 @@
-﻿using BusStop.Infrastructure;
+﻿using System.Threading.RateLimiting;
+using BusStop.Infrastructure;
 using Microsoft.AspNetCore.RateLimiting;
-using System.Threading.RateLimiting;
 
 namespace BusStop.Web.Configurations;
 

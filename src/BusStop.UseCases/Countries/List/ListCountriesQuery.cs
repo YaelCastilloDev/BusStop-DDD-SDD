@@ -1,3 +1,5 @@
+using BusStop.Core.Interfaces;
+
 namespace BusStop.UseCases.Countries.List;
 
-public sealed record ListCountriesQuery : IQuery<Result<IEnumerable<CountryResponse>>>;
+public sealed record ListCountriesQuery : IQuery<Result<IEnumerable<CountryResponse>>>, IIdempotentRequest;

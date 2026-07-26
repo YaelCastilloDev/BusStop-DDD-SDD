@@ -28,6 +28,7 @@ public static class MediatorConfig
 
       options.PipelineBehaviors =
       [
+        typeof(ResilienceBehavior<,>),
         typeof(DomainExceptionBehavior<,>),
         typeof(LoggingBehavior<,>),
         typeof(CurrentUserBehavior<,>)
