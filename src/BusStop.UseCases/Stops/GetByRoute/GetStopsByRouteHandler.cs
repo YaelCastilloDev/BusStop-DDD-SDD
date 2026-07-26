@@ -1,7 +1,7 @@
-using BusStop.Core.StopAggregate;
-using BusStop.Core.StopAggregate.Specifications;
 using BusStop.Core.RouteAggregate;
 using BusStop.Core.RouteAggregate.Specifications;
+using BusStop.Core.StopAggregate;
+using BusStop.Core.StopAggregate.Specifications;
 
 namespace BusStop.UseCases.Stops.GetByRoute;
 

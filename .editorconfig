@@ -149,3 +149,11 @@ csharp_style_expression_bodied_local_functions = false:silent
 [*.vb]
 # Modifier preferences
 visual_basic_preferred_modifier_order = Partial,Default,Private,Protected,Public,Friend,NotOverridable,Overridable,MustOverride,Overloads,Overrides,MustInherit,NotInheritable,Static,Shared,Shadows,ReadOnly,WriteOnly,Dim,Const,WithEvents,Widening,Narrowing,Custom,Async:suggestion
+
+###############################
+# Suppressions                 #
+###############################
+# EF Core migration files are auto-generated with block-scoped namespaces.
+# Converting them to file-scoped would be reverted on every `dotnet ef migrations add`.
+[src/BusStop.Infrastructure/Migrations/*.cs]
+dotnet_diagnostic.IDE0161.severity = none

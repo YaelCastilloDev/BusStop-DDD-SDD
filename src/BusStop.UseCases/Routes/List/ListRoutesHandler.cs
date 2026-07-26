@@ -1,5 +1,5 @@
-using BusStop.Core.RouteAggregate;
 using Ardalis.Specification;
+using BusStop.Core.RouteAggregate;
 
 namespace BusStop.UseCases.Routes.List;
 
