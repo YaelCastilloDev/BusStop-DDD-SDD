@@ -5,6 +5,10 @@ using BusStop.Infrastructure.Integrations.RabbitMQ;
 using MassTransit;
 using Mediator;
 
+// TODO: Implement consumer for UserRegisteredIntegrationEvent (Gate 5 — Contract Safety).
+//       Currently this event is published but no service consumes it. Intended for
+//       future cross-context or external consumers via RabbitMQ.
+
 namespace BusStop.Infrastructure.Handlers;
 
 public sealed class UserRegisteredIntegrationHandler(

@@ -1,6 +1,6 @@
-using BusStop.Infrastructure.Integrations.RabbitMQ;
+using BusStop.Core.ModerationActionAggregate.Events;
 using BusStop.UseCases.Notifications.ConsumeModerated;
-using MassTransit;
+using Mediator;
 using Microsoft.AspNetCore.SignalR;
 
 namespace BusStop.Web.Notifications;
@@ -9,39 +9,37 @@ public class ModerationActionRecordedEventConsumer(
   IMediator mediator,
   IHubContext<NotificationsHub> hubContext,
   ILogger<ModerationActionRecordedEventConsumer> logger)
-  : IConsumer<ModerationActionRecordedIntegrationEvent>
+  : INotificationHandler<ModerationActionRecordedEvent>
 {
   private readonly IMediator _mediator = mediator;
   private readonly IHubContext<NotificationsHub> _hubContext = hubContext;
   private readonly ILogger<ModerationActionRecordedEventConsumer> _logger = logger;
 
-  public async Task Consume(ConsumeContext<ModerationActionRecordedIntegrationEvent> context)
+  public async ValueTask Handle(ModerationActionRecordedEvent notification, CancellationToken cancellationToken)
   {
-    var msg = context.Message;
-    _logger.LogInformation("Consumed ModerationActionRecordedIntegrationEvent for {TargetType} {TargetId}",
-        msg.TargetType, msg.TargetId);
+    _logger.LogInformation("Handling ModerationActionRecordedEvent for {TargetType} {TargetId}",
+        notification.TargetType, notification.TargetId);
 
     var command = new ProcessModerationNotificationCommand(
-        msg.UserId,
-        msg.TargetType,
-        msg.TargetId,
-        msg.Reason,
-        msg.Category);
-    var result = await _mediator.Send(command, context.CancellationToken);
+        notification.UserId,
+        notification.TargetType,
+        notification.TargetId,
+        notification.Reason,
+        notification.Category);
+    var result = await _mediator.Send(command, cancellationToken);
 
     if (result.IsSuccess)
     {
-      // Push via SignalR
-      await _hubContext.Clients.User(msg.UserId.ToString()).SendAsync(NotificationsHub.ReceiveNotificationMethod, new
+      await _hubContext.Clients.User(notification.UserId.ToString()).SendAsync(NotificationsHub.ReceiveNotificationMethod, new
       {
         Title = "Your content was moderated",
-        Message = $"Your {msg.TargetType.ToString().ToLower()} (ID: {msg.TargetId}) was moderated. Reason: {msg.Reason}",
+        Message = $"Your {notification.TargetType.ToString().ToLower()} (ID: {notification.TargetId}) was moderated. Reason: {notification.Reason}",
         CreatedAt = DateTime.UtcNow
-      }, context.CancellationToken);
+      }, cancellationToken);
     }
     else
     {
-      _logger.LogWarning("Failed to process moderation notification for User {UserId}", msg.UserId);
+      _logger.LogWarning("Failed to process moderation notification for User {UserId}", notification.UserId);
     }
   }
 }
