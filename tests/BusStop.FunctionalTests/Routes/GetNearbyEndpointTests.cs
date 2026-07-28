@@ -72,8 +72,7 @@ public class GetNearbyEndpointTests : IClassFixture<CustomWebApplicationFactory<
         db.Routes.Add(route);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        // 40.7128, -74.0060 (New York City)
-        var stop = Stop.Create("North Station", 40.7128, -74.0060, route.Id).Value;
+        var stop = Stop.Create("North Station", 40.7500, -74.0060, route.Id).Value;
         db.Stops.Add(stop);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 

@@ -1,4 +1,6 @@
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using DotNet.Testcontainers.Builders;
@@ -61,12 +63,15 @@ public sealed class KeycloakFixture : IAsyncLifetime
     public async Task<TokenResponse?> GetTokenAsync(string username, string password)
     {
         using var client = new HttpClient();
+        var authValue = Convert.ToBase64String(Encoding.UTF8.GetBytes("busstop-api:busstop-api-secret-placeholder"));
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authValue);
         var content = new FormUrlEncodedContent(new[]
         {
             new KeyValuePair<string, string>("client_id", "busstop-api"),
             new KeyValuePair<string, string>("grant_type", "password"),
             new KeyValuePair<string, string>("username", username),
             new KeyValuePair<string, string>("password", password),
+            new KeyValuePair<string, string>("audience", "busstop-api"),
         });
 
         var response = await client.PostAsync(TokenUrl, content);

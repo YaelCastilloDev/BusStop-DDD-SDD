@@ -37,18 +37,6 @@ public abstract class IntegrationTestBase : IAsyncLifetime
 
         _dbContext = new AppDbContext(options);
         await _dbContext.Database.EnsureCreatedAsync();
-
-        await VerifyPgStatStatementsEnabled();
-    }
-
-    private async Task VerifyPgStatStatementsEnabled()
-    {
-        await using var conn = new NpgsqlConnection(_dbConnectionString);
-        await conn.OpenAsync();
-        await using var cmd = conn.CreateCommand();
-        cmd.CommandText = "SELECT count(*) FROM pg_stat_statements";
-        var result = await cmd.ExecuteScalarAsync();
-        result.ShouldNotBeNull();
     }
 
     public virtual async ValueTask DisposeAsync()

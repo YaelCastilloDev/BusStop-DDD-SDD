@@ -20,7 +20,6 @@ public sealed class ListRoutesHandler(IReadRepository<Route> repository) : IQuer
     public ListRoutesSpec(int page, int pageSize)
     {
       Query
-        .Where(r => !r.IsDeleted)
         .OrderByDescending(r => r.CreatedAt)
         .Skip((page - 1) * pageSize)
         .Take(pageSize);

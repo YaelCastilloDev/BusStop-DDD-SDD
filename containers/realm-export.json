@@ -124,6 +124,7 @@
     {
       "username": "registered1",
       "enabled": true,
+      "emailVerified": true,
       "email": "registered1@example.com",
       "firstName": "Registered",
       "lastName": "User",
@@ -141,6 +142,7 @@
     {
       "username": "curator1",
       "enabled": true,
+      "emailVerified": true,
       "email": "curator1@example.com",
       "firstName": "Curator",
       "lastName": "One",
@@ -158,6 +160,7 @@
     {
       "username": "subadmin1",
       "enabled": true,
+      "emailVerified": true,
       "email": "subadmin1@example.com",
       "firstName": "SubAdmin",
       "lastName": "One",
@@ -175,6 +178,7 @@
     {
       "username": "admin1",
       "enabled": true,
+      "emailVerified": true,
       "email": "admin1@example.com",
       "firstName": "Admin",
       "lastName": "One",
