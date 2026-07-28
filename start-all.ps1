@@ -51,8 +51,7 @@ if (-not $SkipApi) {
 Write-Host ""
 Write-Host "[2/5] Creating root .env for docker-compose..." -ForegroundColor Yellow
 
-if (-not (Test-Path $dockerComposeEnv)) {
-    @"
+$envDefaults = @"
 DB_USER=busstop
 DB_PASSWORD=busstop
 KEYCLOAK_ADMIN_USER=admin
@@ -60,7 +59,10 @@ KEYCLOAK_ADMIN_PASSWORD=admin
 DOMAIN=localhost
 RABBITMQ_USER=guest
 RABBITMQ_PASS=guest
-"@ | Set-Content -LiteralPath $dockerComposeEnv -Encoding UTF8
+"@
+
+if (-not (Test-Path $dockerComposeEnv)) {
+    Set-Content -LiteralPath $dockerComposeEnv -Value $envDefaults -Encoding UTF8
     Write-Host "  Created .env with default credentials" -ForegroundColor Green
 } else {
     Write-Host "  .env already exists" -ForegroundColor Green
@@ -104,7 +106,7 @@ if ($pgReady) {
         Write-Host "  busstop database already exists" -ForegroundColor Green
     }
 } else {
-    Write-Host "  WARNING: PostgreSQL not ready — busstop DB will be created by EF migrations" -ForegroundColor Yellow
+    Write-Host "  WARNING: PostgreSQL not ready -- busstop DB will be created by EF migrations" -ForegroundColor Yellow
 }
 
 # ── 4. Wait for Keycloak ──────────────────────────────────
