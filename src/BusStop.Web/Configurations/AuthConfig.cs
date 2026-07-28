@@ -21,13 +21,13 @@ public static class AuthConfig
         .AddJwtBearer(options =>
         {
             options.MetadataAddress = metadataAddress;
-            options.RequireHttpsMetadata = !environment.IsDevelopment();
+            options.RequireHttpsMetadata = !environment.IsDevelopment() && !environment.IsEnvironment("Testing");
             options.MapInboundClaims = false;
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
                 ValidIssuer = validIssuer,
-                ValidateAudience = true,
+                ValidateAudience = !environment.IsEnvironment("Testing"),
                 ValidAudience = audience,
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.Zero,

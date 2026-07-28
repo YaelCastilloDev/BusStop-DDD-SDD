@@ -2,12 +2,14 @@ using System.Net.Http.Headers;
 using BusStop.Infrastructure.Data;
 using Microsoft.Extensions.Configuration;
 using Testcontainers.PostgreSql;
+using Testcontainers.RabbitMq;
 
 namespace BusStop.FunctionalTests.Auth;
 
 public class KeycloakWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private readonly PostgreSqlContainer _dbContainer;
+    private readonly RabbitMqContainer _rabbitMqContainer;
     private readonly string _keycloakBaseUrl;
 
     public KeycloakWebApplicationFactory(string keycloakBaseUrl)
@@ -18,21 +20,33 @@ public class KeycloakWebApplicationFactory : WebApplicationFactory<Program>, IAs
             .WithUsername("postgres")
             .WithPassword("postgres")
             .Build();
+        _rabbitMqContainer = new RabbitMqBuilder("rabbitmq:3-management")
+            .WithUsername("guest")
+            .WithPassword("guest")
+            .Build();
     }
 
     public async ValueTask InitializeAsync()
     {
         await _dbContainer.StartAsync();
+        await _rabbitMqContainer.StartAsync();
     }
 
     public new async ValueTask DisposeAsync()
     {
         await _dbContainer.DisposeAsync();
+        await _rabbitMqContainer.DisposeAsync();
     }
 
     protected override IHost CreateHost(IHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
+        Environment.SetEnvironmentVariable("ConnectionStrings__PostgresConnection", _dbContainer.GetConnectionString());
+        Environment.SetEnvironmentVariable("ConnectionStrings__messaging", _rabbitMqContainer.GetConnectionString());
+        var keycloakRealmUrl = $"{_keycloakBaseUrl}/realms/auth-demo";
+        Environment.SetEnvironmentVariable("Authentication__MetadataAddress", $"{keycloakRealmUrl}/.well-known/openid-configuration");
+        Environment.SetEnvironmentVariable("Authentication__ValidIssuer", keycloakRealmUrl);
+        Environment.SetEnvironmentVariable("Authentication__Audience", "busstop-api");
         var host = builder.Build();
         host.Start();
 

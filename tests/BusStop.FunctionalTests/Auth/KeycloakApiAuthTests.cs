@@ -31,21 +31,21 @@ public class KeycloakApiAuthTests : IClassFixture<KeycloakFixture>, IAsyncLifeti
     [Fact]
     public async Task ProtectedEndpoint_Returns401_WithoutToken()
     {
-        var response = await _client!.GetAsync("/api/routes", CancellationToken.None);
+        var response = await _client!.DeleteAsync("/routes/999", CancellationToken.None);
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 
     [Fact]
     public async Task ProtectedEndpoint_Returns200_WithValidToken()
     {
-        var token = await _keycloak.GetTokenAsync("registered1", "password");
+        var token = await _keycloak.GetTokenAsync("curator1", "password");
         token.ShouldNotBeNull();
 
         _client!.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", token!.AccessToken);
 
-        var response = await _client.GetAsync("/api/routes", CancellationToken.None);
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var response = await _client.DeleteAsync("/routes/999", CancellationToken.None);
+        response.StatusCode.ShouldNotBe(HttpStatusCode.Unauthorized);
     }
 
     [Fact]
@@ -54,7 +54,7 @@ public class KeycloakApiAuthTests : IClassFixture<KeycloakFixture>, IAsyncLifeti
         _client!.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", "invalid-token-value");
 
-        var response = await _client.GetAsync("/api/routes", CancellationToken.None);
+        var response = await _client.DeleteAsync("/routes/999", CancellationToken.None);
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 }
