@@ -5,6 +5,9 @@ using Microsoft.Extensions.Logging;
 
 namespace BusStop.Infrastructure.Integrations.RabbitMQ;
 
+// Publishes ModerationActionRecordedIntegrationEvent to RabbitMQ for future external
+// consumers. Local processing (notification creation + email + SignalR push) is handled
+// in-process by ModerationActionRecordedEventConsumer in the Web layer.
 public class ModerationActionRecordedEventPublisher(
     IPublishEndpoint publishEndpoint,
     ILogger<ModerationActionRecordedEventPublisher> logger)
