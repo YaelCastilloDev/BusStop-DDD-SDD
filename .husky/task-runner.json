@@ -1,0 +1,41 @@
+{
+  "$schema": "https://alirezanet.github.io/Husky.Net/schema.json",
+  "tasks": [
+    {
+      "name": "nuget-restore",
+      "group": "pre-commit",
+      "command": "dotnet",
+      "args": ["restore", "-p:NuGetAudit=false"]
+    },
+    {
+      "name": "format-check",
+      "group": "pre-commit",
+      "command": "dotnet",
+      "args": ["format", "style", "--verify-no-changes", "--verbosity", "diagnostic", "--no-restore"]
+    },
+    {
+      "name": "unit-tests",
+      "group": "pre-commit",
+      "command": "dotnet",
+      "args": ["test", "tests/BusStop.UnitTests/BusStop.UnitTests.csproj", "--verbosity", "quiet"]
+    },
+    {
+      "name": "nuget-restore",
+      "group": "pre-push",
+      "command": "dotnet",
+      "args": ["restore", "-p:NuGetAudit=false"]
+    },
+    {
+      "name": "integration-tests",
+      "group": "pre-push",
+      "command": "dotnet",
+      "args": ["test", "tests/BusStop.IntegrationTests/BusStop.IntegrationTests.csproj", "--verbosity", "quiet"]
+    },
+    {
+      "name": "functional-tests",
+      "group": "pre-push",
+      "command": "dotnet",
+      "args": ["test", "tests/BusStop.FunctionalTests/BusStop.FunctionalTests.csproj", "--verbosity", "quiet"]
+    }
+  ]
+}
