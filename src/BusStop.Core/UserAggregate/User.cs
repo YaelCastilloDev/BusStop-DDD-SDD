@@ -1,3 +1,4 @@
+using System.Net.Mail;
 using BusStop.Core.Errors;
 using BusStop.Core.UserAggregate.Events;
 
@@ -8,14 +9,14 @@ public class User : EntityBase<long>, IAggregateRoot
     public Username? Username { get; private set; }
     public string Email { get; private set; }
     public long? CountryId { get; private set; }
-    public string? ExternalId { get; private set; }
+    public string ExternalId { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
 #pragma warning disable CS8618
     private User() { }
 #pragma warning restore CS8618
 
-    private User(string email, string? externalId)
+    private User(string email, string externalId)
     {
         Guard.Against.NullOrWhiteSpace(email, nameof(email));
 
@@ -30,6 +31,8 @@ public class User : EntityBase<long>, IAggregateRoot
 
         if (string.IsNullOrWhiteSpace(email))
             errors.Add(UserErrors.EmptyEmail);
+        if (!string.IsNullOrWhiteSpace(email) && !IsValidEmail(email))
+            errors.Add(UserErrors.InvalidEmail);
         if (string.IsNullOrWhiteSpace(externalId))
             errors.Add(UserErrors.EmptyExternalId);
 
@@ -37,13 +40,16 @@ public class User : EntityBase<long>, IAggregateRoot
             return Result<User>.Error(new ErrorList(errors));
 
         var user = new User(email, externalId);
-        user.RegisterDomainEvent(new UserRegisteredEvent(user.Email, user.ExternalId!));
+        user.RegisterDomainEvent(new UserRegisteredEvent(user.Email, user.ExternalId));
         return Result<User>.Success(user);
     }
 
     public Result CompleteOnboarding(Username username, long countryId)
     {
         Guard.Against.Null(username, nameof(username));
+
+        if (Username is not null)
+            return Result.Error(new ErrorList([UserErrors.AlreadyOnboarded]));
 
         if (countryId <= 0)
             return Result.Error(new ErrorList([UserErrors.InvalidCountryId]));
@@ -65,7 +71,12 @@ public class User : EntityBase<long>, IAggregateRoot
         if (string.IsNullOrWhiteSpace(newEmail))
             return Result.Error(new ErrorList([UserErrors.EmptyEmail]));
 
+        if (!IsValidEmail(newEmail))
+            return Result.Error(new ErrorList([UserErrors.InvalidEmail]));
+
         Email = newEmail;
         return Result.Success();
     }
+
+    private static bool IsValidEmail(string email) => MailAddress.TryCreate(email, out _);
 }
