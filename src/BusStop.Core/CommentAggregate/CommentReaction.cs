@@ -6,18 +6,18 @@ namespace BusStop.Core.CommentAggregate;
 public sealed class CommentReaction : ValueObject
 {
     public UserId UserId { get; }
-    public ReactionType ReactionType { get; }
+    public bool IsLike { get; }
 
-    private CommentReaction(UserId userId, ReactionType reactionType)
+    private CommentReaction(UserId userId, bool isLike)
     {
         UserId = userId;
-        ReactionType = reactionType;
+        IsLike = isLike;
     }
 
-    public static CommentReaction From(UserId userId, ReactionType reactionType)
+    public static CommentReaction From(UserId userId, bool isLike)
     {
         Guard.Against.Null(userId, nameof(userId));
-        return new CommentReaction(userId, reactionType);
+        return new CommentReaction(userId, isLike);
     }
 
 #pragma warning disable CS8618
@@ -27,5 +27,6 @@ public sealed class CommentReaction : ValueObject
     protected override IEnumerable<object> GetEqualityComponents()
     {
         yield return UserId;
+        yield return IsLike;
     }
 }

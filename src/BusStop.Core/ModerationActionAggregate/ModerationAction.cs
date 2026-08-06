@@ -1,4 +1,5 @@
 using BusStop.Core.Errors;
+using BusStop.Core.ModerationActionAggregate.Events;
 using BusStop.Core.UserAggregate;
 
 namespace BusStop.Core.ModerationActionAggregate;
@@ -53,6 +54,15 @@ public class ModerationAction : EntityBase<long>, IAggregateRoot
             return Result<ModerationAction>.Error(new ErrorList(errors));
 
         var action = new ModerationAction(targetType, targetId, new UserId(userId), new UserId(issuedBy), category, Reason.From(reason));
+        action.RegisterDomainEvent(new ModerationActionRecordedEvent(
+            action.Id,
+            action.TargetType,
+            action.TargetId,
+            action.UserId.Value,
+            action.IssuedBy.Value,
+            action.Category,
+            action.Reason.Value,
+            action.IssuedAt));
         return Result<ModerationAction>.Success(action);
     }
 

@@ -1,5 +1,4 @@
 using BusStop.Core.Errors;
-using BusStop.Core.RouteAggregate;
 using BusStop.Core.StopAggregate.Events;
 using BusStop.Core.UserAggregate;
 
@@ -9,7 +8,7 @@ public class Stop : EntityBase<long>, IAggregateRoot
 {
     public StopName Name { get; private set; }
     public Location Location { get; private set; }
-    public RouteId RouteId { get; private set; }
+    public long RouteId { get; private set; }
     public DateTime? DeletedAt { get; private set; }
     public long? DeletedBy { get; private set; }
 
@@ -17,11 +16,10 @@ public class Stop : EntityBase<long>, IAggregateRoot
     private Stop() { }
 #pragma warning restore CS8618
 
-    private Stop(StopName name, Location location, RouteId routeId)
+    private Stop(StopName name, Location location, long routeId)
     {
         Guard.Against.Null(name, nameof(name));
         Guard.Against.Null(location, nameof(location));
-        Guard.Against.Null(routeId, nameof(routeId));
 
         Name = name;
         Location = location;
@@ -44,7 +42,7 @@ public class Stop : EntityBase<long>, IAggregateRoot
         if (errors.Count > 0)
             return Result<Stop>.Error(new ErrorList(errors));
 
-        return Result<Stop>.Success(new Stop(new StopName(name), new Location(latitude, longitude), new RouteId(routeId)));
+        return Result<Stop>.Success(new Stop(new StopName(name), new Location(latitude, longitude), routeId));
     }
 
     public Result UpdateName(StopName newName)

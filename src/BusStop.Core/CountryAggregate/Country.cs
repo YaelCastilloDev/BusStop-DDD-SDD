@@ -1,7 +1,7 @@
-using BusStop.Core.Errors;
+﻿using BusStop.Core.Errors;
 
 namespace BusStop.Core.CountryAggregate;
-
+// I may add some specific features based on the country, such as recomendations...
 public class Country : EntityBase<long>, IAggregateRoot
 {
     public string Name { get; private set; }

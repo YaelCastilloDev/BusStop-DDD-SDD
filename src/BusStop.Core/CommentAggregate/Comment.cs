@@ -1,6 +1,5 @@
 using BusStop.Core.CommentAggregate.Events;
 using BusStop.Core.Errors;
-using BusStop.Core.RouteAggregate;
 using BusStop.Core.UserAggregate;
 
 namespace BusStop.Core.CommentAggregate;
@@ -9,7 +8,7 @@ public class Comment : EntityBase<long>, IAggregateRoot
 {
     public CommentContent Content { get; private set; }
     public UserId UserId { get; private set; }
-    public RouteId RouteId { get; private set; }
+    public long RouteId { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime? ModeratedAt { get; private set; }
     public long? ModeratedBy { get; private set; }
@@ -21,11 +20,10 @@ public class Comment : EntityBase<long>, IAggregateRoot
     private Comment() { }
 #pragma warning restore CS8618
 
-    private Comment(CommentContent content, UserId userId, RouteId routeId)
+    private Comment(CommentContent content, UserId userId, long routeId)
     {
         Guard.Against.Null(content, nameof(content));
         Guard.Against.Null(userId, nameof(userId));
-        Guard.Against.Null(routeId, nameof(routeId));
 
         Content = content;
         UserId = userId;
@@ -47,7 +45,7 @@ public class Comment : EntityBase<long>, IAggregateRoot
         if (errors.Count > 0)
             return Result<Comment>.Error(new ErrorList(errors));
 
-        return Result<Comment>.Success(new Comment(new CommentContent(content), new UserId(userId), new RouteId(routeId)));
+        return Result<Comment>.Success(new Comment(new CommentContent(content), new UserId(userId), routeId));
     }
 
     public Result Moderate(UserId moderatedBy)
@@ -65,11 +63,11 @@ public class Comment : EntityBase<long>, IAggregateRoot
 
     public bool IsModerated => ModeratedAt.HasValue;
 
-    public Result AddReaction(UserId userId, ReactionType reactionType)
+    public Result AddReaction(UserId userId, bool isLike)
     {
         Guard.Against.Null(userId, nameof(userId));
         _reactions.RemoveAll(r => r.UserId == userId);
-        _reactions.Add(CommentReaction.From(userId, reactionType));
+        _reactions.Add(CommentReaction.From(userId, isLike));
         return Result.Success();
     }
 }

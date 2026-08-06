@@ -6,7 +6,7 @@ public class RouteDeletedHandler(ILogger<RouteDeletedHandler> logger) : INotific
 {
   public ValueTask Handle(RouteDeletedEvent notification, CancellationToken cancellationToken)
   {
-    logger.LogInformation("Route {RouteId} was deleted", notification.RouteId);
+    logger.LogInformation("Route {RouteId} was hard-deleted by user {DeletedByUserId}", notification.RouteId, notification.DeletedByUserId);
     return ValueTask.CompletedTask;
   }
 }

@@ -59,7 +59,7 @@ public class Route : EntityBase<long>, IAggregateRoot
 
         DeletedAt = DateTime.UtcNow;
         DeletedBy = deletedBy.Value;
-        RegisterDomainEvent(new RouteDeletedEvent(Id));
+        RegisterDomainEvent(new RouteDeletedEvent(Id, deletedBy.Value));
         return Result.Success();
     }
 
