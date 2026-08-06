@@ -25,11 +25,18 @@ public sealed class StopConfiguration : IEntityTypeConfiguration<Stop>
            .HasColumnType("geography (point)");
 
     builder.Property(s => s.RouteId)
-           .HasConversion(id => id.Value, value => new RouteId(value))
            .IsRequired();
 
     builder.Property(s => s.DeletedAt).IsRequired(false);
     builder.Property(s => s.DeletedBy).IsRequired(false);
+
+    builder.HasIndex(s => s.RouteId);
+
+    builder.HasOne<Route>()
+           .WithMany()
+           .HasForeignKey(s => s.RouteId)
+           .HasConstraintName("fk_stops_route")
+           .OnDelete(DeleteBehavior.Cascade);
 
     builder.HasQueryFilter(s => s.DeletedAt == null);
   }

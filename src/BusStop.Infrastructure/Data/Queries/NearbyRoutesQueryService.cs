@@ -42,8 +42,21 @@ public sealed class NearbyRoutesQueryService(AppDbContext dbContext) : INearbyRo
 
     private async Task<List<NearbyRouteDto>> GetRoutesWithinRadiusAsync(double latitude, double longitude, double radiusMeters, CancellationToken cancellationToken, int? limit = null)
     {
-        // We use raw SQL because Stop.Location is a custom ValueObject with a ValueConverter, 
-        // which prevents EF Core from translating LINQ spatial methods (like .Distance()) directly.
+        var (sql, parameters) = BuildQuery(latitude, longitude, radiusMeters, limit);
+
+        return await dbContext.Database.SqlQueryRaw<NearbyRouteDto>(
+            sql,
+            parameters)
+            .ToListAsync(cancellationToken);
+    }
+
+    // We use raw SQL because Stop.Location is a custom ValueObject with a ValueConverter,
+    // which prevents EF Core from translating LINQ spatial methods (like .Distance()) directly.
+    // The WHERE filters mirror:
+    //   - RouteConfiguration.HasQueryFilter (DeletedAt + ModeratedAt)
+    //   - StopConfiguration.HasQueryFilter (DeletedAt)
+    public static (string Sql, object[] Parameters) BuildQuery(double latitude, double longitude, double radiusMeters, int? limit)
+    {
         var sql = $@"
             SELECT 
                 r.""Id"", 
@@ -54,21 +67,21 @@ public sealed class NearbyRoutesQueryService(AppDbContext dbContext) : INearbyRo
                 MIN(ST_Distance(s.""Location"", ST_SetSRID(ST_MakePoint({{1}}, {{0}}), {Wgs84Srid})::geography)) AS ""DistanceMeters""
             FROM routes r
             JOIN stops s ON r.""Id"" = s.""RouteId""
-            WHERE r.""DeletedAt"" IS NULL AND s.""DeletedAt"" IS NULL
+            WHERE r.""DeletedAt"" IS NULL 
+              AND r.""ModeratedAt"" IS NULL 
+              AND s.""DeletedAt"" IS NULL
               AND ST_DWithin(s.""Location"", ST_SetSRID(ST_MakePoint({{1}}, {{0}}), {Wgs84Srid})::geography, {{2}})
             GROUP BY r.""Id"", r.""Name"", r.""CreatedById"", r.""CreatedAt"", r.""DeletedAt""
             ORDER BY ""DistanceMeters"" ASC";
 
+        var parameters = new List<object> { latitude, longitude, radiusMeters };
+
         if (limit.HasValue)
         {
-            sql += $"\n            LIMIT {limit.Value}";
+            sql += "\n            LIMIT {3}";
+            parameters.Add(limit.Value);
         }
 
-        return await dbContext.Database.SqlQueryRaw<NearbyRouteDto>(
-            sql, 
-            latitude, 
-            longitude, 
-            radiusMeters)
-            .ToListAsync(cancellationToken);
+        return (sql, parameters.ToArray());
     }
 }

@@ -23,7 +23,6 @@ public sealed class CommentConfiguration : IEntityTypeConfiguration<Comment>
            .IsRequired();
 
     builder.Property(c => c.RouteId)
-           .HasConversion(id => id.Value, value => new RouteId(value))
            .IsRequired();
 
     builder.Property(c => c.CreatedAt).IsRequired();
@@ -36,9 +35,16 @@ public sealed class CommentConfiguration : IEntityTypeConfiguration<Comment>
       r.ToJson("reactions");
       r.Property(x => x.UserId)
        .HasConversion(id => id.Value, value => new UserId(value));
-      r.Property(x => x.ReactionType)
-       .HasConversion<int>();
+      r.Property(x => x.IsLike);
     });
+
+    builder.HasIndex(c => c.RouteId);
+
+    builder.HasOne<Route>()
+           .WithMany()
+           .HasForeignKey(c => c.RouteId)
+           .HasConstraintName("fk_comments_route")
+           .OnDelete(DeleteBehavior.Cascade);
 
     builder.HasQueryFilter(c => c.ModeratedAt == null);
   }
