@@ -15,4 +15,14 @@ public static class UserRepositoryExtensions
             ? Result<User>.NotFound("User not found.")
             : Result<User>.Success(user);
     }
+
+    public static async Task<Result<User>> GetUserByUsernameAsync(
+        this IRepository<User> repository, string username, CancellationToken ct)
+    {
+        var spec = new UserByUsernameSpec(username);
+        var user = await repository.FirstOrDefaultAsync(spec, ct);
+        return user is null
+            ? Result<User>.NotFound("User not found.")
+            : Result<User>.Success(user);
+    }
 }

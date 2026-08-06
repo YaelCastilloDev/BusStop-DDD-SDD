@@ -1,15 +1,12 @@
 using BusStop.Core.CountryAggregate;
 using BusStop.Core.CountryAggregate.Specifications;
+using BusStop.Core.Errors;
 using BusStop.Core.Interfaces;
 using BusStop.Core.UserAggregate;
 using BusStop.Core.UserAggregate.Specifications;
 
 namespace BusStop.UseCases.Users.Onboarding;
 
-// TODO: Deferred — username uniqueness domain invariant is not enforced.
-// SPEC-IdentityAccess-RegisterFlow requires "Username is unique across all users" but
-// no duplicate-username check exists here. Keycloak only handles email uniqueness.
-// A UserByUsernameSpec and guard clause should be added before closing this spec.
 public sealed class OnboardingHandler(
   IRepository<User> repository,
   ICurrentUser currentUser,
@@ -24,6 +21,13 @@ public sealed class OnboardingHandler(
     if (!userResult.IsSuccess)
       return Result<UserResponse>.NotFound("User not found.");
     var user = userResult.Value;
+
+    var existingUser = await repository.FirstOrDefaultAsync(
+      new UserByUsernameSpec(request.Username),
+      cancellationToken);
+
+    if (existingUser is not null && existingUser.Id != user.Id)
+      return Result<UserResponse>.Error(new ErrorList([UserErrors.UsernameAlreadyTaken]));
 
     var countryResult = await countryRepository.FindRequiredAsync(
       new CountryByIdSpec(request.CountryId),
