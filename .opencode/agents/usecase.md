@@ -60,6 +60,7 @@ Return `Result` / `Result<T>` for expected failures. Never throw for flow contro
 - MediatR usage — always use Mediator source generator.
 - Direct DbContext, EF Core, or HTTP references.
 - Business logic in DTOs.
+- Modifying, removing, or relaxing existing error returns in handlers that enforce domain invariants without explicit user authorization. If a handler's validation logic needs to change, ask the user first and explain why.
 
 ## Deliverables
 - Complete vertical use-case slice ready for Infrastructure and Web wiring.

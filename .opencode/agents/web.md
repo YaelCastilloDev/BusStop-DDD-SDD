@@ -70,6 +70,7 @@ public class Create(IMediator mediator) : Endpoint<CreateRouteRequest, RouteResp
 - Business logic, validation rules, or direct DbContext in endpoints.
 - Using primary constructor parameters directly — assign to `_privateFields`.
 - Skipping validators on input-bearing endpoints.
+- Modifying, removing, or relaxing existing FastEndpoints `Validator<TRequest>` classes or validation rules without explicit user authorization. If a change to an existing validator is needed, ask the user first and explain why.
 
 ## Deliverables
 - Thin endpoints that delegate all logic to UseCase handlers.

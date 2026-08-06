@@ -44,6 +44,7 @@ Implementation order: Planner → Context → Domain → UseCase → Infrastruct
 - No undocumented breaking changes.
 - Commits/PRs reference spec ID.
 - Every use case: command/query + handler + endpoint + tests.
+- Do not modify, remove, or relax existing guard clauses, domain invariants, `.Create()` factory methods, FastEndpoints validators, or validation error constants without explicit user authorization. If a change is needed, ask the user first and explain why.
 
 ## Key References
 - Product: `harness/product/vision.md`

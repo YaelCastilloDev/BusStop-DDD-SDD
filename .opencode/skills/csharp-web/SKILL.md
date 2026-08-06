@@ -44,3 +44,6 @@ Always assign primary constructor parameters to private `_fields`. Never use con
 - Route groups per bounded context: `/routes`, `/stops`, `/moderation`.
 - OpenAPI tags per aggregate/feature.
 - Authorization policies per role where required.
+
+## Immutability Rule
+Existing FastEndpoints `Validator<TRequest>` classes, validation rules, and error messages must not be modified, removed, or relaxed unless the user explicitly instructs you to do so. If you believe a validator change is necessary, ask the user first and explain the reasoning.

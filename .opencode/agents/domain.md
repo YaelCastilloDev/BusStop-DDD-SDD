@@ -87,6 +87,7 @@ public sealed class RouteId : ValueObject
 - EF Core attributes, DbContext, HTTP, ASP.NET Core in Core.
 - Use-case orchestration handlers in Core (domain event handlers using `INotificationHandler<T>` are allowed).
 - Cross-context data writes.
+- Modifying, removing, or relaxing existing guard clauses, domain invariants, `.Create()` factory methods, or validation error constants without explicit user authorization. If a change to these artifacts is needed, ask the user first and explain why.
 
 ## Deliverables
 - Core classes with invariants documented in code.

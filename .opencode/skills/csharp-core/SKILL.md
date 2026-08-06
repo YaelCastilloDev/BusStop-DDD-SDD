@@ -139,3 +139,6 @@ public static RouteResponse ToResponse(this Route route) =>
     new(route.Id, route.Name.Value, route.CreatedById.Value, route.CreatedAt, route.IsDeleted);
 ```
 All handlers use `entity.ToResponse()` instead of inline `new XxxResponse(...)` constructor calls.
+
+## Immutability Rule
+Existing guard clauses, domain invariants, `.Create()` factory methods, and validation error constants (`Errors/{Entity}Errors.cs`) must not be modified, removed, or relaxed unless the user explicitly instructs you to do so. If you believe a change is necessary, ask the user first and explain the reasoning.
