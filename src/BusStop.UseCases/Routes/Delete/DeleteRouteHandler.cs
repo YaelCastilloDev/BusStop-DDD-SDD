@@ -1,5 +1,6 @@
 using BusStop.Core.Interfaces;
 using BusStop.Core.RouteAggregate;
+using BusStop.Core.RouteAggregate.Events;
 using BusStop.Core.RouteAggregate.Specifications;
 using BusStop.Core.UserAggregate;
 
@@ -7,7 +8,8 @@ namespace BusStop.UseCases.Routes.Delete;
 
 public sealed class DeleteRouteHandler(
   IRepository<Route> repository,
-  ICurrentUser currentUser) : ICommandHandler<DeleteRouteCommand, Result>
+  ICurrentUser currentUser,
+  IPublisher publisher) : ICommandHandler<DeleteRouteCommand, Result>
 {
   public async ValueTask<Result> Handle(DeleteRouteCommand request, CancellationToken cancellationToken)
   {
@@ -19,11 +21,9 @@ public sealed class DeleteRouteHandler(
       return Result.NotFound("Route not found.");
     var route = routeResult.Value;
 
-    var deleteResult = route.Delete(new UserId(currentUser.Id));
-    if (!deleteResult.IsSuccess)
-      return Result.Error(new ErrorList(deleteResult.Errors));
+    await publisher.Publish(new RouteDeletedEvent(route.Id, currentUser.Id), cancellationToken);
 
-    await repository.UpdateAsync(route, cancellationToken);
+    await repository.DeleteAsync(route, cancellationToken);
 
     return Result.Success();
   }
