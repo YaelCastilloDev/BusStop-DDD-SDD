@@ -10,6 +10,13 @@ public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logge
         Exception exception,
         CancellationToken cancellationToken)
     {
+        if (exception is OperationCanceledException)
+        {
+            logger.LogWarning("Request canceled: {Message}", exception.Message);
+            httpContext.Response.StatusCode = 499; // Client Closed Request (Nginx convention)
+            return true;
+        }
+
         logger.LogError(exception, "Unhandled exception: {Message}", exception.Message);
 
         httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;

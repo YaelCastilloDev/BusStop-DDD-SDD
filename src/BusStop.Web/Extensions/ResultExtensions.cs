@@ -1,4 +1,5 @@
-﻿using Ardalis.Result;
+﻿using System.Reflection;
+using Ardalis.Result;
 using FastEndpoints;
 
 namespace BusStop.Web.Extensions;
@@ -22,7 +23,13 @@ public static class ResultExtensions
             // FastEndpoints doesn't have a direct IEndpoint.SendCreatedAtAsync that takes route values easily without the endpoint type.
             // We can use SendAsync with 201 status code.
             ep.HttpContext.Response.StatusCode = 201;
-            // Note: Ideally we'd set the Location header here using routeValues
+            var id = routeValues.GetType().GetProperty("Id", BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)
+                ?.GetValue(routeValues);
+            if (id != null)
+            {
+                var path = ep.HttpContext.Request.Path;
+                ep.HttpContext.Response.Headers.Location = $"{path}/{id}";
+            }
             await ep.HttpContext.Response.SendAsync(result.Value, cancellation: ct);
             return;
         }

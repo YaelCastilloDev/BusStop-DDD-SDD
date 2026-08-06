@@ -13,6 +13,7 @@ public abstract class IntegrationTestBase : IAsyncLifetime
     private string? _dbConnectionString;
 
     protected AppDbContext DbContext => _dbContext!;
+    protected string DatabaseName => _databaseName;
 
     protected IntegrationTestBase(PostgreSqlFixture fixture)
     {
