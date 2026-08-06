@@ -1,0 +1,52 @@
+# Build outputs
+**/bin/
+**/obj/
+
+# Frontend
+**/node_modules/
+**/dist/
+**/.vite/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# IDE / Editor
+.idea/
+.vs/
+.vscode/
+*.sln.iml
+*.user
+*.suo
+*.DotSettings.user
+
+# Environment & secrets
+.env
+*.env.local
+*.env.*.local
+
+# Docker state
+containers/database/
+
+# CI / GitHub
+.github/
+
+# Docs (not needed for build)
+*.md
+!README.md
+/docs/
+
+# Tests (not needed for app image)
+tests/
+
+# Miscellaneous
+*.log
+*.cache
+**/packages/*
+coverage/
+.vscodecounter/
+
+# OS files
+Thumbs.db
+.DS_Store
