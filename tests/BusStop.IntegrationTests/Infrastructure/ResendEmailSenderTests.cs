@@ -1,4 +1,4 @@
-using BusStop.Core.NotificationAggregate.Interfaces;
+using BusStop.Core.Interfaces;
 using BusStop.Infrastructure.Integrations.Email;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

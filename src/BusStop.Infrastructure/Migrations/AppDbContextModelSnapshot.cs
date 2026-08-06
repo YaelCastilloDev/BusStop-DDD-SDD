@@ -54,6 +54,8 @@ namespace BusStop.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("RouteId");
+
                     b.ToTable("comments", (string)null);
                 });
 
@@ -128,38 +130,6 @@ namespace BusStop.Infrastructure.Migrations
                     b.ToTable("moderation_actions", (string)null);
                 });
 
-            modelBuilder.Entity("BusStop.Core.NotificationAggregate.UserNotification", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("UserNotifications");
-                });
-
             modelBuilder.Entity("BusStop.Core.RouteAggregate.Route", b =>
                 {
                     b.Property<long>("Id")
@@ -223,6 +193,8 @@ namespace BusStop.Infrastructure.Migrations
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("RouteId");
 
                     b.ToTable("stops", (string)null);
                 });
@@ -303,8 +275,47 @@ namespace BusStop.Infrastructure.Migrations
                     b.ToTable("target_types", (string)null);
                 });
 
+            modelBuilder.Entity("BusStop.Infrastructure.Data.NotificationRecord", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Notifications", (string)null);
+                });
+
             modelBuilder.Entity("BusStop.Core.CommentAggregate.Comment", b =>
                 {
+                    b.HasOne("BusStop.Core.RouteAggregate.Route", null)
+                        .WithMany()
+                        .HasForeignKey("RouteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_comments_route");
+
                     b.OwnsMany("BusStop.Core.CommentAggregate.CommentReaction", "Reactions", b1 =>
                         {
                             b1.Property<long>("CommentId");
@@ -312,7 +323,7 @@ namespace BusStop.Infrastructure.Migrations
                             b1.Property<int>("__synthesizedOrdinal")
                                 .ValueGeneratedOnAdd();
 
-                            b1.Property<int>("ReactionType");
+                            b1.Property<bool>("IsLike");
 
                             b1.Property<long>("UserId");
 
@@ -329,6 +340,16 @@ namespace BusStop.Infrastructure.Migrations
                         });
 
                     b.Navigation("Reactions");
+                });
+
+            modelBuilder.Entity("BusStop.Core.StopAggregate.Stop", b =>
+                {
+                    b.HasOne("BusStop.Core.RouteAggregate.Route", null)
+                        .WithMany()
+                        .HasForeignKey("RouteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_stops_route");
                 });
 #pragma warning restore 612, 618
         }

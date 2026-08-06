@@ -11,9 +11,9 @@ namespace BusStop.IntegrationTests;
 // ModerateComment, ListCountries, GetMeHandler, GetUserByIdHandler, GetMyNotifications,
 // DeleteNotification, ProcessModerationNotification). Add unit/integration tests incrementally.
 //
-// TODO: Deferred — CountryAggregate and NotificationAggregate are missing Events/ and Handlers/
-// subfolders. Currently no domain events exist for these aggregates, so the folders are not yet
-// needed but should be created when events are introduced.
+// TODO: Deferred — CountryAggregate is missing Events/ and Handlers/ subfolders.
+// NotificationAggregate has been removed; notifications now use INotificationRepository
+// and Notification entities in BusStop.Core.Notifications.
 
 public sealed class PostgreSqlFixture : IAsyncLifetime
 {

@@ -1,12 +1,11 @@
 using Ardalis.Result;
 using BusStop.Core.Interfaces;
-using BusStop.Core.NotificationAggregate;
-using BusStop.Core.NotificationAggregate.Specifications;
+using BusStop.Core.Notifications;
 
 namespace BusStop.UseCases.Notifications.GetMy;
 
 public class GetMyNotificationsHandler(
-  IReadRepository<UserNotification> repository,
+  INotificationRepository notificationRepository,
   ICurrentUser currentUser)
   : IQueryHandler<GetMyNotificationsQuery, Result<IEnumerable<NotificationDto>>>
 {
@@ -15,11 +14,8 @@ public class GetMyNotificationsHandler(
     if (currentUser.Id <= 0)
       return Result.NotFound("User not found.");
 
-    var spec = new NotificationsByUserIdSpec(currentUser.Id);
-    var notifications = await repository.ListAsync(spec, cancellationToken);
-
+    var notifications = await notificationRepository.GetByUserIdAsync(currentUser.Id, cancellationToken);
     var dtos = notifications.Select(n => n.ToResponse());
-
     return Result.Success(dtos);
   }
 }

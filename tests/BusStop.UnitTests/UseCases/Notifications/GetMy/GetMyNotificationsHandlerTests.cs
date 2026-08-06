@@ -1,9 +1,7 @@
 using Ardalis.Result;
 using Ardalis.SharedKernel;
 using BusStop.Core.Interfaces;
-using BusStop.Core.NotificationAggregate;
-using BusStop.Core.NotificationAggregate.Specifications;
-using BusStop.UseCases.Notifications;
+using BusStop.Core.Notifications;
 using BusStop.UseCases.Notifications.GetMy;
 using NSubstitute;
 
@@ -12,13 +10,13 @@ namespace BusStop.UnitTests.UseCases.Notifications.GetMy;
 // SPEC-NotificationContext-Moderation
 public class GetMyNotificationsHandlerTests
 {
-    private readonly IReadRepository<UserNotification> _notificationRepository;
+    private readonly INotificationRepository _notificationRepository;
     private readonly ICurrentUser _currentUser;
     private readonly GetMyNotificationsHandler _handler;
 
     public GetMyNotificationsHandlerTests()
     {
-        _notificationRepository = Substitute.For<IReadRepository<UserNotification>>();
+        _notificationRepository = Substitute.For<INotificationRepository>();
         _currentUser = Substitute.For<ICurrentUser>();
         _handler = new GetMyNotificationsHandler(_notificationRepository, _currentUser);
     }
@@ -29,11 +27,11 @@ public class GetMyNotificationsHandlerTests
         var query = new GetMyNotificationsQuery { Sub = "kc-sub" };
         _currentUser.Id.Returns(1L);
 
-        var notification = UserNotification.Create(1, "Title", "Message").Value;
+        var notification = new Notification(1, "Title", "Message");
         typeof(EntityBase<long>).GetProperty("Id")!.SetValue(notification, 100L);
 
-        _notificationRepository.ListAsync(Arg.Any<NotificationsByUserIdSpec>(), Arg.Any<CancellationToken>())
-            .Returns([notification]);
+        _notificationRepository.GetByUserIdAsync(Arg.Any<long>(), Arg.Any<CancellationToken>())
+            .Returns(new[] { notification });
 
         var result = await _handler.Handle(query, CancellationToken.None);
 

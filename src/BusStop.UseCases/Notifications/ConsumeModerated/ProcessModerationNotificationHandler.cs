@@ -1,5 +1,6 @@
-using BusStop.Core.NotificationAggregate;
-using BusStop.Core.NotificationAggregate.Interfaces;
+using Ardalis.Result;
+using BusStop.Core.Interfaces;
+using BusStop.Core.Notifications;
 using BusStop.Core.UserAggregate;
 using BusStop.Core.UserAggregate.Specifications;
 using Microsoft.Extensions.Logging;
@@ -7,7 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace BusStop.UseCases.Notifications.ConsumeModerated;
 
 public class ProcessModerationNotificationHandler(
-  IRepository<UserNotification> repository,
+  INotificationRepository notificationRepository,
   IReadRepository<User> userRepository,
   IEmailSender emailSender,
   ILogger<ProcessModerationNotificationHandler> logger)
@@ -36,13 +37,8 @@ public class ProcessModerationNotificationHandler(
     var title = $"Your {request.TargetType} was moderated";
     var message = $"Your {request.TargetType.ToString().ToLower()} (ID: {request.TargetId}) was moderated for {request.Category}. Reason: {request.Reason}";
 
-    var notificationResult = UserNotification.Create(request.UserId, title, message);
-    if (!notificationResult.IsSuccess)
-      return Result.Error(new ErrorList(notificationResult.Errors));
-
-    var notification = notificationResult.Value;
-    await repository.AddAsync(notification, cancellationToken);
-
+    var notification = new Notification(request.UserId, title, message);
+    await notificationRepository.AddAsync(notification, cancellationToken);
     await emailSender.SendEmailAsync(user.Email, title, message, cancellationToken);
 
     return Result.Success();

@@ -1,4 +1,4 @@
-using BusStop.Core.NotificationAggregate.Interfaces;
+using BusStop.Core.Interfaces;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Resend;

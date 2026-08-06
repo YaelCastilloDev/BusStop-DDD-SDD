@@ -27,6 +27,7 @@ public static class InfrastructureServiceExtensions
       {
         o.UseNetTopologySuite();
         o.EnableRetryOnFailure(2, TimeSpan.FromSeconds(15), null);
+        o.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName);
       });
       options.AddInterceptors(eventDispatchInterceptor);
     });
@@ -46,7 +47,8 @@ public static class InfrastructureServiceExtensions
     services.AddHttpClient<ResendClient>();
     services.Configure<ResendClientOptions>(options => options.ApiToken = resendApiKey ?? "missing-key");
     services.AddTransient<IResend, ResendClient>();
-    services.AddScoped<BusStop.Core.NotificationAggregate.Interfaces.IEmailSender, BusStop.Infrastructure.Integrations.Email.ResendEmailSender>();
+    services.AddScoped<BusStop.Core.Interfaces.IEmailSender, BusStop.Infrastructure.Integrations.Email.ResendEmailSender>();
+    services.AddScoped<BusStop.Core.Interfaces.INotificationRepository, BusStop.Infrastructure.Data.NotificationPersistence>();
     logger.LogInformation("Resend email sender registered.");
     
     services.AddHttpClient("KeycloakAdmin", c => c.Timeout = TimeSpan.FromSeconds(10));

@@ -111,7 +111,7 @@ See `.opencode/skills/csharp-core/SKILL.md` for code examples of each tier.
 | Stop | `StopAggregate/Stop.cs` | `Stops/Create`, `Stops/GetByRoute` |
 | Comment | `CommentAggregate/Comment.cs` | `Comments/Create`, `Comments/Moderate` |
 | User | `UserAggregate/User.cs` | `Users/Register`, `Users/Onboarding` |
-| Notification | `NotificationAggregate/UserNotification.cs` | `Notifications/ConsumeModerated` |
+| Notification | `Interfaces/INotificationRepository.cs` (not an aggregate) | `Notifications/ConsumeModerated`, `Notifications/GetMy`, `Notifications/Delete` |
 | Country | `CountryAggregate/Country.cs` | `Countries/List` |
 
 ## Project Coding Standards (BusStop)
