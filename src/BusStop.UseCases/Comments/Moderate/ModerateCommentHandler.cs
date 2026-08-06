@@ -2,7 +2,6 @@ using BusStop.Core.CommentAggregate;
 using BusStop.Core.CommentAggregate.Specifications;
 using BusStop.Core.Interfaces;
 using BusStop.Core.ModerationActionAggregate;
-using BusStop.Core.ModerationActionAggregate.Events;
 using BusStop.Core.UserAggregate;
 
 namespace BusStop.UseCases.Comments.Moderate;
@@ -10,8 +9,7 @@ namespace BusStop.UseCases.Comments.Moderate;
 public sealed class ModerateCommentHandler(
   IRepository<Comment> commentRepository,
   IRepository<ModerationAction> moderationActionRepository,
-  ICurrentUser currentUser,
-  IPublisher publisher) : ICommandHandler<ModerateCommentCommand, Result>
+  ICurrentUser currentUser) : ICommandHandler<ModerateCommentCommand, Result>
 {
   public async ValueTask<Result> Handle(ModerateCommentCommand request, CancellationToken cancellationToken)
   {
@@ -33,16 +31,6 @@ public sealed class ModerateCommentHandler(
 
     var moderationAction = actionResult.Value;
     await moderationActionRepository.AddAsync(moderationAction, cancellationToken);
-
-    await publisher.Publish(new ModerationActionRecordedEvent(
-        moderationAction.Id,
-        moderationAction.TargetType,
-        moderationAction.TargetId,
-        moderationAction.UserId.Value,
-        moderationAction.IssuedBy.Value,
-        moderationAction.Category,
-        moderationAction.Reason.Value,
-        moderationAction.IssuedAt), cancellationToken);
 
     await commentRepository.UpdateAsync(comment, cancellationToken);
 

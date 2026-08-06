@@ -16,7 +16,7 @@ public sealed class GetCommentsByRouteHandler(
       return Result<List<CommentResponse>>.NotFound("Route not found.");
     var route = routeResult.Value;
 
-    var spec = new CommentsByRouteSpec(new RouteId(request.RouteId));
+    var spec = new CommentsByRouteSpec(request.RouteId);
     var comments = await repository.ListAsync(spec, cancellationToken);
 
     var responses = comments

@@ -1,6 +1,5 @@
 using BusStop.Core.Interfaces;
 using BusStop.Core.ModerationActionAggregate;
-using BusStop.Core.ModerationActionAggregate.Events;
 using BusStop.Core.RouteAggregate;
 using BusStop.Core.RouteAggregate.Specifications;
 using BusStop.Core.UserAggregate;
@@ -10,8 +9,7 @@ namespace BusStop.UseCases.Routes.Moderate;
 public sealed class ModerateRouteHandler(
   IRepository<Route> routeRepository,
   IRepository<ModerationAction> moderationActionRepository,
-  ICurrentUser currentUser,
-  IPublisher publisher) : ICommandHandler<ModerateRouteCommand, Result>
+  ICurrentUser currentUser) : ICommandHandler<ModerateRouteCommand, Result>
 {
   public async ValueTask<Result> Handle(ModerateRouteCommand request, CancellationToken cancellationToken)
   {
@@ -33,16 +31,6 @@ public sealed class ModerateRouteHandler(
 
     var moderationAction = actionResult.Value;
     await moderationActionRepository.AddAsync(moderationAction, cancellationToken);
-
-    await publisher.Publish(new ModerationActionRecordedEvent(
-        moderationAction.Id,
-        moderationAction.TargetType,
-        moderationAction.TargetId,
-        moderationAction.UserId.Value,
-        moderationAction.IssuedBy.Value,
-        moderationAction.Category,
-        moderationAction.Reason.Value,
-        moderationAction.IssuedAt), cancellationToken);
 
     await routeRepository.UpdateAsync(route, cancellationToken);
 

@@ -16,7 +16,7 @@ public sealed class GetStopsByRouteHandler(
       return Result<List<StopResponse>>.NotFound("Route not found.");
     var route = routeResult.Value;
 
-    var spec = new StopsByRouteSpec(new RouteId(request.RouteId));
+    var spec = new StopsByRouteSpec(request.RouteId);
     var stops = await repository.ListAsync(spec, cancellationToken);
 
     var responses = stops

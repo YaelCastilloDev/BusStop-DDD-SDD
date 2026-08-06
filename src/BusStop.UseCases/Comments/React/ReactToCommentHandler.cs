@@ -22,10 +22,7 @@ public sealed class ReactToCommentHandler(
     if (comment.IsModerated)
       return Result.Error("Cannot react to a moderated comment.");
 
-    if (!Enum.TryParse<ReactionType>(request.ReactionType, ignoreCase: true, out var reactionType))
-      reactionType = ReactionType.Like;
-
-    _ = comment.AddReaction(new UserId(currentUser.Id), reactionType);
+    _ = comment.AddReaction(new UserId(currentUser.Id), request.IsLike);
 
     await repository.UpdateAsync(comment, cancellationToken);
 
