@@ -12,7 +12,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://aspire-dashboard:18889"
-      ConnectionStrings__PostgresConnection: "Host=pgbouncer;Port=6432;Database=busstop;Username=${DB_USER};Password=${DB_PASSWORD};Pooling=false"
+      ConnectionStrings__PostgresConnection: "Host=pgbouncer;Port=5432;Database=busstop;Username=${DB_USER};Password=${DB_PASSWORD};Pooling=false"
       ConnectionStrings__messaging: "amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672"
       RabbitMQ__Host: "rabbitmq"
       Keycloak__AuthorizationUrl: "http://keycloak:8080/realms/auth-demo/protocol/openid-connect/auth"
@@ -30,22 +30,22 @@ services:
       - keycloak
 
   pgbouncer:
-    image: bitnami/pgbouncer:1.23.1
+    image: edoburu/pgbouncer:v1.25.2-p0
     container_name: pgbouncer
     environment:
-      PGBOUNCER_DATABASE: busstop
-      PGBOUNCER_PORT: 6432
-      POSTGRESQL_HOST: postgres
-      POSTGRESQL_PORT: 5432
-      POSTGRESQL_USERNAME: ${DB_USER}
-      POSTGRESQL_PASSWORD: ${DB_PASSWORD}
-      PGBOUNCER_POOL_MODE: transaction
-      PGBOUNCER_MAX_CLIENT_CONN: 1000
-      PGBOUNCER_DEFAULT_POOL_SIZE: 25
-      PGBOUNCER_RESERVE_POOL_SIZE: 5
-      PGBOUNCER_IGNORE_STARTUP_PARAMETERS: extra_float_digits
+      DB_NAME: busstop
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      AUTH_TYPE: scram-sha-256
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 1000
+      DEFAULT_POOL_SIZE: 25
+      RESERVE_POOL_SIZE: 5
+      IGNORE_STARTUP_PARAMETERS: extra_float_digits
     ports:
-      - "6432:6432"
+      - "6432:5432"
     depends_on:
       - postgres
     restart: unless-stopped

@@ -68,6 +68,10 @@ if (-not (Test-Path $dockerComposeEnv)) {
     Write-Host "  .env already exists" -ForegroundColor Green
 }
 
+$envContent = Get-Content $dockerComposeEnv -Encoding UTF8 -Raw
+$dbUser = if ([regex]::Match($envContent, 'DB_USER\s*=\s*(.+)').Success) { [regex]::Match($envContent, 'DB_USER\s*=\s*(.+)').Groups[1].Value.Trim() } else { "busstop" }
+$dbPass = if ([regex]::Match($envContent, 'DB_PASSWORD\s*=\s*(.+)').Success) { [regex]::Match($envContent, 'DB_PASSWORD\s*=\s*(.+)').Groups[1].Value.Trim() } else { "busstop" }
+
 # ── 3. Docker Compose ─────────────────────────────────────
 Write-Host ""
 Write-Host "[3/5] Starting Docker services..." -ForegroundColor Yellow
@@ -89,18 +93,21 @@ if (-not $SkipDocker) {
 Write-Host ""
 Write-Host "  Ensuring busstop database exists..." -ForegroundColor Yellow
 
+$prevErrorAction = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+
 $maxPgRetries = 30
 $pgReady = $false
 for ($i = 0; $i -lt $maxPgRetries; $i++) {
-    $result = docker exec keycloak-db psql -U busstop -t -c "SELECT 1" 2>&1
-    if ("$result" -match "1") { $pgReady = $true; break }
+    $result = docker exec keycloak-db psql -U $dbUser -d postgres -t -c "SELECT 1" 2>$null
+    if ($result -match "1") { $pgReady = $true; break }
     Write-Host "  Waiting for PostgreSQL... ($($i+1)/$maxPgRetries)" -ForegroundColor Gray
     Start-Sleep -Seconds 2
 }
 if ($pgReady) {
-    $dbExists = docker exec keycloak-db psql -U busstop -t -c "SELECT 1 FROM pg_database WHERE datname='busstop'" 2>&1
-    if ("$dbExists" -notmatch "1") {
-        docker exec keycloak-db psql -U busstop -c "CREATE DATABASE busstop;"
+    $dbExists = docker exec keycloak-db psql -U $dbUser -d postgres -t -c "SELECT 1 FROM pg_database WHERE datname='busstop'" 2>$null
+    if ($dbExists -notmatch "1") {
+        docker exec keycloak-db psql -U $dbUser -d postgres -c "CREATE DATABASE busstop;"
         Write-Host "  busstop database created" -ForegroundColor Green
     } else {
         Write-Host "  busstop database already exists" -ForegroundColor Green
@@ -108,6 +115,8 @@ if ($pgReady) {
 } else {
     Write-Host "  WARNING: PostgreSQL not ready -- busstop DB will be created by EF migrations" -ForegroundColor Yellow
 }
+
+$ErrorActionPreference = $prevErrorAction
 
 # ── 4. Wait for Keycloak ──────────────────────────────────
 Write-Host ""
@@ -149,6 +158,7 @@ $frontendDir = Join-Path $projectRoot "src\BusStop.Frontend"
 
 if (-not $SkipApi -and (Test-Path $apiProject)) {
     Write-Host "  Starting API (dotnet run)..." -ForegroundColor Cyan
+    $env:ConnectionStrings__PostgresConnection = "Host=localhost;Port=6432;Database=busstop;Username=$dbUser;Password=$dbPass;Pooling=false"
     Start-Process powershell -ArgumentList "-NoExit", "-Command", "Write-Host 'BusStop API'; dotnet run --project `"$apiProject`" --launch-profile https" 
     Write-Host "    API will start on https://localhost:57679" -ForegroundColor Gray
 } else {

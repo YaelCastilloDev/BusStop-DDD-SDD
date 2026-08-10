@@ -157,11 +157,11 @@ namespace BusStop.Infrastructure.Migrations
             migrationBuilder.Sql(@"
                 ALTER TABLE moderation_actions 
                 ADD CONSTRAINT fk_moderation_actions_target_type 
-                FOREIGN KEY (target_type) REFERENCES target_types(id);
+                FOREIGN KEY (""TargetType"") REFERENCES target_types(""Id"");
                 
                 ALTER TABLE moderation_actions 
                 ADD CONSTRAINT fk_moderation_actions_category 
-                FOREIGN KEY (category) REFERENCES moderation_categories(id);
+                FOREIGN KEY (""Category"") REFERENCES moderation_categories(""Id"");
             ");
         }
 

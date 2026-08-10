@@ -9,6 +9,8 @@ receivers:
 exporters:
   prometheus:
     endpoint: 0.0.0.0:8889
+  debug:
+    verbosity: detailed
 
 service:
   pipelines:
@@ -17,4 +19,4 @@ service:
       exporters: [prometheus]
     traces:
       receivers: [otlp]
-      exporters: [logging]
+      exporters: [debug]

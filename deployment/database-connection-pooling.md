@@ -9,7 +9,7 @@ This is critical for Cloud Run deployments where each instance opens its own Npg
 ```
  Cloud Run 1 ─┐
  Cloud Run 2 ─┤                          ┌─────────────┐
- Cloud Run N ─┼──► PgBouncer :6432 ────► │ PostgreSQL   │
+  Cloud Run N ─┼──► PgBouncer :5432 ────► │ PostgreSQL   │
                   (25 pool)               │ (postgis)   │
                   Pooling=false           └─────────────┘
 ```
@@ -18,10 +18,10 @@ This is critical for Cloud Run deployments where each instance opens its own Npg
 
 | Environment | Connection String |
 |---|---|
-| Local (docker compose) | `Host=pgbouncer;Port=6432;Database=busstop;Username=busstop;Password=busstop;Pooling=false` |
-| Local (dotnet run) | `Host=localhost;Port=6432;Database=busstop;Username=busstop;Password=busstop;Pooling=false` |
+| Local (docker compose) | `Host=pgbouncer;Port=5432;Database=busstop;Username=${DB_USER};Password=${DB_PASSWORD};Pooling=false` |
+| Local (dotnet run) | `Host=localhost;Port=6432;Database=busstop;Username=<user>;Password=<pass>;Pooling=false` |
 | Aspire dev | Injected automatically via `.WithPgBouncer()` |
-| Cloud Run (prod) | `Host=<pgbouncer-address>;Port=6432;Database=busstop;Username=<user>;Password=<pass>;Pooling=false` |
+| Cloud Run (prod) | `Host=<pgbouncer-address>;Port=5432;Database=busstop;Username=<user>;Password=<pass>;Pooling=false` |
 
 **Critical:** `Pooling=false` must be set when behind PgBouncer. Double-pooling (Npgsql + PgBouncer) causes
 connection leaks and degraded performance.
@@ -70,10 +70,10 @@ Set `max_client_conn` to 1200 (20% headroom).
 **Option A — Separate Cloud Run service (recommended)**
 ```
 gcloud run deploy pgbouncer \
-  --image bitnami/pgbouncer:1.23.1 \
-  --port 6432 \
+  --image edoburu/pgbouncer:v1.25.2-p0 \
+  --port 5432 \
   --vpc-connector <your-vpc-connector> \
-  --set-env-vars POSTGRESQL_HOST=<pg-private-ip>,POSTGRESQL_PORT=5432,...
+  --set-env-vars DB_HOST=<pg-private-ip>,DB_PORT=5432,...
 ```
 
 Use a VPC connector so PgBouncer can reach the PostgreSQL instance on a private IP.
@@ -85,30 +85,30 @@ Install via `apt install pgbouncer` and configure `/etc/pgbouncer/pgbouncer.ini`
 ### 2. Set environment variable on BusStop API (Cloud Run)
 
 ```
-ConnectionStrings__PostgresConnection=Host=<pgbouncer-internal-url>;Port=6432;Database=busstop;Username=<user>;Password=<pass>;Pooling=false
+ConnectionStrings__PostgresConnection=Host=<pgbouncer-internal-url>;Port=5432;Database=busstop;Username=<user>;Password=<pass>;Pooling=false
 ```
 
 ### 3. Network / firewall
 
 - PostgreSQL must accept connections from PgBouncer's VPC/subnet
 - Cloud Run API instances must reach PgBouncer (via VPC connector or internal URL)
-- PgBouncer port 6432 must be open between API and PgBouncer
+- PgBouncer port 5432 must be open between API and PgBouncer
 
 ### 4. Authentication
 
 PgBouncer's `userlist.txt` must contain the PostgreSQL credentials the API uses.
-The bitnami image auto-generates this from `POSTGRESQL_USERNAME` / `POSTGRESQL_PASSWORD` env vars.
+The edoburu image auto-generates this from `DB_USER` / `DB_PASSWORD` env vars.
 
 If using a custom PgBouncer deployment, generate the userlist with:
 ```bash
-echo "\"busstop\" \"<password>\"" >> /etc/pgbouncer/userlist.txt
+echo "\"$DB_USER\" \"$DB_PASSWORD\"" >> /etc/pgbouncer/userlist.txt
 ```
 
 ### 5. Verify before going live
 
 ```bash
 # Connect to PgBouncer admin console
-psql -h <pgbouncer-host> -p 6432 -U pgbouncer -d pgbouncer
+psql -h <pgbouncer-host> -p 5432 -U pgbouncer -d pgbouncer
 
 # Check pool status
 SHOW POOLS;
@@ -123,7 +123,7 @@ Look for:
 
 ## PgBouncer Monitoring Commands
 
-Run via `psql -h <pgbouncer-host> -p 6432 -U pgbouncer -d pgbouncer`:
+Run via `psql -h <pgbouncer-host> -p 5432 -U pgbouncer -d pgbouncer`:
 
 | Command | What it shows |
 |---|---|
