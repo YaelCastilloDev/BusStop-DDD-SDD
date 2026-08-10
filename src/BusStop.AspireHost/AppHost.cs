@@ -3,8 +3,7 @@
 var postgres = builder.AddPostgres("postgres")
   .WithImage("postgis/postgis")
   .WithImageTag("18-3.6")
-  .WithLifetime(ContainerLifetime.Persistent)
-  .WithPgBouncer();
+  .WithLifetime(ContainerLifetime.Persistent);
 
 var busStopDb = postgres.AddDatabase("PostgresConnection");
 
