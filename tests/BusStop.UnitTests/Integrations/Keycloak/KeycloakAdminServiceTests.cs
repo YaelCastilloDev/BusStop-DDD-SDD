@@ -181,6 +181,60 @@ public class KeycloakAdminServiceTests
         result.Errors.ShouldContain("Failed to create user account. The authentication service returned an unexpected error.");
     }
 
+    [Fact]
+    public async Task CreateUserPayload_UsesAnonymousType_NoCompileTimeSafety()
+    {
+        var (service, handler) = CreateService();
+
+        var result = await service.CreateUserAsync("test@example.com", "Password123!", TestContext.Current.CancellationToken);
+
+        result.IsSuccess.ShouldBeTrue();
+
+        var createRequest = handler.Requests[1];
+        createRequest.Content.ShouldNotBeNull();
+
+        var jsonContent = createRequest.Content as JsonContent;
+        jsonContent.ShouldNotBeNull();
+
+        var objectType = jsonContent!.ObjectType;
+        objectType.ShouldNotBeNull();
+
+        var isAnonymous = objectType!.GetCustomAttributes(
+            typeof(System.Runtime.CompilerServices.CompilerGeneratedAttribute), inherit: false).Length > 0;
+        isAnonymous.ShouldBeTrue();
+
+        var properties = objectType.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+        var propertyNames = properties.Select(p => p.Name).ToList();
+
+        propertyNames.ShouldContain("email");
+        propertyNames.ShouldContain("username");
+        propertyNames.ShouldContain("enabled");
+        propertyNames.ShouldContain("emailVerified");
+        propertyNames.ShouldContain("credentials");
+        propertyNames.ShouldContain("realmRoles");
+        propertyNames.ShouldContain("requiredActions");
+    }
+
+    [Fact]
+    public async Task CreateUserPayload_Includes_RegisteredUserRole()
+    {
+        var (service, handler) = CreateService();
+
+        var result = await service.CreateUserAsync("test@example.com", "Password123!", TestContext.Current.CancellationToken);
+
+        result.IsSuccess.ShouldBeTrue();
+
+        var createRequest = handler.Requests[1];
+        var requestBody = await createRequest.Content!.ReadAsStringAsync(TestContext.Current.CancellationToken);
+
+        using var doc = System.Text.Json.JsonDocument.Parse(requestBody);
+        var root = doc.RootElement;
+
+        root.TryGetProperty("realmRoles", out var realmRoles).ShouldBeTrue();
+        realmRoles.ValueKind.ShouldBe(System.Text.Json.JsonValueKind.Array);
+        realmRoles.EnumerateArray().Any(r => r.GetString() == "RegisteredUser").ShouldBeTrue();
+    }
+
     /// <summary>
     /// Test double for <see cref="HttpMessageHandler"/> that queues responses
     /// and records all requests for later inspection.

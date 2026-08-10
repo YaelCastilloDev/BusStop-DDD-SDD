@@ -67,4 +67,30 @@ public class SignupHandlerTests
         result.IsSuccess.ShouldBeFalse();
         result.Errors.ShouldContain(expectedError);
     }
+
+    [Fact]
+    public async Task Handle_ShouldValidate_EmailFormat_BeforeKeycloakCall()
+    {
+        var command = new SignupCommand("not-an-email", "Password123!");
+        _keycloakAdmin
+            .CreateUserAsync(command.Email, command.Password, Arg.Any<CancellationToken>())
+            .Returns(Result.Success());
+
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task Handle_ShouldValidate_PasswordLength_BeforeKeycloakCall()
+    {
+        var command = new SignupCommand("test@example.com", "12");
+        _keycloakAdmin
+            .CreateUserAsync(command.Email, command.Password, Arg.Any<CancellationToken>())
+            .Returns(Result.Success());
+
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeFalse();
+    }
 }

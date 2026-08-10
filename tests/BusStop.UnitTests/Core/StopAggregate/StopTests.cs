@@ -16,7 +16,7 @@ public class StopTests
         result.Value.Name.Value.ShouldBe("Main Street");
         result.Value.Location.Latitude.ShouldBe(45.5);
         result.Value.Location.Longitude.ShouldBe(-122.6);
-        result.Value.RouteId.Value.ShouldBe(1);
+        result.Value.RouteId.ShouldBe(1);
     }
 
     [Fact]

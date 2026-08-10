@@ -30,7 +30,7 @@ public class GetNearbyEndpointTests : IClassFixture<CustomWebApplicationFactory<
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        var user = User.Create("testuser", "test@example.com").Value;
+        var user = User.Create("test@example.com", "testuser").Value;
         db.Users.Add(user);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
@@ -64,7 +64,7 @@ public class GetNearbyEndpointTests : IClassFixture<CustomWebApplicationFactory<
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        var user = User.Create("testuser2", "test2@example.com").Value;
+        var user = User.Create("test2@example.com", "testuser2").Value;
         db.Users.Add(user);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
@@ -97,7 +97,7 @@ public class GetNearbyEndpointTests : IClassFixture<CustomWebApplicationFactory<
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        var user = User.Create("testuser3", "test3@example.com").Value;
+        var user = User.Create("test3@example.com", "testuser3").Value;
         db.Users.Add(user);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 

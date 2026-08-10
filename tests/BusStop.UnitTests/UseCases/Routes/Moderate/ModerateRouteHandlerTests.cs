@@ -17,7 +17,6 @@ public class ModerateRouteHandlerTests
     private readonly IRepository<Route> _routeRepository;
     private readonly IRepository<ModerationAction> _moderationActionRepository;
     private readonly ICurrentUser _currentUser;
-    private readonly IPublisher _publisher;
     private readonly ModerateRouteHandler _handler;
 
     public ModerateRouteHandlerTests()
@@ -25,8 +24,7 @@ public class ModerateRouteHandlerTests
         _routeRepository = Substitute.For<IRepository<Route>>();
         _moderationActionRepository = Substitute.For<IRepository<ModerationAction>>();
         _currentUser = Substitute.For<ICurrentUser>();
-        _publisher = Substitute.For<IPublisher>();
-        _handler = new ModerateRouteHandler(_routeRepository, _moderationActionRepository, _currentUser, _publisher);
+        _handler = new ModerateRouteHandler(_routeRepository, _moderationActionRepository, _currentUser);
     }
 
     [Fact]
@@ -47,8 +45,36 @@ public class ModerateRouteHandlerTests
 
         result.IsSuccess.ShouldBeTrue();
         await _moderationActionRepository.Received(1).AddAsync(Arg.Any<ModerationAction>(), Arg.Any<CancellationToken>());
-        await _publisher.Received(1).Publish(Arg.Any<ModerationActionRecordedEvent>(), Arg.Any<CancellationToken>());
         await _routeRepository.Received(1).UpdateAsync(route, Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Succeeds_AndRegistersModerationActionRecordedEvent()
+    {
+        var command = new ModerateRouteCommand(1, ModerationCategory.InappropriateContent, "Inappropriate route") { Sub = "kc-sub" };
+        _currentUser.Id.Returns(5L);
+
+        var route = Route.Create("Line A", 10).Value;
+        typeof(EntityBase<long>).GetProperty("Id")!.SetValue(route, 1L);
+
+        _routeRepository.FirstOrDefaultAsync(Arg.Any<RouteByIdSpec>(), Arg.Any<CancellationToken>())
+            .Returns(route);
+
+        ModerationAction? capturedAction = null;
+        _moderationActionRepository.AddAsync(Arg.Do<ModerationAction>(a => capturedAction = a), Arg.Any<CancellationToken>())
+            .Returns(ci => ci.Arg<ModerationAction>());
+
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        capturedAction.ShouldNotBeNull();
+        var domainEvent = capturedAction.DomainEvents.OfType<ModerationActionRecordedEvent>().Single();
+        domainEvent.TargetType.ShouldBe(TargetType.Route);
+        domainEvent.TargetId.ShouldBe(route.Id);
+        domainEvent.UserId.ShouldBe(route.CreatedById.Value);
+        domainEvent.IssuedByUserId.ShouldBe(5);
+        domainEvent.Category.ShouldBe(ModerationCategory.InappropriateContent);
+        domainEvent.Reason.ShouldBe("Inappropriate route");
     }
 
     [Fact]
@@ -116,5 +142,29 @@ public class ModerateRouteHandlerTests
         result.IsSuccess.ShouldBeFalse();
         await _moderationActionRepository.DidNotReceive().AddAsync(Arg.Any<ModerationAction>(), Arg.Any<CancellationToken>());
         await _routeRepository.DidNotReceive().UpdateAsync(route, Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_ShouldNotPersistModerationAction_WhenRouteUpdateFails()
+    {
+        var command = new ModerateRouteCommand(1, ModerationCategory.InappropriateContent, "Inappropriate route") { Sub = "kc-sub" };
+        _currentUser.Id.Returns(5L);
+
+        var route = Route.Create("Line A", 10).Value;
+        typeof(EntityBase<long>).GetProperty("Id")!.SetValue(route, 1L);
+
+        _routeRepository.FirstOrDefaultAsync(Arg.Any<RouteByIdSpec>(), Arg.Any<CancellationToken>())
+            .Returns(route);
+        _moderationActionRepository.AddAsync(Arg.Any<ModerationAction>(), Arg.Any<CancellationToken>())
+            .Returns(ci => ci.Arg<ModerationAction>());
+        _routeRepository.When(x => x.UpdateAsync(route, Arg.Any<CancellationToken>()))
+            .Do(_ => throw new InvalidOperationException("Database failure"));
+
+        var exception = await Should.ThrowAsync<InvalidOperationException>(async () =>
+            await _handler.Handle(command, CancellationToken.None));
+
+        exception.Message.ShouldBe("Database failure");
+
+        await _moderationActionRepository.Received(1).AddAsync(Arg.Any<ModerationAction>(), Arg.Any<CancellationToken>());
     }
 }

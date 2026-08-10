@@ -8,23 +8,32 @@ public class CommentReactionTests
     [Fact]
     public void From_CreatesInstance_WhenValidInput()
     {
-        var reaction = CommentReaction.From(new UserId(1), ReactionType.Like);
+        var reaction = CommentReaction.From(new UserId(1), true);
 
         reaction.UserId.Value.ShouldBe(1);
-        reaction.ReactionType.ShouldBe(ReactionType.Like);
+        reaction.IsLike.ShouldBeTrue();
     }
 
     [Fact]
     public void From_Throws_WhenNullUserId()
     {
-        Should.Throw<ArgumentNullException>(() => CommentReaction.From(null!, ReactionType.Like));
+        Should.Throw<ArgumentNullException>(() => CommentReaction.From(null!, true));
     }
 
     [Fact]
-    public void Equals_ReturnsTrue_WhenSameUserId()
+    public void Equals_ReturnsFalse_WhenSameUserIdDifferentIsLike()
     {
-        var a = CommentReaction.From(new UserId(1), ReactionType.Like);
-        var b = CommentReaction.From(new UserId(1), ReactionType.Dislike);
+        var a = CommentReaction.From(new UserId(1), true);
+        var b = CommentReaction.From(new UserId(1), false);
+
+        a.ShouldNotBe(b);
+    }
+
+    [Fact]
+    public void Equals_ReturnsTrue_WhenSameUserIdAndSameIsLike()
+    {
+        var a = CommentReaction.From(new UserId(1), true);
+        var b = CommentReaction.From(new UserId(1), true);
 
         a.ShouldBe(b);
     }
@@ -32,8 +41,8 @@ public class CommentReactionTests
     [Fact]
     public void Equals_ReturnsFalse_WhenDifferentUserId()
     {
-        var a = CommentReaction.From(new UserId(1), ReactionType.Like);
-        var b = CommentReaction.From(new UserId(2), ReactionType.Like);
+        var a = CommentReaction.From(new UserId(1), true);
+        var b = CommentReaction.From(new UserId(2), true);
 
         a.ShouldNotBe(b);
     }

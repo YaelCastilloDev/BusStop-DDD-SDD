@@ -1,6 +1,7 @@
 using Ardalis.Result;
 using BusStop.Core.Errors;
 using BusStop.Core.ModerationActionAggregate;
+using BusStop.Core.ModerationActionAggregate.Events;
 
 namespace BusStop.UnitTests.Core.ModerationActionAggregate;
 
@@ -144,5 +145,24 @@ public class ModerationActionTests
         result.Errors.ShouldContain(e => e.Contains(ModerationActionErrors.InvalidIssuedBy));
         result.Errors.ShouldContain(e => e.Contains(ModerationActionErrors.InvalidCategory));
         result.Errors.ShouldContain(e => e.Contains(ModerationActionErrors.EmptyReason));
+    }
+
+    [Fact]
+    public void Create_RegistersDomainEvent()
+    {
+        var result = ModerationAction.Create(TargetType.Route, 1, 2, 3, ModerationCategory.Spam, "reason");
+
+        var domainEvent = result.Value.DomainEvents
+            .OfType<ModerationActionRecordedEvent>()
+            .Single();
+
+        domainEvent.ModerationActionId.ShouldBe(result.Value.Id);
+        domainEvent.TargetType.ShouldBe(TargetType.Route);
+        domainEvent.TargetId.ShouldBe(1);
+        domainEvent.UserId.ShouldBe(2);
+        domainEvent.IssuedByUserId.ShouldBe(3);
+        domainEvent.Category.ShouldBe(ModerationCategory.Spam);
+        domainEvent.Reason.ShouldBe("reason");
+        domainEvent.IssuedAt.ShouldBe(result.Value.IssuedAt);
     }
 }

@@ -15,7 +15,7 @@ public class CommentTests
         result.IsSuccess.ShouldBeTrue();
         result.Value.Content.Value.ShouldBe("Great stop!");
         result.Value.UserId.Value.ShouldBe(1);
-        result.Value.RouteId.Value.ShouldBe(10);
+        result.Value.RouteId.ShouldBe(10);
     }
 
     [Fact]
@@ -120,12 +120,12 @@ public class CommentTests
         var commentResult = Comment.Create("Great stop!", 1, 10);
         var comment = commentResult.Value;
 
-        var reactionResult = comment.AddReaction(new UserId(1), ReactionType.Like);
+        var reactionResult = comment.AddReaction(new UserId(1), true);
         reactionResult.IsSuccess.ShouldBeTrue();
 
         comment.Reactions.ShouldHaveSingleItem();
         comment.Reactions.Single().UserId.Value.ShouldBe(1);
-        comment.Reactions.Single().ReactionType.ShouldBe(ReactionType.Like);
+        comment.Reactions.Single().IsLike.ShouldBeTrue();
     }
 
     [Fact]
@@ -133,14 +133,14 @@ public class CommentTests
     {
         var commentResult = Comment.Create("Great stop!", 1, 10);
         var comment = commentResult.Value;
-        var reactionResult1 = comment.AddReaction(new UserId(1), ReactionType.Like);
+        var reactionResult1 = comment.AddReaction(new UserId(1), true);
         reactionResult1.IsSuccess.ShouldBeTrue();
 
-        var reactionResult2 = comment.AddReaction(new UserId(1), ReactionType.Dislike);
+        var reactionResult2 = comment.AddReaction(new UserId(1), false);
         reactionResult2.IsSuccess.ShouldBeTrue();
 
         comment.Reactions.ShouldHaveSingleItem();
-        comment.Reactions.Single().ReactionType.ShouldBe(ReactionType.Dislike);
+        comment.Reactions.Single().IsLike.ShouldBeFalse();
     }
 
     [Fact]
@@ -149,6 +149,6 @@ public class CommentTests
         var commentResult = Comment.Create("Great stop!", 1, 10);
         var comment = commentResult.Value;
 
-        Should.Throw<ArgumentNullException>(() => comment.AddReaction(null!, ReactionType.Like));
+        Should.Throw<ArgumentNullException>(() => comment.AddReaction(null!, true));
     }
 }

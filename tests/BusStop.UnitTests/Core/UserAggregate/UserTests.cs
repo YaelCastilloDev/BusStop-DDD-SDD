@@ -1,3 +1,4 @@
+using System.Reflection;
 using Ardalis.Result;
 using BusStop.Core.Errors;
 using BusStop.Core.UserAggregate;
@@ -99,6 +100,18 @@ public class UserTests
     }
 
     [Fact]
+    public void CompleteOnboarding_ShouldPreventReOnboarding()
+    {
+        var userResult = User.Create("test@example.com", "keycloak-sub");
+        var user = userResult.Value;
+        user.CompleteOnboarding(new Username("first_name"), 1);
+
+        var result = user.CompleteOnboarding(new Username("second_name"), 2);
+
+        result.IsSuccess.ShouldBeFalse();
+    }
+
+    [Fact]
     public void UpdateUsername_Throws_WhenNullUsername()
     {
         var userResult = User.Create("test@example.com", "keycloak-sub");
@@ -142,5 +155,36 @@ public class UserTests
         result.IsSuccess.ShouldBeFalse();
         result.Errors.ShouldContain(e => e.Contains(UserErrors.EmptyEmail));
         user.Email.ShouldBe("test@example.com");
+    }
+
+    [Fact]
+    public void Create_ReturnsError_WhenInvalidEmailFormat()
+    {
+        var result = User.Create("not-an-email", "external-1");
+
+        result.IsSuccess.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void UpdateEmail_ReturnsError_WhenInvalidEmailFormat()
+    {
+        var userResult = User.Create("test@example.com", "keycloak-sub");
+        var user = userResult.Value;
+
+        var result = user.UpdateEmail("not-an-email");
+
+        result.IsSuccess.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void ExternalId_Property_ShouldBeNonNullable()
+    {
+        var property = typeof(User).GetProperty("ExternalId");
+        property.ShouldNotBeNull();
+
+        var nullabilityContext = new NullabilityInfoContext();
+        var nullabilityInfo = nullabilityContext.Create(property);
+
+        nullabilityInfo.ReadState.ShouldBe(NullabilityState.NotNull);
     }
 }
