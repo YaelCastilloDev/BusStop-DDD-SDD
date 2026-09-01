@@ -14,7 +14,7 @@ Load these references:
 1. `harness/product/vision.md`
 2. `harness/system-design.md`
 3. `harness/specs/clean-architecture-conventions.md`
-4. `harness/specs/agents.md`
+4. `AGENTS.md` (agent roles and rule locations)
 5. Active feature spec (if any)
 6. Current git diff or changed files
 

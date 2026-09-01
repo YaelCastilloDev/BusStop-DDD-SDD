@@ -84,7 +84,6 @@ Core ──► UseCases ──► Infrastructure ──► Web ──► AspireH
 - **AspireTests targets net9.0.** Every other project targets `net10.0`. AspireTests cannot be built in a net10.0-only context.
 - **FunctionalTests use Testcontainers PostgreSQL,** not the SQLite connection string in `appsettings.Testing.json`. The test factory (`CustomWebApplicationFactory`) overrides the connection string at runtime.
 - **Central Package Management.** All package versions in `Directory.Packages.props`. Project files reference packages without `Version` attribute.
-- **GitHub Copilot instructions are stale.** `.github/copilot-instructions.md` references `Clean.Architecture` (template name) and `net9.0`. Trust the actual code over that file.
 - **SaveChanges() is blocked.** `AppDbContext.SaveChanges()` (sync) throws `NotSupportedException`. Only `SaveChangesAsync()` is valid.
 
 ## Layered conventions (cheat sheet)
@@ -99,10 +98,11 @@ Core ──► UseCases ──► Infrastructure ──► Web ──► AspireH
 
 ## Where rules live
 
-- **Per-layer conventions:** `harness/specs/clean-architecture-conventions.md`, `domain.md`, `usecase.md`, `infrastructure.md`, `web.md`, `test.md`
+- **Per-layer conventions:** `harness/specs/clean-architecture-conventions.md` (layer rules in the agent files below)
 - **Validation gates:** `harness/specs/gates-guardrails.md`
-- **Domain glossary:** `harness/specs/domain.md` and `.cursor/rules/busstop-domain.mdc`
-- **Agent definitions:** `.opencode/agents/` (planner, context, domain, usecase, infrastructure, web, reviewer, test, frontend)
-- **Skills:** `.opencode/skills/` (busstop-domain, clean-architecture, csharp-core, csharp-web, frontend/*)
-- **Cursor rules:** `.cursor/rules/` (18 .mdc files covering backend + frontend)
+- **Domain glossary:** `.agents/skills/busstop-domain/SKILL.md` and `harness/system-design.md`
+- **Agent definitions:** `.opencode/agents/` (opencode, markdown) and `.codex/agents/` (Codex, TOML) — planner, context, domain, usecase, infrastructure, web, reviewer, test, frontend
+- **Skills:** `.agents/skills/` — shared by opencode and Codex (busstop-domain, busstop-harness, clean-architecture, csharp-core, csharp-web, busstop-frontend-*, react-*)
 - **CI:** `.github/workflows/ci.yml` — format check then build + unit → integration → functional tests
+
+`AGENTS.md` and `.agents/skills/` are shared across tools; `harness/` is the canonical spec source. Keep rule edits in `harness/specs/` + agent files, never in per-tool duplicates.

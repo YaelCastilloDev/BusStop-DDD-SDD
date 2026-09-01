@@ -41,7 +41,7 @@ Decision log format: Decision, rationale, impact, revisit trigger.
 - Re-plan immediately when assumptions change.
 
 ## Context Tiers
-Three-tier context model for agent decision-making. See `harness/specs/context.md` for the full Context Agent specification.
+Three-tier context model for agent decision-making. See `.opencode/agents/context.md` for the full Context Agent specification (mirrored in `.codex/agents/context.toml`).
 
 | Tier | Scope | Refresh Rule |
 |---|---|---|

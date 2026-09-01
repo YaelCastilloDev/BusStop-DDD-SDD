@@ -3,7 +3,7 @@
 ## Purpose
 Define the canonical design tokens and visual conventions for the BusStop frontend. Every component, feature, and page must reference these tokens. Ad-hoc size, weight, or color combinations are prohibited.
 
-Reference: `.cursor/rules/frontend/busstop-frontend-styling.mdc`
+Reference: `.agents/skills/busstop-frontend-styling/SKILL.md`
 Implementation: `src/BusStop.Frontend/src/styles/tokens.css`
 
 ---

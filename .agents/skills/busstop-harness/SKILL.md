@@ -19,14 +19,17 @@ Follow spec-driven delivery. Full spec: `harness/specs/lifecycle.md`.
 
 | Agent | Role | Spec |
 |---|---|---|
-| **Planner** | Converts requests into validated specs; maps work to bounded contexts and feature slices. Use FIRST. | `harness/specs/planner.md` |
-| **Context** | Assembles context packs from docs, specs, and diffs. Detects glossary drift. | `harness/specs/context.md` |
-| **Domain** | Implements Core layer: aggregates, value objects, domain events, specifications. | `harness/specs/domain.md` |
-| **UseCase** | Implements Application layer: commands, queries, handlers, DTOs via Mediator. | `harness/specs/usecase.md` |
-| **Infrastructure** | Implements EF Core config, repositories, queries, event dispatch. | `harness/specs/infrastructure.md` |
-| **Web** | Implements FastEndpoints REPR endpoints, validators, DI config. | `harness/specs/web.md` |
-| **Reviewer** | Verifies code against validation gates. Read-only — never modifies code. | `harness/specs/reviewer.md` |
-| **Test** | Writes unit, integration, and functional tests; maps every criterion to a test. | `harness/specs/test.md` |
+| **Planner** | Converts requests into validated specs; maps work to bounded contexts and feature slices. Use FIRST. | `.opencode/agents/planner.md` |
+| **Context** | Assembles context packs from docs, specs, and diffs. Detects glossary drift. | `.opencode/agents/context.md` |
+| **Domain** | Implements Core layer: aggregates, value objects, domain events, specifications. | `.opencode/agents/domain.md` |
+| **UseCase** | Implements Application layer: commands, queries, handlers, DTOs via Mediator. | `.opencode/agents/usecase.md` |
+| **Infrastructure** | Implements EF Core config, repositories, queries, event dispatch. | `.opencode/agents/infrastructure.md` |
+| **Web** | Implements FastEndpoints REPR endpoints, validators, DI config. | `.opencode/agents/web.md` |
+| **Reviewer** | Verifies code against validation gates. Read-only — never modifies code. | `.opencode/agents/reviewer.md` |
+| **Test** | Writes unit, integration, and functional tests; maps every criterion to a test. | `.opencode/agents/test.md` |
+| **Frontend** | Implements React features: components, forms, routing, data fetching, i18n, error handling. | `.opencode/agents/frontend.md` |
+
+Agent definitions are mirrored for Codex in `.codex/agents/*.toml`.
 
 Implementation order: Planner → Context → Domain → UseCase → Infrastructure → Web → Reviewer → Test
 

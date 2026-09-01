@@ -86,7 +86,7 @@ UseCases/Routes/Create/
 - **Primary constructors:** assign dependencies to private `_fields` (never use constructor parameters directly).
 
 ## Key Patterns
-- **Error strategy:** Two-tier approach — factories return `Result<T>` for business rules, internal constructors use `Guard.Against` for impossible failures. See `.opencode/skills/csharp-core/SKILL.md` for the canonical pattern.
+- **Error strategy:** Two-tier approach — factories return `Result<T>` for business rules, internal constructors use `Guard.Against` for impossible failures. See `.agents/skills/csharp-core/SKILL.md` for the canonical pattern.
 - **Specification:** all conditional queries as `Specification<T>` classes in Core, not inline repository logic.
 - **Domain events:** aggregates call `RegisterDomainEvent`; handlers implement `INotificationHandler<T>`.
 - **Result wrapper:** handlers return `Result<T>`; endpoints map results to HTTP responses without throwing for flow control.
@@ -102,7 +102,7 @@ UseCases/Routes/Create/
 | 3 — Core | `Guard.Against` in constructors | Impossible failures (bugs) | 500 via `GlobalExceptionHandler` |
 | — Web | `DomainExceptionBehavior` pipeline | Safety net (legacy throws) | 400 |
 
-See `.opencode/skills/csharp-core/SKILL.md` for code examples of each tier.
+See `.agents/skills/csharp-core/SKILL.md` for code examples of each tier.
 
 ## BusStop Domain Mapping
 | Concept | Core location | Use case slice example |

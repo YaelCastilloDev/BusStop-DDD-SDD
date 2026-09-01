@@ -176,4 +176,3 @@ Check individual job logs to identify OS-specific issues.
 - [GitHub Actions Docs](https://docs.github.com/en/actions)
 - [.NET 10 Preview](https://dotnet.microsoft.com/download/dotnet/10.0)
 - [Clean Architecture Template](../../README.md)
-- [Copilot Instructions](../copilot-instructions.md)

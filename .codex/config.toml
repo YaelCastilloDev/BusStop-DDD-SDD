@@ -1,0 +1,6 @@
+# Project-level Codex configuration for BusStop.
+# Skills live in the shared .agents/skills/ directory (same location opencode uses).
+# Custom agents live in .codex/agents/ as TOML files.
+
+[agents]
+max_concurrent_threads_per_session = 3
