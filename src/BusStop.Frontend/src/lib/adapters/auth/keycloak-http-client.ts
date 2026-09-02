@@ -31,9 +31,11 @@ export class KeycloakHttpClient {
       const message =
         networkError instanceof Error ? networkError.message : 'Network error'
       this.logger.error('token request network error', message)
-      throw new Error(
+      const error = new Error(
         'Unable to reach the authentication server. Please try again.'
-      )
+      ) as Error & { cause?: unknown }
+      error.cause = networkError
+      throw error
     }
   }
 }

@@ -55,7 +55,7 @@ export function useAuth() {
 
   useEffect(() => {
     initializeAuth(auth, store)
-  }, [])
+  }, [auth, store])
 
   const login = useCallback(async () => {
     try {
@@ -64,7 +64,7 @@ export function useAuth() {
     } catch {
       store.setError('Login failed')
     }
-  }, [])
+  }, [auth, store])
 
   const directLogin = useCallback(
     async (username: string, password: string) => {
@@ -81,7 +81,7 @@ export function useAuth() {
         throw err
       }
     },
-    []
+    [auth, store]
   )
 
   const logout = useCallback(async () => {
@@ -91,7 +91,7 @@ export function useAuth() {
     } catch {
       store.setError('Logout failed')
     }
-  }, [])
+  }, [auth, store])
 
   const register = useCallback(async () => {
     try {
@@ -100,20 +100,20 @@ export function useAuth() {
     } catch {
       store.setError('Registration failed')
     }
-  }, [])
+  }, [auth, store])
 
   const discardSession = useCallback(() => {
     auth.discardSession()
     store.clear()
-  }, [])
+  }, [auth, store])
 
   const getToken = useCallback(async () => {
     return auth.getToken()
-  }, [])
+  }, [auth])
 
   const hasRole = useCallback((role: BusStopRole | string) => {
     return auth.hasRole(role)
-  }, [])
+  }, [auth])
 
   return {
     isAuthenticated: store.isAuthenticated,

@@ -1,6 +1,6 @@
-import { useEffect, useRef, useCallback } from 'react'
-import type { IMapAdapter, MapOptions } from './types'
+import { useCallback, useEffect, useRef } from 'react'
 import { MapLibreAdapter } from './maplibre-adapter'
+import type { IMapAdapter, MapOptions } from './types'
 
 let adapterInstance: IMapAdapter | null = null
 
@@ -12,7 +12,7 @@ function getAdapter(): IMapAdapter {
 }
 
 export function useMapService(options: MapOptions) {
-  const adapterRef = useRef<IMapAdapter>(getAdapter())
+  const adapter = getAdapter()
   const containerRef = useRef<HTMLDivElement | null>(null)
   const initializedRef = useRef(false)
 
@@ -22,8 +22,6 @@ export function useMapService(options: MapOptions) {
 
   useEffect(() => {
     const container = containerRef.current
-    const adapter = adapterRef.current
-
     if (container && !initializedRef.current) {
       adapter.initialize(container, options)
       initializedRef.current = true
@@ -36,10 +34,10 @@ export function useMapService(options: MapOptions) {
         initializedRef.current = false
       }
     }
-  }, [options])
+  }, [adapter, options])
 
   return {
-    adapter: adapterRef.current,
+    adapter,
     containerRef: setContainerRef,
   }
 }

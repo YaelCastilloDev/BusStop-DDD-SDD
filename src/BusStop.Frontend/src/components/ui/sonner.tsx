@@ -1,6 +1,6 @@
-import { Toaster as Sonner, ToasterProps } from 'sonner'
+import { Toaster as Sonner, type ToasterProps } from 'sonner'
 
-export function Toaster({ ...props }: ToasterProps) {
+function Toaster({ ...props }: ToasterProps) {
   return (
     <Sonner
       className='toaster group [&_div[data-content]]:w-full'
@@ -15,3 +15,5 @@ export function Toaster({ ...props }: ToasterProps) {
     />
   )
 }
+
+export { Toaster }

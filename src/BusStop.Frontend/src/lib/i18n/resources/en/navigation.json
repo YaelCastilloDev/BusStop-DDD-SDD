@@ -1,4 +1,5 @@
 {
+  "brand": "BusStop",
   "dashboard": "Dashboard",
   "mapExplorer": "Map Explorer",
   "stops": "Stops",
@@ -9,5 +10,7 @@
   "shareEmbed": "Share or embed map",
   "print": "Print",
   "addMissingPlace": "Add a missing place",
-  "cancelAddStop": "Cancel registration"
+  "cancelAddStop": "Cancel registration",
+  "platform": "Platform",
+  "sections": "Sections"
 }

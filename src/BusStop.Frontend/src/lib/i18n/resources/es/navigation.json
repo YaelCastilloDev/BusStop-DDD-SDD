@@ -1,4 +1,5 @@
 {
+  "brand": "BusStop",
   "dashboard": "Panel",
   "mapExplorer": "Explorador de Mapa",
   "stops": "Paradas",
@@ -9,5 +10,7 @@
   "shareEmbed": "Compartir o incorporar mapa",
   "print": "Imprimir",
   "addMissingPlace": "Agregar un lugar faltante",
-  "cancelAddStop": "Cancelar registro"
+  "cancelAddStop": "Cancelar registro",
+  "platform": "Plataforma",
+  "sections": "Secciones"
 }

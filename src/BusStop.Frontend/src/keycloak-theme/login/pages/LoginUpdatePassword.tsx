@@ -1,10 +1,10 @@
 import type { PageProps } from 'keycloakify/login/pages/PageProps'
-import type { KcContext } from '../KcContext'
-import type { I18n } from '../i18n'
-import { AuthCardLayout } from '../components/AuthCardLayout'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
+import type { KcContext } from '../KcContext'
+import { AuthCardLayout } from '../components/AuthCardLayout'
+import type { I18n } from '../i18n'
 
 type LoginUpdatePasswordProps = PageProps<
   Extract<KcContext, { pageId: 'login-update-password.ftl' }>,
@@ -13,7 +13,7 @@ type LoginUpdatePasswordProps = PageProps<
 
 export default function LoginUpdatePassword(props: LoginUpdatePasswordProps) {
   const { kcContext, i18n } = props
-  const { msg, msgStr } = i18n
+  const { msgStr } = i18n
   const { url, messagesPerField, username } = kcContext
 
   return (
@@ -43,39 +43,29 @@ export default function LoginUpdatePassword(props: LoginUpdatePasswordProps) {
             type='password'
             autoFocus
             autoComplete='new-password'
-            aria-invalid={
-              messagesPerField.existsError('password') || undefined
-            }
+            aria-invalid={messagesPerField.existsError('password') || undefined}
           />
           {messagesPerField.existsError('password') ? (
             <p className='text-sm text-destructive' role='alert'>
-              {msgStr(
-                messagesPerField.getFirstError('password') ?? ''
-              )}
+              {msgStr(messagesPerField.getFirstError('password') ?? '')}
             </p>
           ) : null}
         </div>
 
         <div className='space-y-2'>
-          <Label htmlFor='password-confirm'>
-            {msgStr('passwordConfirm')}
-          </Label>
+          <Label htmlFor='password-confirm'>{msgStr('passwordConfirm')}</Label>
           <Input
             id='password-confirm'
             name='password-confirm'
             type='password'
             autoComplete='new-password'
             aria-invalid={
-              messagesPerField.existsError('password-confirm') ||
-              undefined
+              messagesPerField.existsError('password-confirm') || undefined
             }
           />
           {messagesPerField.existsError('password-confirm') ? (
             <p className='text-sm text-destructive' role='alert'>
-              {msgStr(
-                messagesPerField.getFirstError('password-confirm') ??
-                  ''
-              )}
+              {msgStr(messagesPerField.getFirstError('password-confirm') ?? '')}
             </p>
           ) : null}
         </div>

@@ -1,30 +1,27 @@
 import { useTranslation } from 'react-i18next'
 import { Drawer } from 'vaul'
+import { useMapUIStore } from '@/stores/map-ui-store'
 import { cn } from '@/lib/utils'
 import { useIsMobile } from '@/hooks/use-mobile'
-import { useMapUIStore } from '@/stores/map-ui-store'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useSelectedEntity } from '../hooks/use-selected-entity'
-import { StopDetails } from './stop-details'
-import { RouteDetails } from './route-details'
-import { DetailPanelHeader } from './detail-panel-header'
 import type { Stop, Route } from '../types'
+import { DetailPanelHeader } from './detail-panel-header'
+import { RouteDetails } from './route-details'
+import { StopDetails } from './stop-details'
 
 export function EntityDetailsPanel() {
   const isMobile = useIsMobile()
+  const { t } = useTranslation('map')
+  const { t: tc } = useTranslation('common')
   const selectedEntity = useMapUIStore((s) => s.selectedEntity)
   const clearSelection = useMapUIStore((s) => s.clearSelection)
   const entity = useSelectedEntity()
 
   if (!selectedEntity || !entity) return null
 
-  const { t } = useTranslation('map')
-  const { t: tc } = useTranslation('common')
-
   const title =
-    selectedEntity.type === 'stop'
-      ? t('stopDetails')
-      : t('routeDetails')
+    selectedEntity.type === 'stop' ? t('stopDetails') : t('routeDetails')
 
   const content = (
     <div className='flex h-full flex-col'>
@@ -66,7 +63,7 @@ export function EntityDetailsPanel() {
     <aside
       className={cn(
         'absolute inset-y-0 right-0 z-40 w-[380px] border-l bg-background shadow-lg',
-        'animate-in slide-in-from-right duration-300'
+        'animate-in duration-300 slide-in-from-right'
       )}
     >
       {content}

@@ -1,10 +1,10 @@
 import type { PageProps } from 'keycloakify/login/pages/PageProps'
-import type { KcContext } from '../KcContext'
-import type { I18n } from '../i18n'
-import { AuthCardLayout } from '../components/AuthCardLayout'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
+import type { KcContext } from '../KcContext'
+import { AuthCardLayout } from '../components/AuthCardLayout'
+import type { I18n } from '../i18n'
 
 type LoginResetPasswordProps = PageProps<
   Extract<KcContext, { pageId: 'login-reset-password.ftl' }>,
@@ -13,7 +13,7 @@ type LoginResetPasswordProps = PageProps<
 
 export default function LoginResetPassword(props: LoginResetPasswordProps) {
   const { kcContext, i18n } = props
-  const { msg, msgStr } = i18n
+  const { msgStr } = i18n
   const { url, realm, messagesPerField } = kcContext
 
   return (
@@ -51,15 +51,11 @@ export default function LoginResetPassword(props: LoginResetPasswordProps) {
             type='text'
             autoFocus
             autoComplete='username'
-            aria-invalid={
-              messagesPerField.existsError('username') || undefined
-            }
+            aria-invalid={messagesPerField.existsError('username') || undefined}
           />
           {messagesPerField.existsError('username') ? (
             <p className='text-sm text-destructive' role='alert'>
-              {msgStr(
-                messagesPerField.getFirstError('username') ?? ''
-              )}
+              {msgStr(messagesPerField.getFirstError('username') ?? '')}
             </p>
           ) : null}
         </div>

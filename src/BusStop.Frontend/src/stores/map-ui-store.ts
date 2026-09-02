@@ -1,6 +1,10 @@
 import { create } from 'zustand'
 import { getCookie, setCookie } from '@/lib/cookies'
-import type { InteractionMode, MapEntityType, SelectedEntity } from '@/features/map/types'
+import type {
+  InteractionMode,
+  MapEntityType,
+  SelectedEntity,
+} from '@/features/map/types'
 
 const SIDEBAR_COLLAPSED_KEY = 'bs_sidebar_collapsed'
 

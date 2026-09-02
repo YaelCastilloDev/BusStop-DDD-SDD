@@ -9,5 +9,7 @@
   "retry": "Reintentar",
   "signIn": "Iniciar sesión",
   "logout": "Cerrar sesión",
+  "account": "Cuenta",
+  "accountMenu": "Abrir menú de cuenta",
   "toggleSidebar": "Alternar barra lateral"
 }
