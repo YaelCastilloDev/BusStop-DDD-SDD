@@ -34,9 +34,9 @@ Current transit information ecosystems commonly fail because:
 
 ## Core Product Capabilities
 1. Search transportation data by location and route identity.
-2. Submit create/edit proposals for routes and stops.
+2. Create and update routes and stops.
 3. Review and reverse sensitive or problematic changes through moderation queues.
-4. Track contribution history, reviewer decisions, and rationale.
+4. Track change history, reviewer decisions, and rationale.
 5. Support regional governance without forking domain rules.
 
 ## Community Governance Model
@@ -55,7 +55,6 @@ Governance principles:
 This vision standardizes these domain terms:
 - Route: a transport path with ordered stops.
 - Stop: a boarding/alighting point.
-- Contribution: a community-submitted create/edit proposal for a route or stop.
 - ModerationAction: a review, undo, escalation, or rollback decision.
 
 ## Delivery Principles

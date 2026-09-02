@@ -1,4 +1,5 @@
 ﻿using BusStop.Infrastructure.Data;
+using BusStop.Infrastructure.Integrations.RabbitMQ;
 
 namespace BusStop.Infrastructure;
 
@@ -26,6 +27,7 @@ public static class InfrastructureServiceExtensions
            .AddScoped(typeof(IReadRepository<>), typeof(EfRepository<>));
 
     services.AddScoped<BusStop.UseCases.Routes.GetNearby.INearbyRoutesQueryService, BusStop.Infrastructure.Data.Queries.NearbyRoutesQueryService>();
+    services.AddRabbitMqMessaging(config);
 
     logger.LogInformation("{Project} services registered", "Infrastructure");
 

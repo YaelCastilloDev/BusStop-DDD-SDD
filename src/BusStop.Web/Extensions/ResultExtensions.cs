@@ -57,6 +57,18 @@ public static class ResultExtensions
             return;
         }
 
+        if (result.Status == ResultStatus.Unauthorized)
+        {
+            await ep.HttpContext.Response.SendUnauthorizedAsync(cancellation: ct);
+            return;
+        }
+
+        if (result.Status == ResultStatus.Forbidden)
+        {
+            await ep.HttpContext.Response.SendForbiddenAsync(cancellation: ct);
+            return;
+        }
+
         if (result.Status == ResultStatus.Invalid)
         {
             foreach (var error in result.ValidationErrors)

@@ -1,5 +1,5 @@
 using BusStop.Core.CommentAggregate;
-using BusStop.Core.CommentAggregate.Specifications;
+using BusStop.Core.Interfaces;
 using BusStop.Core.RouteAggregate;
 using BusStop.Core.RouteAggregate.Specifications;
 using BusStop.Core.UserAggregate;
@@ -14,15 +14,18 @@ public sealed class CreateCommentHandler(
 {
   public async ValueTask<Result<CommentResponse>> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
   {
-    var user = await userRepository.FirstOrDefaultAsync(new UserByIdSpec(new UserId(request.UserId)), cancellationToken);
+    if (string.IsNullOrEmpty(request.Sub))
+      return Result<CommentResponse>.Unauthorized("Authentication required.");
+
+    var user = await userRepository.FirstOrDefaultAsync(new UserByExternalIdSpec(request.Sub), cancellationToken);
     if (user is null)
-      return Result<CommentResponse>.NotFound("User not found.");
+      return Result<CommentResponse>.NotFound("User not found. Please register first.");
 
     var route = await routeRepository.FirstOrDefaultAsync(new RouteByIdSpec(new RouteId(request.RouteId)), cancellationToken);
     if (route is null)
       return Result<CommentResponse>.NotFound("Route not found.");
 
-    var comment = Comment.Create(request.Content, request.UserId, request.RouteId);
+    var comment = Comment.Create(request.Content, user.Id, request.RouteId);
     var created = await repository.AddAsync(comment, cancellationToken);
 
     return ToResponse(created);

@@ -14,6 +14,7 @@ description: BusStop.Web FastEndpoints and API patterns. Use when working in Bus
 - Co-locate: `Create.CreateRequest.cs`, `Create.CreateValidator.cs`.
 - Or nest in endpoint file for small features.
 - Every input-bearing endpoint must have a `Validator<TRequest>` (FluentValidation via FastEndpoints).
+- Validators are the first line of defense — catch malformed input before it reaches the handler or domain layer.
 
 ## Result Mapping
 - Use `ResultExtensions.ToCreatedResult()`, `.ToGetByIdResult()`, etc.

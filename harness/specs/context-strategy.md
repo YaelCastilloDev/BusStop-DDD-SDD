@@ -58,7 +58,7 @@ Short-lived execution details:
 - Discard stale assumptions not backed by current sources.
 
 ## Drift Prevention
-- Use canonical terms only: Route, Stop, Contribution, ModerationAction.
+- Use canonical terms only: Route, Stop, ModerationAction.
 - Reject synonyms that alter domain meaning unless glossary is updated.
 - Flag contradictions between specs and code as blockers.
 - Require explicit migration notes when contracts change.

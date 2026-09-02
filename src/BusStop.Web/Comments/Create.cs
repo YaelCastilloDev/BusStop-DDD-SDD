@@ -10,12 +10,12 @@ public sealed class Create(IMediator mediator) : Endpoint<CreateCommentRequest, 
   public override void Configure()
   {
     Post("/comments");
-    AllowAnonymous();
+    Roles("RegisteredUser");
   }
 
   public override async Task HandleAsync(CreateCommentRequest req, CancellationToken ct)
   {
-    var command = new CreateCommentCommand(req.Content, req.UserId, req.RouteId);
+    var command = new CreateCommentCommand(req.Content, req.RouteId);
     var result = await _mediator.Send(command, ct);
 
     if (result.IsSuccess)
@@ -26,12 +26,14 @@ public sealed class Create(IMediator mediator) : Endpoint<CreateCommentRequest, 
 
     if (result.Status == ResultStatus.NotFound)
       await Send.NotFoundAsync(ct);
+    else if (result.Status == ResultStatus.Unauthorized)
+      await Send.UnauthorizedAsync(ct);
     else
       await Send.ErrorsAsync(cancellation: ct);
   }
 }
 
-public sealed record CreateCommentRequest(string Content, long UserId, long RouteId);
+public sealed record CreateCommentRequest(string Content, long RouteId);
 
 public sealed class CreateCommentValidator : Validator<CreateCommentRequest>
 {

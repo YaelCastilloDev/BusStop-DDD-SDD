@@ -6,24 +6,40 @@
   "registrationAllowed": false,
   "resetPasswordAllowed": true,
   "loginWithEmailAllowed": true,
+  "accessTokenLifespan": 900,
   "roles": {
     "realm": [
       {
-        "name": "reader",
-        "description": "Can read published transportation data",
+        "name": "RegisteredUser",
+        "description": "Can register routes, add comments, react to comments",
         "composite": false,
         "clientRole": false
       },
       {
-        "name": "contributor",
-        "description": "Can create and update routes and stops",
-        "composite": false,
+        "name": "Curator",
+        "description": "RegisteredUser permissions + soft-delete routes, comments, users",
+        "composite": true,
+        "composites": {
+          "realm": ["RegisteredUser"]
+        },
         "clientRole": false
       },
       {
-        "name": "admin",
-        "description": "Full administrative access",
-        "composite": false,
+        "name": "SubAdmin",
+        "description": "Curator permissions + approve/deny soft-delete requests + promote/demote User to Curator",
+        "composite": true,
+        "composites": {
+          "realm": ["Curator"]
+        },
+        "clientRole": false
+      },
+      {
+        "name": "Admin",
+        "description": "SubAdmin permissions + assign/manage SubAdmin role",
+        "composite": true,
+        "composites": {
+          "realm": ["SubAdmin"]
+        },
         "clientRole": false
       }
     ]
@@ -59,7 +75,7 @@
           "protocol": "openid-connect",
           "protocolMapper": "oidc-usermodel-realm-role-mapper",
           "config": {
-            "claim.name": "role",
+            "claim.name": "realm_access.roles",
             "user.attribute": "realm_roles",
             "access.token.claim": "true",
             "id.token.claim": "true",
@@ -97,11 +113,11 @@
   ],
   "users": [
     {
-      "username": "reader1",
+      "username": "registered1",
       "enabled": true,
-      "email": "reader1@example.com",
-      "firstName": "Reader",
-      "lastName": "One",
+      "email": "registered1@example.com",
+      "firstName": "Registered",
+      "lastName": "User",
       "credentials": [
         {
           "type": "password",
@@ -109,13 +125,13 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["reader"]
+      "realmRoles": ["RegisteredUser"]
     },
     {
-      "username": "contributor1",
+      "username": "curator1",
       "enabled": true,
-      "email": "contributor1@example.com",
-      "firstName": "Contributor",
+      "email": "curator1@example.com",
+      "firstName": "Curator",
       "lastName": "One",
       "credentials": [
         {
@@ -124,7 +140,22 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["reader", "contributor"]
+      "realmRoles": ["Curator"]
+    },
+    {
+      "username": "subadmin1",
+      "enabled": true,
+      "email": "subadmin1@example.com",
+      "firstName": "SubAdmin",
+      "lastName": "One",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["SubAdmin"]
     },
     {
       "username": "admin1",
@@ -139,7 +170,7 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["reader", "contributor", "admin"]
+      "realmRoles": ["Admin"]
     }
   ]
 }

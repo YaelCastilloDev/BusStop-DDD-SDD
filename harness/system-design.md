@@ -5,7 +5,7 @@ Define the minimum architecture required to deliver BusStop through spec-driven,
 This document is the implementation baseline, not an exhaustive future-state blueprint.
 
 ## System Scope
-- Contribution submission and moderation workflows.
+- Route and stop data management with moderation workflows.
 - Search and read APIs for published transportation data.
 - Auditability and operational visibility for all critical flows.
 
@@ -22,15 +22,13 @@ This document is the implementation baseline, not an exhaustive future-state blu
 - API-first contracts with explicit versioning.
 
 ## Bounded Contexts
-- TransitCatalog: route, stop lifecycle and validation.
-- ContributionModeration: review, escalation, undo, and rollback of changes already made within permissions.
+- TransitCatalog: route/stop lifecycle, validation, and moderation.
 - IdentityAccess: authentication, role claims, policy enforcement.
 - SearchReadModel: optimized querying and indexing projections.
 - AuditObservability: immutable action logs and operational signals.
 
 ## Context Map
 - TransitCatalog publishes domain events consumed by SearchReadModel and AuditObservability.
-- ContributionModeration orchestrates state transitions on TransitCatalog entities.
 - IdentityAccess provides claims used by all write-side policies.
 - AuditObservability is append-only and cannot mutate domain aggregates.
 
@@ -75,7 +73,6 @@ This document is the implementation baseline, not an exhaustive future-state blu
 
 ## Data Design Principles
 - Route, Stop are aggregate roots with explicit invariants.
-- Contribution is a first-class aggregate linked to target entity and decision state.
 - ModerationAction is immutable and append-only for accountability.
 - Use optimistic concurrency for conflicting edits.
 - Use outbox pattern to guarantee publish-after-commit consistency (Phase 2).
@@ -90,9 +87,6 @@ This document is the implementation baseline, not an exhaustive future-state blu
 - RouteCreated
 - RouteUpdated
 - StopCreated
-- ContributionSubmitted
-- ContributionReviewed
-- ContributionUndone
 - ModerationActionRecorded
 
 ## Quality Attributes
