@@ -5,7 +5,7 @@
       "name": "nuget-restore",
       "group": "pre-commit",
       "command": "dotnet",
-      "args": ["restore", "-p:NuGetAudit=false"]
+      "args": ["restore"]
     },
     {
       "name": "format-check",
@@ -23,7 +23,7 @@
       "name": "nuget-restore",
       "group": "pre-push",
       "command": "dotnet",
-      "args": ["restore", "-p:NuGetAudit=false"]
+      "args": ["restore"]
     },
     {
       "name": "integration-tests",

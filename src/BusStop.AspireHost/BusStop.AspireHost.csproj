@@ -4,8 +4,6 @@
     <OutputType>Exe</OutputType>
     <IsAspireHost>true</IsAspireHost>
     <UserSecretsId>c540eeb6-e06b-4456-a539-be58dd8b88c7</UserSecretsId>
-    <!-- TODO: Investigate and fix underlying package warnings instead of suppressing vulnerability/deprecation warnings -->
-    <NoWarn>NU1902;NU1903</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

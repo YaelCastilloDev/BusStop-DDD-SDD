@@ -8,7 +8,4 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
-  <PropertyGroup>
-    <NoWarn>1591</NoWarn> <!-- Remove this to turn on warnings for missing XML Comments -->
-  </PropertyGroup>
 </Project>
