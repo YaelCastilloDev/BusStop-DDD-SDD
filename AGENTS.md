@@ -5,7 +5,7 @@
 .\start-all.ps1                # Full stack (Docker + API + Frontend)
 .\start-all.ps1 -SkipFrontend  # Backend only
 .\start-all.ps1 -Build         # Rebuild containers first
-docker compose down            # Stop all Docker services
+.\stop-all.ps1                 # Stop API, frontend, and Docker services
 ```
 
 | Service | Port | Notes |
