@@ -1,3 +1,4 @@
+import { useInitialize } from 'keycloakify/login/Template.useInitialize'
 import type { PageProps } from 'keycloakify/login/pages/PageProps'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,8 +14,14 @@ type LoginResetPasswordProps = PageProps<
 
 export default function LoginResetPassword(props: LoginResetPasswordProps) {
   const { kcContext, i18n } = props
-  const { msgStr } = i18n
-  const { url, realm, messagesPerField } = kcContext
+  const { isReadyToRender } = useInitialize({
+    kcContext,
+    doUseDefaultCss: props.doUseDefaultCss,
+  })
+  const { advancedMsgStr, msgStr } = i18n
+  const { url, realm, messagesPerField, message } = kcContext
+
+  if (!isReadyToRender) return null
 
   return (
     <AuthCardLayout
@@ -31,6 +38,19 @@ export default function LoginResetPassword(props: LoginResetPasswordProps) {
         </div>
       }
     >
+      {message ? (
+        <p
+          className={
+            message.type === 'error'
+              ? 'text-sm text-destructive'
+              : 'text-sm text-muted-foreground'
+          }
+          role={message.type === 'error' ? 'alert' : 'status'}
+        >
+          {message.summary}
+        </p>
+      ) : null}
+
       <form
         id='kc-reset-password-form'
         action={url.loginAction}
@@ -55,7 +75,7 @@ export default function LoginResetPassword(props: LoginResetPasswordProps) {
           />
           {messagesPerField.existsError('username') ? (
             <p className='text-sm text-destructive' role='alert'>
-              {msgStr(messagesPerField.getFirstError('username') ?? '')}
+              {advancedMsgStr(messagesPerField.getFirstError('username') ?? '')}
             </p>
           ) : null}
         </div>

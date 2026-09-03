@@ -4,7 +4,7 @@ using Ardalis.Specification;
 using BusStop.Core.Interfaces;
 using BusStop.Core.StopAggregate;
 using BusStop.Infrastructure.Data;
-using BusStop.UseCases.Users.Signup;
+using BusStop.UseCases.Users.Register;
 using BusStop.Web.Configurations;
 using Mediator;
 using NetArchTest.Rules;
@@ -14,7 +14,7 @@ namespace BusStop.UnitTests.Architecture;
 public class ArchitectureTests
 {
     private static readonly Assembly CoreAssembly = typeof(Stop).Assembly;
-    private static readonly Assembly UseCasesAssembly = typeof(SignupCommand).Assembly;
+    private static readonly Assembly UseCasesAssembly = typeof(RegisterUserCommand).Assembly;
     private static readonly Assembly InfrastructureAssembly = typeof(AppDbContext).Assembly;
     private static readonly Assembly WebAssembly = Assembly.Load("BusStop.Web");
 

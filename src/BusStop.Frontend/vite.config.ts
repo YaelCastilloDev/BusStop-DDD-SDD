@@ -5,10 +5,16 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import { playwright } from '@vitest/browser-playwright'
+import { keycloakify } from 'keycloakify/vite-plugin'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    keycloakify({
+      accountThemeImplementation: 'none',
+      themeName: 'busstop',
+      extraThemeProperties: ['parent=keycloak'],
+    }),
     tanstackRouter({
       target: 'react',
       autoCodeSplitting: true,

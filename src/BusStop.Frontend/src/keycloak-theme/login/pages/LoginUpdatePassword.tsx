@@ -1,3 +1,4 @@
+import { useInitialize } from 'keycloakify/login/Template.useInitialize'
 import type { PageProps } from 'keycloakify/login/pages/PageProps'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,28 +14,39 @@ type LoginUpdatePasswordProps = PageProps<
 
 export default function LoginUpdatePassword(props: LoginUpdatePasswordProps) {
   const { kcContext, i18n } = props
-  const { msgStr } = i18n
-  const { url, messagesPerField, username } = kcContext
+  const { isReadyToRender } = useInitialize({
+    kcContext,
+    doUseDefaultCss: props.doUseDefaultCss,
+  })
+  const { advancedMsgStr, msgStr } = i18n
+  const { url, messagesPerField, isAppInitiatedAction, message } = kcContext
+
+  if (!isReadyToRender) return null
 
   return (
     <AuthCardLayout
       title={msgStr('updatePasswordTitle')}
       description={msgStr('updatePasswordMessage')}
     >
+      {message ? (
+        <p
+          className={
+            message.type === 'error'
+              ? 'text-sm text-destructive'
+              : 'text-sm text-muted-foreground'
+          }
+          role={message.type === 'error' ? 'alert' : 'status'}
+        >
+          {message.summary}
+        </p>
+      ) : null}
+
       <form
         id='kc-passwd-update-form'
         action={url.loginAction}
         method='post'
         className='flex flex-col gap-4'
       >
-        <Input
-          id='username'
-          name='username'
-          type='hidden'
-          value={username}
-          readOnly
-        />
-
         <div className='space-y-2'>
           <Label htmlFor='password-new'>{msgStr('passwordNew')}</Label>
           <Input
@@ -47,7 +59,7 @@ export default function LoginUpdatePassword(props: LoginUpdatePasswordProps) {
           />
           {messagesPerField.existsError('password') ? (
             <p className='text-sm text-destructive' role='alert'>
-              {msgStr(messagesPerField.getFirstError('password') ?? '')}
+              {advancedMsgStr(messagesPerField.getFirstError('password') ?? '')}
             </p>
           ) : null}
         </div>
@@ -65,15 +77,40 @@ export default function LoginUpdatePassword(props: LoginUpdatePasswordProps) {
           />
           {messagesPerField.existsError('password-confirm') ? (
             <p className='text-sm text-destructive' role='alert'>
-              {msgStr(messagesPerField.getFirstError('password-confirm') ?? '')}
+              {advancedMsgStr(
+                messagesPerField.getFirstError('password-confirm') ?? ''
+              )}
             </p>
           ) : null}
         </div>
 
-        <div className='pt-2'>
-          <Button type='submit' className='w-full' size='lg'>
+        <label className='flex items-center gap-2 text-sm text-muted-foreground'>
+          <input
+            id='logout-sessions'
+            name='logout-sessions'
+            type='checkbox'
+            value='on'
+            defaultChecked
+            className='size-4 rounded border text-primary'
+          />
+          {msgStr('logoutOtherSessions')}
+        </label>
+
+        <div className='flex gap-3 pt-2'>
+          <Button type='submit' className='flex-1' size='lg'>
             {msgStr('doSubmit')}
           </Button>
+          {isAppInitiatedAction ? (
+            <Button
+              type='submit'
+              name='cancel-aia'
+              value='true'
+              variant='outline'
+              size='lg'
+            >
+              {msgStr('doCancel')}
+            </Button>
+          ) : null}
         </div>
       </form>
     </AuthCardLayout>

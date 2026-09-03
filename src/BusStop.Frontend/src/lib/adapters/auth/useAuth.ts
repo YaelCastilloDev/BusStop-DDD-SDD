@@ -1,64 +1,20 @@
 import { useEffect, useCallback } from 'react'
-import type { IAuthAdapter } from './IAuthAdapter'
-import {
-  getAuthAdapter,
-  isInitStarted,
-  markInitStarted,
-} from './adapter-instance'
-import { useAuthStore, type AuthStore } from './auth-store'
+import { getAuthAdapter } from './adapter-instance'
+import { useAuthStore } from './auth-store'
+import { initializeAuth } from './initialize-auth'
 import type { BusStopRole } from './types'
-
-function getErrorMessage(err: unknown, fallback: string): string {
-  return err instanceof Error ? err.message : fallback
-}
-
-function initializeAuth(auth: IAuthAdapter, store: AuthStore) {
-  if (isInitStarted()) return
-  markInitStarted()
-
-  store.setLoading(true)
-
-  auth.onTokenExpired(() => {
-    auth.getToken().catch(() => {
-      store.clear()
-    })
-  })
-
-  auth.onAuthRefreshSuccess(() => {
-    const user = auth.getUserProfile()
-    store.setAuthenticated(user)
-  })
-
-  auth.onAuthRefreshError(() => {
-    store.clear()
-  })
-
-  auth
-    .init()
-    .then((authenticated) => {
-      if (authenticated) {
-        const user = auth.getUserProfile()
-        store.setAuthenticated(user)
-      } else {
-        store.setLoading(false)
-      }
-    })
-    .catch(() => {
-      store.setError('Failed to initialize authentication')
-      store.setLoading(false)
-    })
-}
 
 export function useAuth() {
   const auth = getAuthAdapter()
   const store = useAuthStore()
 
   useEffect(() => {
-    initializeAuth(auth, store)
-  }, [auth, store])
+    void initializeAuth()
+  }, [])
 
   const login = useCallback(async () => {
     try {
+      store.setError(null)
       store.setLoading(true)
       await auth.login()
     } catch {
@@ -66,26 +22,10 @@ export function useAuth() {
     }
   }, [auth, store])
 
-  const directLogin = useCallback(
-    async (username: string, password: string) => {
-      store.setLoading(true)
-      try {
-        await auth.directLogin(username, password)
-        const user = auth.getUserProfile()
-        store.setAuthenticated(user)
-        return user
-      } catch (err) {
-        const message = getErrorMessage(err, 'Login failed')
-        store.setError(message)
-        store.setLoading(false)
-        throw err
-      }
-    },
-    [auth, store]
-  )
-
   const logout = useCallback(async () => {
     try {
+      store.setError(null)
+      store.setLoading(true)
       await auth.logout()
       store.clear()
     } catch {
@@ -95,6 +35,7 @@ export function useAuth() {
 
   const register = useCallback(async () => {
     try {
+      store.setError(null)
       store.setLoading(true)
       await auth.register()
     } catch {
@@ -102,18 +43,16 @@ export function useAuth() {
     }
   }, [auth, store])
 
-  const discardSession = useCallback(() => {
-    auth.discardSession()
-    store.clear()
-  }, [auth, store])
-
   const getToken = useCallback(async () => {
     return auth.getToken()
   }, [auth])
 
-  const hasRole = useCallback((role: BusStopRole | string) => {
-    return auth.hasRole(role)
-  }, [auth])
+  const hasRole = useCallback(
+    (role: BusStopRole | string) => {
+      return auth.hasRole(role)
+    },
+    [auth]
+  )
 
   return {
     isAuthenticated: store.isAuthenticated,
@@ -121,10 +60,8 @@ export function useAuth() {
     error: store.error,
     user: store.user,
     login,
-    directLogin,
     logout,
     register,
-    discardSession,
     getToken,
     hasRole,
   }

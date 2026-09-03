@@ -1,11 +1,6 @@
 import axios, { AxiosError } from 'axios'
 import type { BusStopUser } from './types'
 
-export interface SignupRequest {
-  email: string
-  password: string
-}
-
 export interface OnboardingRequest {
   username: string
   countryId: number
@@ -62,14 +57,6 @@ export function parseApiError(error: unknown, fallback: string): ApiError {
 
   const message = generalMessages[0] ?? data.message ?? fallback
   return new ApiError(message, status, fieldErrors)
-}
-
-export async function signup(request: SignupRequest): Promise<void> {
-  try {
-    await axios.post('/auth/signup', request)
-  } catch (error) {
-    throw parseApiError(error, 'Registration failed. Please try again.')
-  }
 }
 
 export async function registerUser(email: string): Promise<BusStopUser> {

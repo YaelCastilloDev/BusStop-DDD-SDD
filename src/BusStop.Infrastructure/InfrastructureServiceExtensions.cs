@@ -1,5 +1,4 @@
 ﻿using BusStop.Infrastructure.Data;
-using BusStop.Infrastructure.Integrations.Keycloak;
 using BusStop.Infrastructure.Integrations.RabbitMQ;
 using Resend;
 
@@ -51,10 +50,6 @@ public static class InfrastructureServiceExtensions
     services.AddScoped<BusStop.Core.Interfaces.INotificationRepository, BusStop.Infrastructure.Data.NotificationPersistence>();
     logger.LogInformation("Resend email sender registered.");
     
-    services.AddHttpClient("KeycloakAdmin", c => c.Timeout = TimeSpan.FromSeconds(10));
-    services.AddScoped<BusStop.Core.Interfaces.IKeycloakAdminService, KeycloakAdminService>();
-    logger.LogInformation("Keycloak admin service registered.");
-
     var assemblies = new List<System.Reflection.Assembly> { typeof(BusStop.UseCases.Users.Register.RegisterUserCommand).Assembly };
     if (additionalAssemblies != null)
     {
