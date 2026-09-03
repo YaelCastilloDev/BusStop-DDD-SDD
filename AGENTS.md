@@ -17,7 +17,7 @@
 | Frontend | 5173 | Vite dev server |
 | Aspire Dashboard | 18888 | OTLP telemetry |
 
-Test users (password: `password`): `registered1`, `curator1`, `subadmin1`, `admin1`
+Test users (password: `BusStop1234!`): `registered1`, `curator1`, `subadmin1`, `admin1`
 
 ## Everyday commands
 

@@ -1,5 +1,7 @@
 # SPEC-IdentityAccess-LoginOnboardingFrontend
 
+> **Security supersession:** Login, signup, registration-route, and credential-handling requirements in this spec are superseded by `SPEC-IdentityAccess-SecureBrowserAuth`. The onboarding and local-profile requirements remain active.
+
 ## Spec ID
 `SPEC-IdentityAccess-LoginOnboardingFrontend`
 
@@ -91,6 +93,6 @@ None new. `UserRegisteredEvent` publication remains owned by backend `POST /auth
 ## Rollout and Rollback
 - Requires `VITE_API_URL` env var (dev default `https://localhost:57679`) and backend dev CORS origin `http://localhost:5173`.
 - Local dev requires trusting the ASP.NET dev certificate (`dotnet dev-certs https --trust`) for axios calls to the https API.
-- **Risk:** `nginx/nginx.conf` routes `/auth` to Keycloak while the API also owns `/auth/*` — docker deployments would misroute these endpoints. Deferred: introduce an `/api` prefix or fix nginx paths in a follow-up spec.
+- The prior `/auth` proxy collision is resolved by routing Keycloak's `/realms/` and `/resources/` paths explicitly while leaving `/auth/*` with the BusStop API.
 - **Deferred:** resend-verification-email action (requires backend endpoint); auth-page i18n keys (pages currently hardcode English); backend username-uniqueness enforcement (existing TODO in `OnboardingHandler`).
 - Rollback: revert frontend changes; backend config change is additive and harmless.

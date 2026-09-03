@@ -15,8 +15,9 @@ namespace BusStop.Web.Configurations;
 //
 // We intentionally do NOT automate writing this attribute from the backend.
 // Design alternatives considered and deferred:
-//   a) RegisterUserHandler calling KeycloakAdminService — rejected: mixes
-//      infrastructure concern into UseCases layer.
+//   a) RegisterUserHandler calling a Keycloak Admin API service — rejected:
+//      mixes an infrastructure concern into the UseCases layer and expands the
+//      service-account privilege boundary.
 //   b) UserRegisteredIntegrationHandler (domain event handler) extending to set
 //      the attribute — viable but adds complexity; deferred to a future iteration.
 //

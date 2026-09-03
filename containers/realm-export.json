@@ -2,12 +2,23 @@
   "realm": "auth-demo",
   "displayName": "BusStop Authentication Realm",
   "enabled": true,
-  "sslRequired": "none",
+  "sslRequired": "external",
   "registrationAllowed": true,
+  "registrationEmailAsUsername": true,
   "resetPasswordAllowed": true,
   "loginWithEmailAllowed": true,
   "defaultRoles": ["RegisteredUser"],
   "verifyEmail": true,
+  "loginTheme": "busstop",
+  "passwordPolicy": "length(12) and upperCase(1) and lowerCase(1) and digits(1) and specialChars(1) and passwordHistory(5)",
+  "bruteForceProtected": true,
+  "permanentLockout": false,
+  "maxFailureWaitSeconds": 900,
+  "minimumQuickLoginWaitSeconds": 60,
+  "waitIncrementSeconds": 60,
+  "quickLoginCheckMilliSeconds": 1000,
+  "maxDeltaTimeSeconds": 43200,
+  "failureFactor": 5,
   "accessTokenLifespan": 900,
   "roles": {
     "realm": [
@@ -56,27 +67,42 @@
     {
       "clientId": "busstop-api",
       "name": "BusStop API",
-      "description": "The main BusStop ASP.NET API",
+      "description": "Bearer-only audience for the BusStop ASP.NET API",
       "enabled": true,
       "protocol": "openid-connect",
       "publicClient": false,
-      "standardFlowEnabled": true,
-      "directAccessGrantsEnabled": true,
-      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
       "authorizationServicesEnabled": false,
-      "secret": "busstop-api-secret-placeholder",
+      "implicitFlowEnabled": false,
+      "bearerOnly": true,
+      "consentRequired": false,
+      "fullScopeAllowed": false
+    },
+    {
+      "clientId": "busstop-web",
+      "name": "BusStop Web",
+      "description": "Public browser client using Authorization Code flow with PKCE",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
       "implicitFlowEnabled": false,
       "bearerOnly": false,
       "consentRequired": false,
       "fullScopeAllowed": true,
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:5173/*"
+      },
       "redirectUris": [
-        "http://localhost:5000/*",
-        "https://localhost:5001/*",
         "http://localhost:5173/*"
       ],
       "webOrigins": [
-        "http://localhost:5000",
-        "https://localhost:5001",
         "http://localhost:5173"
       ],
       "protocolMappers": [
@@ -85,10 +111,24 @@
           "protocol": "openid-connect",
           "protocolMapper": "oidc-usermodel-realm-role-mapper",
           "config": {
-            "claim.name": "realm_access",
+            "claim.name": "realm_access.roles",
+            "jsonType.label": "String",
             "access.token.claim": "true",
             "id.token.claim": "true",
+            "userinfo.token.claim": "true",
             "multivalued": "true"
+          }
+        },
+        {
+          "name": "busstop-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "busstop-api",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "introspection.token.claim": "true"
           }
         }
       ]
@@ -108,6 +148,9 @@
       "bearerOnly": false,
       "consentRequired": false,
       "fullScopeAllowed": true,
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
       "redirectUris": [
         "http://localhost:57679/swagger/oauth2-redirect.html",
         "https://localhost:57679/swagger/oauth2-redirect.html",
@@ -131,7 +174,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "password",
+          "value": "BusStop1234!",
           "temporary": false
         }
       ],
@@ -149,7 +192,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "password",
+          "value": "BusStop1234!",
           "temporary": false
         }
       ],
@@ -167,7 +210,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "password",
+          "value": "BusStop1234!",
           "temporary": false
         }
       ],
@@ -185,24 +228,13 @@
       "credentials": [
         {
           "type": "password",
-          "value": "password",
+          "value": "BusStop1234!",
           "temporary": false
         }
       ],
       "realmRoles": [
         "Admin"
       ]
-    },
-    {
-      "username": "service-account-busstop-api",
-      "enabled": true,
-      "serviceAccountClientId": "busstop-api",
-      "clientRoles": {
-        "realm-management": [
-          "manage-users",
-          "view-users"
-        ]
-      }
     }
   ],
   "browserFlow": "browser-admin-2fa",

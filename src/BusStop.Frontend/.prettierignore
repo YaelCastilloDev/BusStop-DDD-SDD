@@ -17,3 +17,6 @@
 
 # Ignore auto generated routeTree.gen.ts
 /src/routeTree.gen.ts
+
+# Ignore Keycloakify's generated development resources
+/public/keycloakify-dev-resources/

@@ -9,6 +9,10 @@ const Login = lazy(() => import('./pages/Login'))
 const Register = lazy(() => import('./pages/Register'))
 const LoginResetPassword = lazy(() => import('./pages/LoginResetPassword'))
 const LoginUpdatePassword = lazy(() => import('./pages/LoginUpdatePassword'))
+const UserProfileFormFields = lazy(
+  () => import('keycloakify/login/UserProfileFormFields')
+)
+const doMakeUserConfirmPassword = true
 
 export default function KcPage(props: { kcContext: KcContext }) {
   const { kcContext } = props
@@ -36,6 +40,8 @@ export default function KcPage(props: { kcContext: KcContext }) {
                 Template={Template}
                 doUseDefaultCss={false}
                 classes={classes}
+                UserProfileFormFields={UserProfileFormFields}
+                doMakeUserConfirmPassword={doMakeUserConfirmPassword}
               />
             )
           case 'login-reset-password.ftl':
@@ -66,6 +72,8 @@ export default function KcPage(props: { kcContext: KcContext }) {
                 classes={classes}
                 Template={Template}
                 doUseDefaultCss={true}
+                UserProfileFormFields={UserProfileFormFields}
+                doMakeUserConfirmPassword={doMakeUserConfirmPassword}
               />
             )
         }
@@ -74,4 +82,14 @@ export default function KcPage(props: { kcContext: KcContext }) {
   )
 }
 
-const classes = {} satisfies { [key in ClassKey]?: string }
+const classes = {
+  kcFormGroupClass: 'mb-4',
+  kcLabelWrapperClass: 'mb-2 block',
+  kcLabelClass: 'font-semibold',
+  kcInputWrapperClass: 'w-full',
+  kcInputClass:
+    'h-10 w-full rounded-lg border bg-background px-3 py-2 text-sm shadow-none focus-visible:border-primary focus-visible:outline-none focus-visible:ring-0',
+  kcInputErrorMessageClass: 'mt-1 block text-sm text-destructive',
+  kcInputGroup: 'relative',
+  kcCheckboxInputClass: 'mr-2 size-4 rounded border text-primary',
+} satisfies { [key in ClassKey]?: string }

@@ -1,10 +1,13 @@
 import { type QueryClient } from '@tanstack/react-query'
-import { createRootRouteWithContext, Link, Outlet } from '@tanstack/react-router'
+import {
+  createRootRouteWithContext,
+  Link,
+  Outlet,
+} from '@tanstack/react-router'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-import { Toaster } from '@/components/ui/sonner'
 import { Button } from '@/components/ui/button'
-import { useAuth } from '@/lib/adapters/auth'
+import { Toaster } from '@/components/ui/sonner'
 
 function NotFound() {
   return (
@@ -39,8 +42,6 @@ export const Route = createRootRouteWithContext<{
 })
 
 function RootComponent() {
-  useAuth()
-
   return (
     <>
       <Outlet />

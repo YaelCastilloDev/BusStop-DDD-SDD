@@ -1,3 +1,6 @@
+using System.Net.Http.Headers;
+using System.Text;
+
 namespace BusStop.FunctionalTests.Auth;
 
 [Collection("Sequential")]
@@ -34,7 +37,7 @@ public class KeycloakAuthTests : IClassFixture<KeycloakFixture>
     [Fact]
     public async Task TokenEndpoint_ReturnsAccessToken_ForRegisteredUser()
     {
-        var token = await _keycloak.GetTokenAsync("registered1", "password");
+        var token = await _keycloak.GetTokenAsync("registered1", "BusStop1234!");
 
         token.ShouldNotBeNull();
         token!.AccessToken.ShouldNotBeNullOrEmpty();
@@ -45,7 +48,7 @@ public class KeycloakAuthTests : IClassFixture<KeycloakFixture>
     [Fact]
     public async Task TokenEndpoint_ReturnsTokens_ForCuratorUser()
     {
-        var token = await _keycloak.GetTokenAsync("curator1", "password");
+        var token = await _keycloak.GetTokenAsync("curator1", "BusStop1234!");
 
         token.ShouldNotBeNull();
         token!.AccessToken.ShouldNotBeNullOrEmpty();
@@ -56,9 +59,12 @@ public class KeycloakAuthTests : IClassFixture<KeycloakFixture>
     public async Task TokenEndpoint_RejectsInvalidPassword()
     {
         using var client = new HttpClient();
+        var authValue = Convert.ToBase64String(Encoding.UTF8.GetBytes(
+            $"{KeycloakFixture.TestClientId}:{KeycloakFixture.TestClientSecret}"));
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authValue);
         var content = new FormUrlEncodedContent(new[]
         {
-            new KeyValuePair<string, string>("client_id", "busstop-api"),
+            new KeyValuePair<string, string>("client_id", KeycloakFixture.TestClientId),
             new KeyValuePair<string, string>("grant_type", "password"),
             new KeyValuePair<string, string>("username", "registered1"),
             new KeyValuePair<string, string>("password", "wrong-password"),

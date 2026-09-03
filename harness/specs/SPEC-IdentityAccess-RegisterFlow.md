@@ -1,5 +1,7 @@
 # SPEC-IdentityAccess-RegisterFlow
 
+> **Security supersession:** Browser signup and login steps in this spec are superseded by `SPEC-IdentityAccess-SecureBrowserAuth`. The anonymous `/auth/signup` flow and OAuth password grant are removed; Keycloak-hosted Keycloakify pages now own credentials and the SPA uses Authorization Code flow with PKCE.
+
 ## Spec ID
 `SPEC-IdentityAccess-RegisterFlow`
 

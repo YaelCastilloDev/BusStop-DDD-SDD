@@ -18,17 +18,8 @@
     "test:coverage": "vitest run --coverage --browser.headless",
     "test:browser:install": "playwright install chromium --with-deps",
     "keycloakify": "keycloakify",
-    "build-theme": "keycloakify build",
+    "build-theme": "pnpm build && keycloakify build",
     "dev-theme": "keycloakify start-keycloak"
-  },
-  "keycloakify": {
-    "accountThemeImplementation": "none",
-    "themeName": [
-      "busstop"
-    ],
-    "extraThemeProperties": [
-      "parent=keycloak"
-    ]
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

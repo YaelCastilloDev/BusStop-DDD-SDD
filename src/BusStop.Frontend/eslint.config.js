@@ -7,7 +7,9 @@ import { defineConfig } from 'eslint/config'
 import tseslint from 'typescript-eslint'
 
 export default defineConfig(
-  { ignores: ['dist', 'src/components/ui'] },
+  {
+    ignores: ['dist', 'public/keycloakify-dev-resources', 'src/components/ui'],
+  },
   {
     extends: [
       js.configs.recommended,

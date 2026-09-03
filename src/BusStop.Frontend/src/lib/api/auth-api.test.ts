@@ -1,6 +1,6 @@
 import axios, { AxiosError, type AxiosResponse } from 'axios'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { ApiError, getMe, parseApiError, signup } from './auth-api'
+import { ApiError, getMe, parseApiError } from './auth-api'
 import type { BusStopUser } from './types'
 
 vi.mock('axios', async (importOriginal) => {
@@ -16,7 +16,6 @@ vi.mock('axios', async (importOriginal) => {
 })
 
 const mockedGet = vi.mocked(axios.get)
-const mockedPost = vi.mocked(axios.post)
 
 function axiosError(status: number, data: unknown): AxiosError {
   return new AxiosError('Request failed', undefined, undefined, undefined, {
@@ -64,39 +63,6 @@ describe('getMe', () => {
     expect(failure).toBeInstanceOf(ApiError)
     expect((failure as ApiError).message).toBe('Server exploded')
     expect((failure as ApiError).status).toBe(500)
-  })
-})
-
-describe('signup', () => {
-  beforeEach(() => {
-    vi.resetAllMocks()
-  })
-
-  it('resolves when the API accepts the signup', async () => {
-    mockedPost.mockResolvedValue({ data: null })
-
-    await expect(
-      signup({ email: 'user@example.com', password: 'password123' })
-    ).resolves.toBeUndefined()
-  })
-
-  it('surfaces the duplicate-email message from the API', async () => {
-    mockedPost.mockRejectedValue(
-      axiosError(400, {
-        message: 'One or more errors occurred!',
-        errors: { Error: ['A user with this email already exists.'] },
-      })
-    )
-
-    const failure = await signup({
-      email: 'user@example.com',
-      password: 'password123',
-    }).catch((error: unknown) => error)
-
-    expect(failure).toBeInstanceOf(ApiError)
-    expect((failure as ApiError).message).toBe(
-      'A user with this email already exists.'
-    )
   })
 })
 

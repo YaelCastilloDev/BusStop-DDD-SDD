@@ -38,7 +38,7 @@ public class KeycloakApiAuthTests : IClassFixture<KeycloakFixture>, IAsyncLifeti
     [Fact]
     public async Task ProtectedEndpoint_Returns200_WithValidToken()
     {
-        var token = await _keycloak.GetTokenAsync("curator1", "password");
+        var token = await _keycloak.GetTokenAsync("curator1", "BusStop1234!");
         token.ShouldNotBeNull();
 
         _client!.DefaultRequestHeaders.Authorization =

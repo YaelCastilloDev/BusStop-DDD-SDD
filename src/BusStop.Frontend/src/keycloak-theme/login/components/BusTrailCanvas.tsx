@@ -1,5 +1,11 @@
 import { useEffect } from 'react'
-import { motion, useMotionValue, useSpring, useTransform, type MotionValue } from 'framer-motion'
+import {
+  motion,
+  useMotionValue,
+  useSpring,
+  useTransform,
+  type MotionValue,
+} from 'framer-motion'
 
 const BUS_COLOR = 'var(--color-primary)'
 
@@ -35,7 +41,12 @@ export function BusTrailCanvas() {
     <div className='pointer-events-none absolute inset-0 overflow-hidden'>
       <svg className='absolute inset-0 h-full w-full opacity-[0.04]'>
         <defs>
-          <pattern id='grid' width='40' height='40' patternUnits='userSpaceOnUse'>
+          <pattern
+            id='grid'
+            width='40'
+            height='40'
+            patternUnits='userSpaceOnUse'
+          >
             <path
               d='M 40 0 L 0 0 0 40'
               fill='none'
