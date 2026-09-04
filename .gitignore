@@ -274,5 +274,10 @@ log*.txt
 /containers/database
 .env
 
+# SonarScanner working state (may contain analysis credentials)
+.sonarqube/
+.scannerwork/
+sonarqube-backup.dump
+
 # VS Code Counter
 .VSCodeCounter/

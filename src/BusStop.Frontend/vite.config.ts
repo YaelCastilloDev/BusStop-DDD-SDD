@@ -41,8 +41,19 @@ export default defineConfig({
       ],
     },
     coverage: {
-      // include: ['src/**/*.{js,jsx,ts,tsx}'], // Uncomment to expand the report to all src/**/* so untested modules appear as 0% coverage.
+      provider: 'v8',
+      include: ['src/**/*.{js,jsx,ts,tsx}'],
+      reporter: [
+        'text-summary',
+        'html',
+        // Match the repository-root paths used by the .NET monorepo scanner.
+        ['lcovonly', { projectRoot: path.resolve(__dirname, '../..') }],
+      ],
       exclude: [
+        '**/*.d.ts',
+        '**/*.json*',
+        '**/*.{test,spec}.{js,jsx,ts,tsx}',
+        'src/kc.gen.tsx',
         'src/components/ui/**',
         'src/assets/**',
         'src/tanstack-table.d.ts',

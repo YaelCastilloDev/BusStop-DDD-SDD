@@ -16,6 +16,22 @@
 
 # Clean Architecture
 
+## BusStop code analysis
+
+Run reproducible local SonarQube analysis for the backend and frontend:
+
+```powershell
+pwsh ./scripts/sonarqube/Start-SonarQube.ps1
+# First time: open http://127.0.0.1:9000, change admin/admin, create the
+# busstop project and a project analysis token. Analysis prompts for the token.
+pwsh ./scripts/sonarqube/Invoke-SonarQubeAnalysis.ps1
+pwsh ./scripts/sonarqube/Stop-SonarQube.ps1
+```
+
+See [the setup guide](scripts/sonarqube/README.md) for clone prerequisites,
+coverage, Docker host settings, and persistent data. SonarQube runs independently
+of the application stack and requires no GitHub runner.
+
 A starting point for Clean Architecture with ASP.NET Core. [Clean Architecture](https://8thlight.com/blog/uncle-bob/2012/08/13/the-clean-architecture.html) is just the latest in a series of names for the same loosely-coupled, dependency-inverted architecture. You will also find it named [hexagonal](https://alistair.cockburn.us/hexagonal-architecture), [ports-and-adapters](http://www.dossier-andreas.net/software_architecture/ports_and_adapters.html), or [onion architecture](http://jeffreypalermo.com/blog/the-onion-architecture-part-1/).
 
 Learn more about Clean Architecture and this template in [NimblePros' Introducing Clean Architecture course](https://academy.nimblepros.com/p/learn-clean-architecture). Use code ARDALIS to save 20%.

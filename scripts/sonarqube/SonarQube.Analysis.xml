@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SonarQubeAnalysisProperties xmlns="http://www.sonarsource.com/msbuild/integration/2015/1">
+  <Property Name="sonar.sourceEncoding">UTF-8</Property>
+  <!-- The .NET scanner also discovers TS/TSX outside .csproj files. It classifies
+       *.test.* and *.spec.* JavaScript/TypeScript files as tests automatically. -->
+  <Property Name="sonar.scanner.scanAll">true</Property>
+  <Property Name="sonar.inclusions">src/**,tests/**</Property>
+  <Property Name="sonar.exclusions">**/bin/**,**/obj/**,**/node_modules/**,**/coverage/**,**/dist/**,**/dist_keycloak/**,**/*.d.ts,**/routeTree.gen.ts,**/kc.gen.tsx,src/BusStop.Frontend/public/keycloakify-dev-resources/**,src/BusStop.Frontend/src/test-utils/**,src/BusStop.AspireHost/**,tests/BusStop.AspireTests/**</Property>
+  <Property Name="sonar.test.exclusions">**/bin/**,**/obj/**,**/node_modules/**,**/dist/**,**/coverage/**,src/BusStop.Frontend/public/keycloakify-dev-resources/**,tests/BusStop.AspireTests/**</Property>
+  <!-- Preserve existing frontend coverage exclusions. These files remain subject
+       to static analysis; generated source is excluded above. -->
+  <Property Name="sonar.coverage.exclusions">**/Migrations/**,src/BusStop.Frontend/src/components/ui/**,src/BusStop.Frontend/src/assets/**,src/BusStop.Frontend/src/routes/**,src/BusStop.Frontend/vite.config.ts,src/BusStop.Frontend/eslint.config.js</Property>
+</SonarQubeAnalysisProperties>
